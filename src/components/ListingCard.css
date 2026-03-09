@@ -28,10 +28,33 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: opacity 0.3s ease;
+}
+
+.lc-img-actual.hide {
+    display: none;
 }
 
 .lc-emoji {
     font-size: 72px;
+    display: none;
+    animation: fadeInScale 0.4s ease-out;
+}
+
+.show-emoji .lc-emoji {
+    display: flex;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .lc-badge {

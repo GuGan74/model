@@ -16,10 +16,13 @@ export default function ListingDetailPage() {
     const [listing, setListing] = useState(null);
     const [loading, setLoading] = useState(true);
     const [reporting, setReporting] = useState(false);
-    const [isLiked, setIsLiked] = useState(false);
+    const [imgError, setImgError] = useState(false);
 
     const checkIfLiked = React.useCallback(async () => {
-        if (!currentUser || (String(id).startsWith('d') && String(id).length < 10)) return;
+        if (!currentUser) return;
+        // Even for demo, check local state or just return if not in DB
+        if (String(id).startsWith('d') && String(id).length < 10) return;
+
         const { data } = await supabase
             .from('favorites')
             .select('id')
@@ -48,9 +51,13 @@ export default function ListingDetailPage() {
 
     async function handleToggleLike() {
         if (!currentUser) { toast.error('Please log in to like'); return; }
-        if (String(id).startsWith('d') && String(id).length < 10) { toast.error('Cannot like demo listings'); return; }
 
         if (isLiked) {
+            if (String(id).startsWith('d') && String(id).length < 10) {
+                setIsLiked(false);
+                toast.success('Removed from Favorites');
+                return;
+            }
             const { error } = await supabase
                 .from('favorites')
                 .delete()
@@ -58,6 +65,13 @@ export default function ListingDetailPage() {
                 .eq('listing_id', id);
             if (!error) setIsLiked(false);
         } else {
+            if (String(id).startsWith('d') && String(id).length < 10) {
+                setIsLiked(true);
+                toast.success('Added to Favorites ❤️');
+                // Mock notification for demo
+                toast('Owner notified! (Demo Mode)');
+                return;
+            }
             const { error } = await supabase
                 .from('favorites')
                 .insert({ user_id: currentUser.id, listing_id: id });
@@ -130,10 +144,18 @@ export default function ListingDetailPage() {
                     </div>
 
                     <div className={`det-gallery${isPet ? ' pt' : ' lv'}`}>
-                        {listing.image_url ? (
-                            <img src={listing.image_url} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.style.display = 'none'; }} />
+                        {(listing.image_url && !imgError) ? (
+                            <img
+                                src={listing.image_url}
+                                alt={listing.title}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                onError={() => setImgError(true)}
+                            />
                         ) : (
-                            <div style={{ fontSize: 140 }}>{emoji}</div>
+                            <div className="det-img-fallback">
+                                <div style={{ fontSize: 140, filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.1))' }}>{emoji}</div>
+                                <div style={{ fontSize: 16, color: 'var(--g3)', fontWeight: 500 }}>Image not available</div>
+                            </div>
                         )}
                         <div className="gal-badges">
                             {listing.is_verified && <span className="gal-badge g">✓ ML Verified</span>}

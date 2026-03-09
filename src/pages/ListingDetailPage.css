@@ -57,6 +57,25 @@
     background: var(--purple-light);
 }
 
+.det-img-fallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
 .gal-badges {
     position: absolute;
     top: 14px;

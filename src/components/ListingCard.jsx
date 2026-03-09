@@ -52,12 +52,13 @@ export default function ListingCard({ listing }) {
             toast.error('Please log in to like posts');
             return;
         }
-        if (String(id).startsWith('d') && String(id).length < 10) {
-            toast.error('Cannot like demo listings');
-            return;
-        }
 
         if (isLiked) {
+            if (String(id).startsWith('d') && String(id).length < 10) {
+                setIsLiked(false);
+                toast.success('Removed from favorites');
+                return;
+            }
             const { error } = await supabase
                 .from('favorites')
                 .delete()
@@ -65,6 +66,12 @@ export default function ListingCard({ listing }) {
                 .eq('listing_id', id);
             if (!error) setIsLiked(false);
         } else {
+            if (String(id).startsWith('d') && String(id).length < 10) {
+                setIsLiked(true);
+                toast.success('Added to favorites! ❤️');
+                toast('Owner notified! (Demo Mode)');
+                return;
+            }
             const { error } = await supabase
                 .from('favorites')
                 .insert({ user_id: currentUser.id, listing_id: id });
@@ -90,7 +97,7 @@ export default function ListingCard({ listing }) {
     return (
         <div className="listing-card" onClick={() => navigate(`/listing/${id}`)}>
             {/* Image Box */}
-            <div className="lc-img-box" style={{ background: bg }}>
+            <div className={`lc-img-box${!image_url ? ' show-emoji' : ''}`} style={{ background: bg }}>
                 {is_vaccinated ? (
                     <div className="lc-badge green">VACCINATED</div>
                 ) : (
@@ -112,10 +119,10 @@ export default function ListingCard({ listing }) {
                         src={image_url}
                         alt={title}
                         className="lc-img-actual"
-                        onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                        onError={e => { e.target.classList.add('hide'); e.target.parentElement.classList.add('show-emoji'); }}
                     />
                 ) : null}
-                <div className="lc-emoji" style={{ display: image_url ? 'none' : 'flex' }}>{emoji}</div>
+                <div className="lc-emoji">{emoji}</div>
             </div>
 
             {/* Content Box */}

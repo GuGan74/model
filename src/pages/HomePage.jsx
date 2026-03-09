@@ -5,7 +5,7 @@ import './HomePage.css';
 
 // Fallback demo listings for when DB is empty or in demo mode
 const DEMO_LISTINGS = [
-    { id: 'd1', title: 'dsazfx (Gir Cow)', category: 'cow', breed: 'Gir', age_years: 4, price: 213, location: 'Coimbatore', state: 'Tamil Nadu', milk_yield_liters: 132, is_vaccinated: true, for_adoption: false, image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Gir_cattle.jpg/480px-Gir_cattle.jpg', created_at: new Date().toISOString() },
+    { id: 'd1', title: 'Pure Gir Cow', category: 'cow', breed: 'Gir', age_years: 4, price: 65000, location: 'Coimbatore', state: 'Tamil Nadu', milk_yield_liters: 13, is_vaccinated: true, for_adoption: false, image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Gir_cattle.jpg/480px-Gir_cattle.jpg', created_at: new Date().toISOString() },
     { id: 'd2', title: 'Murrah Buffalo', category: 'buffalo', breed: 'Murrah', age_years: 5, price: 85000, location: 'Ludhiana', state: 'Punjab', milk_yield_liters: 18, is_vaccinated: true, for_adoption: false, image_url: null, created_at: new Date().toISOString() },
     { id: 'd3', title: 'Barbari Goat', category: 'goat', breed: 'Barbari', age_years: 2, price: 12400, location: 'Jaipur', state: 'Rajasthan', milk_yield_liters: null, is_vaccinated: false, for_adoption: false, image_url: null, created_at: new Date().toISOString() },
     { id: 'd4', title: 'HF Pure Breed', category: 'cow', breed: 'HF', age_years: 3.5, price: 120000, location: 'Anand', state: 'Gujarat', milk_yield_liters: 28, is_vaccinated: true, for_adoption: false, image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Cow_female_black_white.jpg/480px-Cow_female_black_white.jpg', created_at: new Date().toISOString() },
@@ -32,7 +32,7 @@ export default function HomePage() {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('all');
     const [searchQuery] = useState('');
-    const [stats, setStats] = useState({ farmers: '12,800+', listings: '4,291' });
+    const [stats, setStats] = useState({ farmers: '1,200', listings: '450' });
 
     const [filters] = useState({ types: [], priceMin: 0, priceMax: 999999 });
     const [sort] = useState('newest');
