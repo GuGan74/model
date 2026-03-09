@@ -1,0 +1,129 @@
+.boost-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 16px;
+}
+
+.boost-hero {
+    background: linear-gradient(135deg, #b8860b, var(--yellow));
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.boost-hero h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 5px;
+}
+
+.boost-hero p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, .85);
+}
+
+.boost-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+.boost-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: var(--sh);
+    border: 2px solid transparent;
+    transition: 0.2s;
+}
+
+.boost-card:hover {
+    transform: translateY(-3px);
+}
+
+.boost-card.rec {
+    border-color: var(--orange);
+}
+
+.bc-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.bc-nm {
+    font-family: 'Poppins', sans-serif;
+    font-size: 17px;
+    font-weight: 900;
+}
+
+.bc-badge {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 3px 7px;
+    border-radius: 6px;
+    background: var(--orange-light);
+    color: var(--orange);
+}
+
+.bc-price {
+    font-family: 'Poppins', sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.bc-period {
+    font-size: 11px;
+    color: var(--g3);
+    margin-bottom: 14px;
+}
+
+.bc-feats {
+    list-style: none;
+    margin-bottom: 14px;
+}
+
+.bc-feats li {
+    font-size: 12px;
+    color: var(--g2);
+    padding: 3px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bc-feats li::before {
+    content: '✓';
+    font-weight: 900;
+}
+
+.bc-btn {
+    width: 100%;
+    padding: 11px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    transition: 0.15s;
+}
+
+.bc-btn:hover {
+    filter: brightness(0.95);
+}
+
+@media (max-width: 900px) {
+    .boost-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .boost-grid {
+        grid-template-columns: 1fr;
+    }
+}

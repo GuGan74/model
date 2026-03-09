@@ -1,0 +1,153 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap');
+
+/* ─── DESIGN TOKENS ─────────────────────────── */
+:root {
+  --green: #1a7a3c;
+  --green-dark: #0f5228;
+  --green-light: #e8f5ed;
+  --green-mid: #2ea555;
+  --yellow: #f5c842;
+  --yellow-light: #fffbe6;
+  --orange: #e65c00;
+  --orange-light: #fff3e8;
+  --purple: #6c3fc5;
+  --purple-light: #f0ebff;
+  --blue: #1565c0;
+  --blue-light: #e3f0ff;
+  --red: #d32f2f;
+  --red-light: #ffeaea;
+  --g1: #1a1a1a;
+  --g2: #444;
+  --g3: #777;
+  --g4: #aaa;
+  --g5: #ddd;
+  --g6: #f2f2f2;
+  --bg: #f7f8fa;
+  --white: #fff;
+  --sh: 0 2px 12px rgba(0, 0, 0, 0.1);
+  --sh-lg: 0 8px 32px rgba(0, 0, 0, 0.14);
+  --r: 12px;
+  --nav-h: 62px;
+  --bottom-nav-h: 64px;
+}
+
+/* ─── RESET ───────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--g1);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+button { cursor: pointer; }
+a { text-decoration: none; color: inherit; }
+input, select, textarea { font-family: inherit; }
+
+/* ─── UTILITY ─────────────────────────────── */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.text-green { color: var(--green); }
+.text-purple { color: var(--purple); }
+.text-orange { color: var(--orange); }
+.text-red { color: var(--red); }
+.chip { padding: 3px 9px; border-radius: 6px; font-size: 11px; font-weight: 700; background: var(--g6); color: var(--g2); display: inline-flex; align-items: center; }
+.chip.gr { background: var(--green-light); color: var(--green); }
+.chip.bl { background: var(--blue-light); color: var(--blue); }
+.chip.pu { background: var(--purple-light); color: var(--purple); }
+.chip.or { background: var(--orange-light); color: var(--orange); }
+
+/* ─── SCROLLBAR ───────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--g6); }
+::-webkit-scrollbar-thumb { background: var(--g5); border-radius: 5px; }
+
+/* ─── ANIMATIONS ─────────────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.animate-fadeIn { animation: fadeIn 0.3s ease; }
+
+/* ─── BUTTONS ─────────────────────────────── */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 11px 24px; background: var(--green); color: white; border: none;
+  border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer;
+  font-family: 'Nunito', sans-serif; transition: 0.15s;
+  box-shadow: 0 3px 12px rgba(26, 122, 60, 0.3);
+}
+.btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
+.btn-secondary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 10px 20px; background: white; color: var(--g2);
+  border: 2px solid var(--g5); border-radius: 10px; font-size: 13px;
+  font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; transition: 0.15s;
+}
+.btn-secondary:hover { border-color: var(--green); color: var(--green); }
+.btn-danger { background: var(--red); color: white; border: none; border-radius: 10px; padding: 10px 20px; font-size: 13px; font-weight: 700; cursor: pointer; }
+
+/* ─── SPINNER ─────────────────────────────── */
+.spinner {
+  width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.35);
+  border-top-color: white; border-radius: 50%;
+  animation: spin 0.7s linear infinite; display: inline-block;
+}
+.spinner.dark { border-color: rgba(0,0,0,0.15); border-top-color: var(--g2); }
+
+/* ─── FORM FIELDS ─────────────────────────── */
+.ff { display: flex; flex-direction: column; gap: 5px; }
+.ff label { font-size: 11px; font-weight: 800; color: var(--g3); text-transform: uppercase; letter-spacing: 0.5px; }
+.ff input, .ff select, .ff textarea {
+  padding: 10px 13px; border: 2px solid var(--g5); border-radius: 9px;
+  font-size: 13px; font-family: 'Nunito', sans-serif; font-weight: 600;
+  outline: none; transition: 0.15s; background: white;
+}
+.ff input:focus, .ff select:focus, .ff textarea:focus { border-color: var(--green); }
+.ff textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+/* ─── CARD BASE ───────────────────────────── */
+.card-base {
+  background: white; border-radius: 14px; box-shadow: var(--sh);
+  overflow: hidden; transition: 0.2s; border: 2px solid transparent;
+}
+.card-base:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(0,0,0,.13); border-color: var(--green-light); }
+
+/* ─── SECTION CARD ────────────────────────── */
+.section-card { background: white; border-radius: var(--r); padding: 18px; box-shadow: var(--sh); }
+.section-card h4 { font-size: 11px; font-weight: 800; color: var(--g3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+
+/* ─── OTP ROW ─────────────────────────────── */
+.otp-row { display: flex; gap: 10px; justify-content: center; margin: 14px 0; }
+.otp-box {
+  width: 46px; height: 52px; text-align: center; font-size: 22px; font-weight: 900;
+  border: 2px solid var(--g5); border-radius: 11px; outline: none; transition: 0.15s;
+  font-family: 'Poppins', sans-serif;
+}
+.otp-box:focus { border-color: var(--green); }
+.otp-box.filled { border-color: var(--green); background: var(--green-light); color: var(--green); }
+
+/* ─── BADGE ───────────────────────────────── */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 11px; border-radius: 9px; font-size: 11px; font-weight: 700; }
+.badge.g { background: var(--green-light); color: var(--green); }
+.badge.o { background: var(--orange-light); color: var(--orange); }
+.badge.b { background: var(--blue-light); color: var(--blue); }
+.badge.p { background: var(--purple-light); color: var(--purple); }
+.badge.r { background: var(--red-light); color: var(--red); }
+
+/* ─── PAGE CONTAINER ─────────────────────── */
+.page-container { min-height: 100vh; }
+
+/* ─── TOAST override ─────────────────────── */
+.toast-container { z-index: 9999 !important; }
+
+/* ─── RESPONSIVE ─────────────────────────── */
+@media (max-width: 639px) {
+  .hide-mobile { display: none !important; }
+}
+@media (min-width: 640px) {
+  .hide-tablet-up { display: none !important; }
+}
+@media (min-width: 1024px) {
+  .hide-desktop { display: none !important; }
+}

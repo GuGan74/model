@@ -1,0 +1,132 @@
+.notif-wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 16px;
+}
+
+.notif-hd {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.notif-hd h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notif-badge {
+    background: var(--green);
+    color: white;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+
+.notif-mark {
+    font-size: 13px;
+    color: var(--green);
+    font-weight: 700;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.unrd-banner {
+    background: var(--green-light);
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-size: 13px;
+    color: var(--green);
+    font-weight: 700;
+    margin-bottom: 14px;
+}
+
+.ni {
+    display: flex;
+    gap: 13px;
+    padding: 14px;
+    border-radius: 11px;
+    cursor: pointer;
+    transition: 0.15s;
+    margin-bottom: 5px;
+}
+
+.ni.unrd {
+    background: #f0faf4;
+    border: 1px solid var(--green-light);
+}
+
+.ni:hover {
+    background: var(--g6);
+}
+
+.ni-ic {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.ni-ic.g {
+    background: var(--green-light);
+}
+
+.ni-ic.o {
+    background: var(--orange-light);
+}
+
+.ni-ic.p {
+    background: var(--purple-light);
+}
+
+.ni-ic.b {
+    background: var(--blue-light);
+}
+
+.ni-txt {
+    flex: 1;
+}
+
+.ni-ttl {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--g1);
+    margin-bottom: 2px;
+}
+
+.ni-sb {
+    font-size: 12px;
+    color: var(--g3);
+    line-height: 1.5;
+}
+
+.ni-r {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.ni-time {
+    font-size: 10px;
+    color: var(--g4);
+}
+
+.ni-dot {
+    width: 9px;
+    height: 9px;
+    background: var(--green);
+    border-radius: 50%;
+}

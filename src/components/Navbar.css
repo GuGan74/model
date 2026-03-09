@@ -1,0 +1,255 @@
+/* NAVBAR */
+.navbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--g5);
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+}
+
+.nav-inner {
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    height: var(--nav-h);
+    gap: 8px;
+}
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    margin-right: 16px;
+    flex-shrink: 0;
+}
+
+.nav-logo-icon {
+    width: 42px;
+    height: 42px;
+    background: var(--green);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.nav-brand {
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--g1);
+}
+
+.nav-brand span {
+    color: var(--green);
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--g2);
+    cursor: pointer;
+    white-space: nowrap;
+    border: none;
+    background: transparent;
+    font-family: 'Nunito', sans-serif;
+    transition: 0.15s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: var(--green-light);
+    color: var(--green);
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.lang-sel {
+    padding: 7px 10px;
+    border: 1.5px solid var(--g5);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    background: var(--white);
+    cursor: pointer;
+    outline: none;
+}
+
+.nav-avatar {
+    width: 36px;
+    height: 36px;
+    background: var(--green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 13px;
+    font-weight: 900;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.btn-sell-nav {
+    padding: 9px 18px;
+    background: var(--green);
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 800;
+    color: white;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    transition: 0.15s;
+    box-shadow: 0 3px 10px rgba(26, 122, 60, .3);
+    white-space: nowrap;
+}
+
+.btn-sell-nav:hover {
+    background: var(--green-dark);
+}
+
+/* HAMBURGER */
+.ham-btn {
+    width: 38px;
+    height: 38px;
+    background: var(--g6);
+    border: none;
+    border-radius: 9px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 6px;
+}
+
+.ham-btn span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--g2);
+    border-radius: 2px;
+}
+
+/* MOBILE DRAWER */
+.mob-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .4);
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+}
+
+.mob-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.mob-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 280px;
+    height: 100%;
+    background: white;
+    z-index: 400;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(.4, 0, .2, 1);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.mob-drawer.open {
+    transform: translateX(0);
+}
+
+.mob-drawer-hd {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px;
+    border-bottom: 1px solid var(--g5);
+}
+
+.mob-close-btn {
+    margin-left: auto;
+    background: var(--g6);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mob-drawer-links {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    gap: 4px;
+}
+
+.mob-dl {
+    padding: 13px 14px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--g2);
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    transition: 0.15s;
+}
+
+.mob-dl:hover {
+    background: var(--g6);
+}
+
+@media (max-width: 767px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .hide-tablet-up {
+        display: none !important;
+    }
+
+    .ham-btn {
+        display: none;
+    }
+}

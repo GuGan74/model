@@ -1,0 +1,74 @@
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--bottom-nav-h);
+    background: white;
+    border-top: 1px solid var(--g5);
+    z-index: 150;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, .08);
+}
+
+.bottom-nav-inner {
+    display: flex;
+    height: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.bnav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: none;
+    background: transparent;
+    color: var(--g4);
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    transition: 0.15s;
+    position: relative;
+}
+
+.bnav-btn.active {
+    color: var(--green);
+}
+
+.bnav-icon {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.bnav-label {
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.bnav-sell {
+    color: var(--g2);
+}
+
+.bnav-sell-icon {
+    width: 46px;
+    height: 46px;
+    background: var(--green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 26px;
+    font-weight: 900;
+    margin-top: -18px;
+    box-shadow: 0 4px 14px rgba(26, 122, 60, .4);
+    line-height: 1;
+}
+
+@media (min-width: 768px) {
+    .bottom-nav {
+        display: none;
+    }
+}

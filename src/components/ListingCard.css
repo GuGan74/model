@@ -1,0 +1,207 @@
+.listing-card {
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.listing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    border-color: rgba(25, 70, 40, 0.2);
+}
+
+.lc-img-box {
+    height: 190px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f4f6f8;
+}
+
+.lc-img-actual {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lc-emoji {
+    font-size: 72px;
+}
+
+.lc-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 0.5px;
+    z-index: 2;
+}
+
+.lc-badge.green {
+    background: #10B981;
+    /* bright green for vaccinated */
+}
+
+.lc-badge.gray {
+    background: #9CA3AF;
+}
+
+.lc-badge.promoted {
+    background: linear-gradient(135deg, #f1c40f, #f39c12);
+    color: #fff;
+    right: 12px !important;
+    left: auto !important;
+    font-weight: 800;
+    box-shadow: 0 2px 8px rgba(241, 196, 15, 0.4);
+}
+
+.lc-heart {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    width: 32px;
+    height: 32px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4B5563;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: 0.2s;
+}
+
+.lc-heart.liked {
+    background: #fff0f0;
+    color: #EF4444;
+}
+
+.lc-heart:hover {
+    color: #EF4444;
+    transform: scale(1.1);
+}
+
+/* CONTENT BOX */
+.lc-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.lc-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+    gap: 12px;
+}
+
+.lc-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 1.4em;
+}
+
+.lc-price {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.lc-location {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #6B7280;
+    margin-bottom: 16px;
+}
+
+/* STATS GRID */
+.lc-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.stat-lbl {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: #9CA3AF;
+    margin-bottom: 2px;
+    letter-spacing: 0.5px;
+}
+
+.stat-val {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+}
+
+/* ACTIONS */
+.lc-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: auto;
+}
+
+.lc-btn-chat {
+    flex: 1;
+    background: #F3F4F6;
+    color: #374151;
+    border: none;
+    border-radius: 20px;
+    padding: 12px 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.lc-btn-chat:hover {
+    background: #E5E7EB;
+}
+
+.lc-btn-call {
+    flex: 1;
+    background: #194628;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 12px 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.lc-btn-call:hover {
+    background: #11331D;
+}
