@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import ListingCard from '../components/ListingCard';
+import SEOHead from '../components/SEOHead';
 import './SearchPage.css';
 
 const FILTER_PILLS = [
@@ -23,7 +24,8 @@ const DEMO_DATA = [
 
 export default function SearchPage() {
     const navigate = useNavigate();
-    const [query, setQuery] = useState('');
+    const [searchParams] = useSearchParams();
+    const [query, setQuery] = useState(searchParams.get('q') || '');
     const [results, setResults] = useState([]);
     const [activePills, setActivePills] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -61,6 +63,11 @@ export default function SearchPage() {
 
     return (
         <div className="search-page">
+            <SEOHead
+                title={query ? `Search: ${query} | PashuBazaar` : 'Search Animals | PashuBazaar'}
+                description="Search thousands of verified livestock and pet listings across India."
+                url="https://model-mauve.vercel.app/search"
+            />
             <div className="search-bar-top">
                 <button className="btn-secondary" style={{ padding: '9px 14px', flexShrink: 0 }} onClick={() => navigate('/')}>←</button>
                 <div className="search-inp-wrap">

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { DEMO_LISTINGS } from '../data/demoData';
 
@@ -7,7 +7,11 @@ const PAGE_SIZE = 20;
 
 /**
  * useListings — fetches listings with sessionStorage cache, 5s timeout,
- * parallel stat queries, and load-more pagination.
+ * and load-more pagination.
+ *
+ * Fix: useRef for offset tracking to avoid stale closure bug.
+ * The old [offset] dependency caused fetchListings to see a stale
+ * offset value when React batched state updates during "Load More".
  */
 export function useListings() {
     const cachedRaw = sessionStorage.getItem(SESSION_KEY);
@@ -15,12 +19,20 @@ export function useListings() {
 
     const [listings, setListings] = useState(initialListings);
     const [loading, setLoading] = useState(!cachedRaw);
-    const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
+
+    // Use a ref instead of state for offset — avoids stale closure in useCallback
+    const offsetRef = useRef(0);
 
     const fetchListings = useCallback(async (reset = false) => {
         const hasCachedData = Boolean(sessionStorage.getItem(SESSION_KEY));
-        const currentOffset = reset ? 0 : offset;
+
+        if (reset) {
+            // Reset offset synchronously via ref before any async work
+            offsetRef.current = 0;
+        }
+
+        const currentOffset = offsetRef.current;
         if (!hasCachedData || reset) setLoading(true);
 
         try {
@@ -54,14 +66,16 @@ export function useListings() {
                 return new Date(b.created_at) - new Date(a.created_at);
             });
 
-            const updated = reset ? newListings : [...listings, ...newListings];
+            setListings(prev => {
+                const updated = reset ? newListings : [...prev, ...newListings];
+                if (reset || currentOffset === 0) {
+                    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(updated)); } catch (_) { }
+                }
+                return updated;
+            });
 
-            if (reset || currentOffset === 0) {
-                try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(updated)); } catch (_) { }
-            }
-
-            setListings(updated);
-            setOffset(currentOffset + PAGE_SIZE);
+            // Advance offset ref AFTER successful fetch
+            offsetRef.current = currentOffset + PAGE_SIZE;
         } catch (err) {
             console.error('useListings fetch error:', err);
             if (!hasCachedData) setListings(DEMO_LISTINGS);
@@ -69,8 +83,8 @@ export function useListings() {
         } finally {
             setLoading(false);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [offset]);
+        // No offset in deps — we read it via ref to avoid stale closures
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const refetch = useCallback(() => fetchListings(true), [fetchListings]);
     const loadMore = useCallback(() => fetchListings(false), [fetchListings]);

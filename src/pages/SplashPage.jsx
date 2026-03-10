@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import OTPInput from '../components/OTPInput';
+import SEOHead from '../components/SEOHead';
 import toast from 'react-hot-toast';
 import './SplashPage.css';
 
@@ -76,6 +77,11 @@ export default function SplashPage() {
 
     return (
         <div className="splash-wrapper">
+            <SEOHead
+                title="PashuBazaar — Buy &amp; Sell Animals with Full Trust"
+                description="India's most trusted animal marketplace. Verified cows, buffaloes, goats and pets from farmers across India."
+                url="https://model-mauve.vercel.app/"
+            />
 
             {/* LEFT / BRANDING PANEL */}
             <div className="splash-brand-panel">

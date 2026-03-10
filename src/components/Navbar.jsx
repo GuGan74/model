@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import cowLogo from '../assets/istockphoto.jpg';
+import cowLogo from '../assets/istockphoto.webp';
 import './Navbar.css';
 
 const LANGUAGES = ['English', 'தமிழ்', 'తెలుగు', 'ಕನ್ನಡ', 'हिंदी', 'മലയാളം'];

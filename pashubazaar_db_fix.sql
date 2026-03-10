@@ -63,26 +63,38 @@ ALTER TABLE profiles  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE listings  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE interests ENABLE ROW LEVEL SECURITY;
 
--- PROFILES: open read/write for now (demo mode users don't have auth.uid)
+-- PROFILES: open read/write for demo mode (unauthenticated users need to create profiles)
+-- Tighten this when real OTP/Google auth is enforced in production
 CREATE POLICY "profiles_open"
   ON profiles FOR ALL USING (true) WITH CHECK (true);
 
--- LISTINGS: open read for all, open write for all (demo friendly)
---   ⚡ When Supabase Phone OTP / Google Auth is live,
---   replace this with: WITH CHECK (auth.uid() = user_id)
+-- LISTINGS: SELECT open — anyone can browse listings (required for homepage & demo mode)
 CREATE POLICY "listings_read_all"
-  ON listings FOR SELECT USING (true);
+  ON listings FOR SELECT
+  USING (true);
+  -- Purpose: public marketplace — all visitors see all active listings
 
+-- LISTINGS: INSERT open — demo mode users may not have auth.uid(), keep open for now
 CREATE POLICY "listings_insert_all"
-  ON listings FOR INSERT WITH CHECK (true);
+  ON listings FOR INSERT
+  WITH CHECK (true);
+  -- Purpose: allow demo mode sellers to post listings without real auth
+  -- TODO: change to WITH CHECK (auth.uid() = user_id) when real auth is enforced
 
+-- LISTINGS: UPDATE restricted — a user can only edit their OWN listings
 CREATE POLICY "listings_update_own"
-  ON listings FOR UPDATE USING (true);
+  ON listings FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+  -- Purpose: prevents any user from editing another seller's listing
 
+-- LISTINGS: DELETE restricted — a user can only delete their OWN listings
 CREATE POLICY "listings_delete_own"
-  ON listings FOR DELETE USING (true);
+  ON listings FOR DELETE
+  USING (auth.uid() = user_id);
+  -- Purpose: prevents any user from removing another seller's listing
 
--- INTERESTS: open insert
+-- INTERESTS: open insert (contact tracking, no sensitive data)
 CREATE POLICY "interests_insert_all"
   ON interests FOR INSERT WITH CHECK (true);
 CREATE POLICY "interests_select_all"

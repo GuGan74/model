@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useListings } from '../hooks/useListings';
@@ -12,10 +13,12 @@ import './HomePage.css';
 export default function HomePage() {
     const { currentUser } = useAuth();
     const { listings, loading, hasMore, refetch, loadMore } = useListings();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('all');
     const [filtered, setFiltered] = useState([]);
     const [stats, setStats] = useState({ farmers: '1,200', listings: '450' });
     const [loadingMore, setLoadingMore] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Refs for scroll rows (instead of DOM traversal)
     const rowRefs = useRef({});
@@ -48,7 +51,7 @@ export default function HomePage() {
         setLoadingMore(false);
     }
 
-    // Filtering logic
+    // Filtering logic — includes live search query
     useEffect(() => {
         let result = [...listings];
         if (activeTab !== 'all') {
@@ -58,8 +61,23 @@ export default function HomePage() {
             else if (activeTab === 'birds') result = result.filter(l => l.category === 'bird');
             else result = result.filter(l => l.category === activeTab);
         }
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            result = result.filter(l =>
+                (l.title || '').toLowerCase().includes(q) ||
+                (l.breed || '').toLowerCase().includes(q) ||
+                (l.location || '').toLowerCase().includes(q) ||
+                (l.category || '').toLowerCase().includes(q)
+            );
+        }
         setFiltered(result);
-    }, [listings, activeTab]);
+    }, [listings, activeTab, searchQuery]);
+
+    function handleSearchKeyDown(e) {
+        if (e.key === 'Enter' && searchQuery.trim()) {
+            navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    }
 
     function scrollRow(key, dir) {
         const row = rowRefs.current[key];
@@ -87,8 +105,21 @@ export default function HomePage() {
                         <h1 className="nh-title">Buy &amp; Sell Cattle<br /><span className="nh-yellow">With Full Trust</span></h1>
                         <p className="nh-sub">Connecting farmers across India with verified livestock listings. Every animal is health-checked and documented.</p>
                         <div className="nh-actions">
-                            <button className="nh-btn-primary">Get Started</button>
-                            <button className="nh-btn-outline">How It Works</button>
+                            <button
+                                className="nh-btn-primary"
+                                onClick={() => navigate('/sell')}
+                            >
+                                Get Started
+                            </button>
+                            <button
+                                className="nh-btn-outline"
+                                onClick={() => {
+                                    document.querySelector('.category-strip')
+                                        ?.scrollIntoView({ behavior: 'smooth' });
+                                }}
+                            >
+                                How It Works
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -116,6 +147,47 @@ export default function HomePage() {
                             <div className="sc-lbl">ML Verified</div>
                         </div>
                     </div>
+                </div>
+
+                {/* SEARCH BAR */}
+                <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    background: 'white', border: '1.5px solid #e5e7eb',
+                    borderRadius: 14, padding: '10px 16px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)', marginBottom: 8
+                }}>
+                    <span style={{ fontSize: 18 }}>🔍</span>
+                    <input
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        onKeyDown={handleSearchKeyDown}
+                        placeholder="Search cow, buffalo, Gir, Murrah, Labrador…"
+                        style={{
+                            flex: 1, border: 'none', outline: 'none',
+                            fontFamily: 'Nunito, sans-serif', fontSize: 14,
+                            color: '#1a3c28', background: 'transparent'
+                        }}
+                    />
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery('')}
+                            style={{
+                                background: 'none', border: 'none', cursor: 'pointer',
+                                color: '#9ca3af', fontSize: 16, lineHeight: 1, padding: 4
+                            }}
+                            title="Clear search"
+                        >✕</button>
+                    )}
+                    {searchQuery && (
+                        <button
+                            onClick={() => navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`)}
+                            style={{
+                                background: '#1a7a3c', color: 'white', border: 'none',
+                                borderRadius: 10, padding: '6px 14px', cursor: 'pointer',
+                                fontWeight: 700, fontFamily: 'Nunito, sans-serif', fontSize: 13
+                            }}
+                        >Search</button>
+                    )}
                 </div>
 
                 {/* CATEGORY STRIP */}
