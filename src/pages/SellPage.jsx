@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { LIVESTOCK_CATS, PET_CATS } from '../constants/index';
@@ -23,9 +23,12 @@ const STEPS = ['Animal Type', 'Details', 'Photos', 'Pricing'];
 
 export default function SellPage() {
     const navigate = useNavigate();
+    const location = useLocation();
     const { currentUser, currentProfile } = useAuth();
     const [step, setStep] = useState(1);
     const [submitting, setSubmitting] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState(null);
     const [fieldErrors, setFieldErrors] = useState({});
 
     // Form data
@@ -48,6 +51,36 @@ export default function SellPage() {
         for_adoption: false,
         is_promoted: false,
     });
+
+    // Check for edit mode on mount
+    useEffect(() => {
+        if (location.state?.editListing) {
+            const l = location.state.editListing;
+            setIsEditing(true);
+            setEditingId(l.id);
+            // Determine listing type
+            const isPet = ['dog', 'cat', 'bird'].includes(l.category);
+            setListingType(isPet ? 'pet' : 'livestock');
+            setForm({
+                category: l.category || '',
+                title: l.title || '',
+                breed: l.breed || '',
+                age_years: l.age_years || '',
+                weight_kg: l.weight_kg || '',
+                milk_yield_liters: l.milk_yield_liters || '',
+                is_vaccinated: l.is_vaccinated || false,
+                is_pregnant: l.is_pregnant || false,
+                purpose: l.purpose || 'dairy',
+                price: l.price || '',
+                location: l.location || '',
+                state: l.state || '',
+                description: l.description || '',
+                image_url: l.image_url || '',
+                for_adoption: l.for_adoption || false,
+                is_promoted: l.is_promoted || false,
+            });
+        }
+    }, [location.state]);
 
     function setF(key, val) { setForm(f => ({ ...f, [key]: val })); }
 
@@ -118,30 +151,37 @@ export default function SellPage() {
             };
 
             // Try insert to Supabase
-            const { data, error } = await supabase.from('listings').insert(payload).select().single();
-            if (error) {
-                // Demo mode — just navigate to success
+            if (isEditing) {
+                const { error } = await supabase.from('listings').update(payload).eq('id', editingId);
+                if (error) throw error;
+                toast.success('Listing updated! 🎉');
+                navigate('/mylisting');
+            } else {
+                const { data, error } = await supabase.from('listings').insert(payload).select().single();
+                if (error) {
+                    // Demo mode — just navigate to success
+                    toast.success('Listing published! 🎉');
+                    navigate('/success', { state: { listing: { ...payload, id: 'demo-' + Date.now() } } });
+                    return;
+                }
                 toast.success('Listing published! 🎉');
-                navigate('/success', { state: { listing: { ...payload, id: 'demo-' + Date.now() } } });
-                return;
+                if (payload.is_promoted) {
+                    await supabase.from('notifications').insert({
+                        user_id: currentUser.id,
+                        type: 'promote',
+                        icon: '⚡',
+                        title: 'Listing Promoted!',
+                        message: `Your ${payload.title} listing is now showing as a promoted listing.`,
+                        metadata: { listing_id: data.id }
+                    });
+                }
+                navigate('/success', { state: { listing: data } });
             }
-            toast.success('Listing published! 🎉');
-            if (payload.is_promoted) {
-                await supabase.from('notifications').insert({
-                    user_id: currentUser.id,
-                    type: 'promote',
-                    icon: '⚡',
-                    title: 'Listing Promoted!',
-                    message: `Your ${payload.title} listing is now showing as a promoted listing.`,
-                    metadata: { listing_id: data.id }
-                });
-            }
-            navigate('/success', { state: { listing: data } });
         } catch (err) {
             console.error('Submit failed:', err);
             // Demo fallback
-            toast.success('Listing published! (Demo mode) 🎉');
-            navigate('/success', { state: { listing: { ...form, id: 'demo-' + Date.now() } } });
+            toast.success(isEditing ? 'Listing updated! (Demo mode) ✓' : 'Listing published! (Demo mode) 🎉');
+            navigate(isEditing ? '/mylisting' : '/success', { state: { listing: { ...form, id: editingId || 'demo-' + Date.now() } } });
         } finally {
             setSubmitting(false);
         }
@@ -151,9 +191,11 @@ export default function SellPage() {
         <div className="sell-wrap">
             {/* Header */}
             <div className="sell-hd">
-                <button className="btn-back" onClick={() => step > 1 ? setStep(s => s - 1) : navigate('/')}>←</button>
+                <button className="btn-back" onClick={() => step > 1 ? setStep(s => s - 1) : navigate(isEditing ? '/mylisting' : '/')}>←</button>
                 <div>
-                    <div className="sell-ttl">{listingType === 'livestock' ? '🐄 Sell Livestock' : '🐾 Sell Pet'}</div>
+                    <div className="sell-ttl">
+                        {isEditing ? '✏️ Edit Listing' : (listingType === 'livestock' ? '🐄 Sell Livestock' : '🐾 Sell Pet')}
+                    </div>
                     <div className="sell-sub">Step {step} of {STEPS.length}: {STEPS[step - 1]}</div>
                 </div>
             </div>
@@ -410,7 +452,11 @@ export default function SellPage() {
                         disabled={!canGoNext() || submitting}
                         onClick={handleSubmit}
                     >
-                        {submitting ? <><span className="spinner" /> Publishing…</> : '🚀 Publish Listing'}
+                        {submitting ? (
+                            <><span className="spinner" /> {isEditing ? 'Updating…' : 'Publishing…'}</>
+                        ) : (
+                            isEditing ? '🚀 Update Listing' : '🚀 Publish Listing'
+                        )}
                     </button>
                 )}
             </div>
