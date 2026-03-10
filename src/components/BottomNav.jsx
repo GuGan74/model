@@ -22,6 +22,8 @@ export default function BottomNav() {
                         key={item.path}
                         className={`bnav-btn${pathname === item.path && !item.isSell ? ' active' : ''}${item.isSell ? ' bnav-sell' : ''}`}
                         onClick={() => navigate(item.path)}
+                        aria-label={item.label}
+                        aria-current={pathname === item.path && !item.isSell ? 'page' : undefined}
                     >
                         {item.isSell ? (
                             <span className="bnav-sell-icon">+</span>

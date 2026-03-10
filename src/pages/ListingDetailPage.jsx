@@ -13,6 +13,8 @@ export default function ListingDetailPage() {
     const { currentUser, currentProfile } = useAuth();
     const [listing, setListing] = useState(null);
     const [sellerPhone, setSellerPhone] = useState(null);
+    const [sellerName, setSellerName] = useState(null);
+    const [sellerJoinDate, setSellerJoinDate] = useState(null);
     const [loading, setLoading] = useState(true);
     const [reporting, setReporting] = useState(false);
     const [imgError, setImgError] = useState(false);
@@ -39,14 +41,16 @@ export default function ListingDetailPage() {
         const { data } = await supabase.from('listings').select('*').eq('id', id).single();
         setListing(data);
 
-        // Fetch seller phone
+        // Fetch seller profile
         if (data?.user_id) {
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('phone')
+                .select('phone, full_name, created_at')
                 .eq('id', data.user_id)
                 .single();
             if (profile?.phone) setSellerPhone(profile.phone);
+            if (profile?.full_name) setSellerName(profile.full_name);
+            if (profile?.created_at) setSellerJoinDate(profile.created_at);
         }
 
         setLoading(false);
@@ -198,7 +202,10 @@ export default function ListingDetailPage() {
                     </div>
 
                     <h1 className="det-title">{listing.title}</h1>
-                    <div className="det-meta">Listed by a verified seller</div>
+                    <div className="det-meta">
+                        Listed by {sellerName || 'Verified Seller'}
+                        · Member since {new Date(sellerJoinDate || Date.now()).getFullYear()}
+                    </div>
                     <div className="det-loc">📍 {listing.location}{listing.state ? `, ${listing.state}` : ''}</div>
 
                     <div className="stats-grid">

@@ -18,6 +18,34 @@ export function AuthProvider({ children }) {
     // Temp registration storage
     const [regData, setRegData] = useState({ name: '', district: '', phone: '', email: '' });
 
+    const loadProfile = React.useCallback(async (uid) => {
+        const { data } = await supabase.from('profiles').select('*').eq('id', uid).single();
+        if (data) {
+            setCurrentProfile(data);
+            setUserRole(data.role || 'user');
+        }
+    }, [setCurrentProfile, setUserRole]);
+
+    const ensureProfile = React.useCallback(async (user) => {
+        const { data: existing } = await supabase.from('profiles').select('id').eq('id', user.id).single();
+        if (!existing) {
+            const profileData = {
+                id: user.id,
+                phone: user.phone || regData.phone,
+                email: user.email || regData.email || null,
+                full_name: regData.name || 'User',
+                location: regData.district || '',
+                role: userRole || 'user',
+                language: 'English',
+                created_at: new Date().toISOString(),
+            };
+            await supabase.from('profiles').insert(profileData);
+            setCurrentProfile(profileData);
+        } else {
+            await loadProfile(user.id);
+        }
+    }, [loadProfile, regData, userRole, setCurrentProfile]);
+
     useEffect(() => {
         // Get initial session
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -35,7 +63,7 @@ export function AuthProvider({ children }) {
                         setUserRole(demo.role || 'user');
                         setIsLoggedIn(true);
                     }
-                } catch { }
+                } catch { /* ignore */ }
             }
             setLoading(false);
         });
@@ -54,35 +82,9 @@ export function AuthProvider({ children }) {
         });
 
         return () => subscription.unsubscribe();
-    }, []);
+    }, [loadProfile, ensureProfile]);
 
-    async function loadProfile(uid) {
-        const { data } = await supabase.from('profiles').select('*').eq('id', uid).single();
-        if (data) {
-            setCurrentProfile(data);
-            setUserRole(data.role || 'user');
-        }
-    }
 
-    async function ensureProfile(user) {
-        const { data: existing } = await supabase.from('profiles').select('id').eq('id', user.id).single();
-        if (!existing) {
-            const profileData = {
-                id: user.id,
-                phone: user.phone || regData.phone,
-                email: user.email || regData.email || null,
-                full_name: regData.name || 'User',
-                location: regData.district || '',
-                role: userRole || 'user',
-                language: 'English',
-                created_at: new Date().toISOString(),
-            };
-            await supabase.from('profiles').insert(profileData);
-            setCurrentProfile(profileData);
-        } else {
-            await loadProfile(user.id);
-        }
-    }
 
     async function sendOTP(phone, name, district, role, email) {
         setRegData({ name, district, phone, email });
@@ -110,7 +112,7 @@ export function AuthProvider({ children }) {
                 try {
                     await supabase.from('profiles').upsert(profile, { onConflict: 'id' });
                 } catch { /* ignore if profiles table not ready */ }
-                try { localStorage.setItem('pb_demo', JSON.stringify(profile)); } catch { }
+                try { localStorage.setItem('pb_demo', JSON.stringify(profile)); } catch { /* ignore */ }
                 setCurrentUser({ id: uid, phone });
                 setCurrentProfile(profile);
                 setIsLoggedIn(true);
@@ -137,7 +139,7 @@ export function AuthProvider({ children }) {
                 language: 'English',
                 created_at: new Date().toISOString(),
             };
-            try { localStorage.setItem('pb_demo', JSON.stringify(profile)); } catch { }
+            try { localStorage.setItem('pb_demo', JSON.stringify(profile)); } catch { /* ignore */ }
             setCurrentUser({ id: uid });
             setCurrentProfile(profile);
             setIsLoggedIn(true);
@@ -145,19 +147,19 @@ export function AuthProvider({ children }) {
         }
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: window.location.href },
+            options: { redirectTo: window.location.origin + '/' },
         });
         return { error };
     }
 
     async function signOut() {
         if (!demoMode) {
-            try { await supabase.auth.signOut(); } catch { }
+            try { await supabase.auth.signOut(); } catch { /* ignore */ }
         }
         try {
             localStorage.removeItem('pb_demo');
             localStorage.removeItem('pb_sess');
-        } catch { }
+        } catch { /* ignore */ }
         setCurrentUser(null);
         setCurrentProfile(null);
         setIsLoggedIn(false);
@@ -195,6 +197,7 @@ export function AuthProvider({ children }) {
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
     const ctx = useContext(AuthContext);
     if (!ctx) throw new Error('useAuth must be used inside AuthProvider');

@@ -6,6 +6,19 @@ import { LIVESTOCK_CATS, PET_CATS } from '../constants/index';
 import toast from 'react-hot-toast';
 import './SellPage.css';
 
+const INDIAN_STATES = [
+    'Tamil Nadu', 'Maharashtra', 'Uttar Pradesh', 'Rajasthan',
+    'Gujarat', 'Punjab', 'Haryana', 'Telangana', 'Karnataka',
+    'Andhra Pradesh', 'Madhya Pradesh', 'Bihar',
+    'Arunachal Pradesh', 'Assam', 'Chhattisgarh', 'Goa',
+    'Himachal Pradesh', 'Jharkhand', 'Kerala', 'Manipur',
+    'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Sikkim',
+    'Tripura', 'Uttarakhand', 'West Bengal',
+    'Delhi', 'Jammu & Kashmir', 'Ladakh', 'Chandigarh',
+    'Puducherry', 'Andaman & Nicobar', 'Dadra & Nagar Haveli',
+    'Daman & Diu', 'Lakshadweep'
+];
+
 const STEPS = ['Animal Type', 'Details', 'Photos', 'Pricing'];
 
 export default function SellPage() {
@@ -37,6 +50,27 @@ export default function SellPage() {
     });
 
     function setF(key, val) { setForm(f => ({ ...f, [key]: val })); }
+
+    async function uploadImage(file) {
+        const ext = file.name.split('.').pop().toLowerCase();
+        const filename = `listings/${Date.now()}-${Math.random()
+            .toString(36).slice(2)}.${ext}`;
+
+        const { error } = await supabase.storage
+            .from('listing-images')
+            .upload(filename, file, { cacheControl: '3600', upsert: false });
+
+        if (error) {
+            // Fallback: if bucket doesn't exist yet, use object URL
+            return URL.createObjectURL(file);
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('listing-images')
+            .getPublicUrl(filename);
+
+        return publicUrl;
+    }
 
     function validate() {
         const errs = {};
@@ -225,29 +259,30 @@ export default function SellPage() {
                         <label className="upload-zone" htmlFor="photo-upload">
                             <div className="uz-ic">📷</div>
                             <div>
-                                <div className="uz-title">Click to Upload Photos</div>
-                                <div className="uz-sub">JPG, PNG · Max 5MB each · Up to 6 photos</div>
+                                <div className="uz-title">Click to Upload Photo</div>
+                                <div className="uz-sub">JPG, PNG · Max 5MB · 1 photo</div>
                             </div>
                         </label>
                         <input
                             id="photo-upload"
                             type="file"
                             accept="image/*"
-                            multiple
                             style={{ display: 'none' }}
-                            onChange={e => {
+                            onChange={async (e) => {
                                 const file = e.target.files?.[0];
-                                if (file) {
-                                    if (file.size > 5 * 1024 * 1024) {
-                                        toast.error('Image is too large. Max 5MB.');
-                                        return;
-                                    }
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => {
-                                        setF('image_url', reader.result);
-                                        toast.success('Photo added! ✓');
-                                    };
-                                    reader.readAsDataURL(file);
+                                if (!file) return;
+                                if (file.size > 5 * 1024 * 1024) {
+                                    toast.error('Image is too large. Max 5MB.');
+                                    return;
+                                }
+                                // Requires 'listing-images' bucket in Supabase Storage
+                                // with public access enabled.
+                                const tid = toast.loading('Uploading photo...');
+                                const url = await uploadImage(file);
+                                toast.dismiss(tid);
+                                if (url) {
+                                    setF('image_url', url);
+                                    toast.success('Photo uploaded! ✓');
                                 }
                             }}
                         />
@@ -306,7 +341,7 @@ export default function SellPage() {
                                 <label>State</label>
                                 <select value={form.state} onChange={e => setF('state', e.target.value)}>
                                     <option value="">Select State</option>
-                                    {['Tamil Nadu', 'Andhra Pradesh', 'Telangana', 'Karnataka', 'Kerala', 'Maharashtra', 'Rajasthan', 'Gujarat', 'Punjab', 'Haryana', 'Madhya Pradesh', 'Uttar Pradesh'].map(s => (
+                                    {INDIAN_STATES.map(s => (
                                         <option key={s} value={s}>{s}</option>
                                     ))}
                                 </select>

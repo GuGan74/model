@@ -61,7 +61,19 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
     }
 
     return (
-        <div className="listing-card" onClick={() => navigate(`/listing/${id}`)}>
+        <div
+            className="listing-card"
+            role="button"
+            tabIndex={0}
+            aria-label={`View ${title}, priced at ${for_adoption ? 'Free' : '₹' + Number(price).toLocaleString('en-IN')}`}
+            onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    navigate(`/listing/${id}`);
+                }
+            }}
+            onClick={() => navigate(`/listing/${id}`)}
+        >
             {/* Image Box */}
             <div className={`lc-img-box${!image_url ? ' show-emoji' : ''}`} style={{ background: bg }}>
                 {is_vaccinated ? (
@@ -74,7 +86,7 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
                     <div className="lc-badge promoted">⚡ PROMOTED</div>
                 )}
 
-                <div className={`lc-heart ${isLiked ? 'liked' : ''}`} onClick={handleLike}>
+                <div className={`lc-heart ${isLiked ? 'liked' : ''}`} onClick={handleLike} aria-label="Add to favorites">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill={isLiked ? "#EF4444" : "none"} stroke={isLiked ? "#EF4444" : "currentColor"} strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>

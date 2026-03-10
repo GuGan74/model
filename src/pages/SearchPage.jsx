@@ -35,8 +35,14 @@ export default function SearchPage() {
         try {
             let q = supabase.from('listings').select('*').eq('status', 'active');
             if (query) q = q.ilike('title', `%${query}%`);
+            const activeCats = activePills.filter(p => p.cat).map(p => p.cat);
+            if (activeCats.length === 1) {
+                q = q.eq('category', activeCats[0]);
+            } else if (activeCats.length > 1) {
+                q = q.in('category', activeCats);
+            }
+
             activePills.forEach(p => {
-                if (p.cat) q = q.eq('category', p.cat);
                 if (p.prop === 'vaccinated') q = q.eq('is_vaccinated', true);
                 if (p.prop === 'verified') q = q.eq('is_verified', true);
             });

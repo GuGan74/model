@@ -7,14 +7,7 @@ import './AdminPage.css';
 
 export default function AdminPage() {
     const navigate = useNavigate();
-    const { currentProfile, isLoggedIn, loading: authLoading } = useAuth();
-    const [authenticated, setAuthenticated] = useState(() => {
-        try { return localStorage.getItem('pb_admin') === 'true'; } catch { return false; }
-    });
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loginErr, setLoginErr] = useState('');
-    const [logging, setLogging] = useState(false);
+    const { currentProfile, isLoggedIn, loading: authLoading, signOut } = useAuth();
 
     // Dashboard state
     const [activeTab, setActiveTab] = useState('overview');
@@ -24,14 +17,21 @@ export default function AdminPage() {
     const [reports, setReports] = useState([]);
     const [loadingData, setLoadingData] = useState(false);
 
-    // Redirect non-admin users
-    if (!authLoading && isLoggedIn && currentProfile && currentProfile.role !== 'admin' && !authenticated) {
+    // Derive admin status from Supabase profile — no localStorage bypass possible
+    const isAdmin = currentProfile?.role === 'admin';
+
+    useEffect(() => {
+        if (isAdmin) fetchDashboardData();
+    }, [isAdmin]);
+
+    // Redirect: not logged in at all → home; logged in but not admin → home
+    if (!authLoading && (!isLoggedIn || !isAdmin)) {
         return <Navigate to="/" />;
     }
 
-    useEffect(() => {
-        if (authenticated) fetchDashboardData();
-    }, [authenticated]);
+    async function handleLogout() {
+        await signOut();
+    }
 
     async function fetchDashboardData() {
         setLoadingData(true);
@@ -105,80 +105,7 @@ export default function AdminPage() {
         setStats(s => ({ ...s, reports: s.reports - 1 }));
     }
 
-    async function handleLogin(e) {
-        e.preventDefault();
-        setLogging(true);
-        setLoginErr('');
-        try {
-            // Try Supabase auth first
-            const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-            if (!error && data?.user) {
-                // Check if this user has admin role in profiles
-                const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
-                if (profile?.role === 'admin') {
-                    localStorage.setItem('pb_admin', 'true');
-                    setAuthenticated(true);
-                    toast.success('Admin access granted ✓');
-                } else {
-                    await supabase.auth.signOut();
-                    setLoginErr('Access denied — admin role required');
-                }
-            } else {
-                setLoginErr('Invalid email or password');
-            }
-        } catch (err) {
-            setLoginErr('Login failed: ' + err.message);
-        } finally {
-            setLogging(false);
-        }
-    }
 
-    function handleLogout() {
-        localStorage.removeItem('pb_admin');
-        setAuthenticated(false);
-        navigate('/');
-    }
-
-    // ─── LOGIN SCREEN ────────────────────────────────────
-    if (!authenticated) {
-        return (
-            <div className="admin-login-page">
-                <div className="admin-login-card">
-                    <div className="adl-logo">🛡️</div>
-                    <div className="adl-title">PashuBazaar Admin</div>
-                    <div className="adl-sub">Restricted access — authorised personnel only</div>
-                    <form onSubmit={handleLogin} className="adl-form">
-                        <div className="adl-field">
-                            <label>Email Address</label>
-                            <input
-                                type="email"
-                                placeholder="admin@gmail.com"
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
-                                required
-                                autoFocus
-                            />
-                        </div>
-                        <div className="adl-field">
-                            <label>Password</label>
-                            <input
-                                type="password"
-                                placeholder="Enter admin password"
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                                required
-                            />
-                        </div>
-                        {loginErr && <div className="adl-err">⚠️ {loginErr}</div>}
-                        <button type="submit" className="adl-btn" disabled={logging}>
-                            {logging ? <><span className="spinner" style={{ width: 16, height: 16 }} /> Verifying…</> : '🔐 Login to Admin'}
-                        </button>
-                    </form>
-                    <button className="adl-back" onClick={() => navigate('/')}>← Back to Home</button>
-                </div>
-            </div>
-        );
-    }
 
     // ─── DASHBOARD ───────────────────────────────────────
     const statCards = [

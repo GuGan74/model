@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import ListingCard from '../components/ListingCard';
+import toast from 'react-hot-toast';
 import './MyListingsPage.css';
 
 const DEMO = [
@@ -16,6 +17,26 @@ export default function MyListingsPage() {
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState('active');
+
+    async function markSold(id) {
+        if (!window.confirm('Mark this listing as sold?')) return;
+        await supabase.from('listings').update({ status: 'sold' }).eq('id', id);
+        setListings(prev => prev.map(l => l.id === id ? { ...l, status: 'sold' } : l));
+        toast.success('Marked as sold! 🎉');
+    }
+
+    async function deleteListing(id) {
+        if (!window.confirm('Delete this listing permanently? This cannot be undone.')) return;
+        await supabase.from('listings').delete().eq('id', id);
+        setListings(prev => prev.filter(l => l.id !== id));
+        toast.success('Listing deleted');
+    }
+
+    async function relistListing(id) {
+        await supabase.from('listings').update({ status: 'active' }).eq('id', id);
+        setListings(prev => prev.map(l => l.id === id ? { ...l, status: 'active' } : l));
+        toast.success('Listing relisted! ✓');
+    }
 
     const fetchMyListings = React.useCallback(async () => {
         if (!currentUser || currentUser.id.startsWith('demo')) {
@@ -63,7 +84,29 @@ export default function MyListingsPage() {
                 </div>
             ) : (
                 <div className="myl-grid">
-                    {filtered.map(l => <ListingCard key={l.id} listing={l} />)}
+                    {filtered.map(l => (
+                        <div key={l.id} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                            <ListingCard listing={l} />
+                            <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                                {l.status === 'active' && (
+                                    <>
+                                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 20 }} onClick={() => navigate('/sell', { state: { editListing: l } })}>✏️ Edit</button>
+                                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 20, color: 'var(--green)', borderColor: 'var(--green)' }} onClick={() => markSold(l.id)}>✅ Mark Sold</button>
+                                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 20, color: 'var(--red)', borderColor: 'var(--red)' }} onClick={() => deleteListing(l.id)}>🗑️ Delete</button>
+                                    </>
+                                )}
+                                {l.status === 'pending' && (
+                                    <>
+                                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 20 }} onClick={() => navigate('/sell', { state: { editListing: l } })}>✏️ Edit</button>
+                                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 20, color: 'var(--red)', borderColor: 'var(--red)' }} onClick={() => deleteListing(l.id)}>🗑️ Delete</button>
+                                    </>
+                                )}
+                                {l.status === 'sold' && (
+                                    <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 20, color: 'var(--blue)', borderColor: 'var(--blue)' }} onClick={() => relistListing(l.id)}>🔄 Relist</button>
+                                )}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
         </div>

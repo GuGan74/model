@@ -3,37 +3,49 @@ import { supabase } from '../lib/supabase';
 import { DEMO_LISTINGS } from '../data/demoData';
 
 const SESSION_KEY = 'pb_listings_cache';
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const PAGE_SIZE = 20;
 
 /**
- * useListings — fetches listings with sessionStorage cache, 5s timeout,
- * and load-more pagination.
+ * useListings — fetches listings with sessionStorage cache (5-min TTL),
+ * 5s timeout fallback, sorting, and load-more pagination.
  *
- * Fix: useRef for offset tracking to avoid stale closure bug.
- * The old [offset] dependency caused fetchListings to see a stale
- * offset value when React batched state updates during "Load More".
+ * Uses offsetRef (useRef) instead of state to avoid stale closure in useCallback.
  */
 export function useListings() {
-    const cachedRaw = sessionStorage.getItem(SESSION_KEY);
-    const initialListings = cachedRaw ? JSON.parse(cachedRaw) : DEMO_LISTINGS;
+    const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-    const [listings, setListings] = useState(initialListings);
-    const [loading, setLoading] = useState(!cachedRaw);
+    // When reading cache:
+    function loadCache() {
+        const cachedRaw = sessionStorage.getItem(SESSION_KEY);
+        if (cachedRaw) {
+            try {
+                const { data, ts } = JSON.parse(cachedRaw);
+                if (Date.now() - ts < CACHE_TTL) {
+                    return data;
+                }
+            } catch { /* ignore */ }
+        }
+        return null;
+    }
+
+    const cached = loadCache();
+    const [listings, setListings] = useState(cached || DEMO_LISTINGS);
+    const [loading, setLoading] = useState(!cached);
     const [hasMore, setHasMore] = useState(true);
 
-    // Use a ref instead of state for offset — avoids stale closure in useCallback
+    // ref-based offset — no stale closure
     const offsetRef = useRef(0);
 
     const fetchListings = useCallback(async (reset = false) => {
-        const hasCachedData = Boolean(sessionStorage.getItem(SESSION_KEY));
+        const isCached = Boolean(loadCache());
 
         if (reset) {
-            // Reset offset synchronously via ref before any async work
             offsetRef.current = 0;
         }
 
         const currentOffset = offsetRef.current;
-        if (!hasCachedData || reset) setLoading(true);
+        if (!isCached || reset) setLoading(true);
 
         try {
             const timeoutPromise = new Promise((_, reject) =>
@@ -50,7 +62,7 @@ export function useListings() {
 
             let newListings = [];
             if (error || !data || data.length === 0) {
-                if (reset || !hasCachedData) newListings = DEMO_LISTINGS;
+                if (reset || !isCached) newListings = DEMO_LISTINGS;
                 setHasMore(false);
             } else {
                 newListings = data;
@@ -68,22 +80,23 @@ export function useListings() {
 
             setListings(prev => {
                 const updated = reset ? newListings : [...prev, ...newListings];
+                // Persist fresh cache with timestamp
                 if (reset || currentOffset === 0) {
-                    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(updated)); } catch (_) { }
+                    try {
+                        sessionStorage.setItem(SESSION_KEY, JSON.stringify({ data: updated, ts: Date.now() }));
+                    } catch { /* ignore */ }
                 }
                 return updated;
             });
 
-            // Advance offset ref AFTER successful fetch
             offsetRef.current = currentOffset + PAGE_SIZE;
         } catch (err) {
             console.error('useListings fetch error:', err);
-            if (!hasCachedData) setListings(DEMO_LISTINGS);
+            if (!isCached) setListings(DEMO_LISTINGS);
             setHasMore(false);
         } finally {
             setLoading(false);
         }
-        // No offset in deps — we read it via ref to avoid stale closures
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const refetch = useCallback(() => fetchListings(true), [fetchListings]);

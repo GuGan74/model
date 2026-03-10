@@ -8,7 +8,7 @@ import './ProfilePage.css';
 
 export default function ProfilePage() {
     const navigate = useNavigate();
-    const { currentProfile, signOut, currentUser } = useAuth();
+    const { currentProfile, signOut, currentUser, loadProfile } = useAuth();
     const p = currentProfile || {};
     const initials = (p.full_name || 'U').slice(0, 2).toUpperCase();
     const yr = new Date(p.created_at || Date.now()).getFullYear();
@@ -16,6 +16,11 @@ export default function ProfilePage() {
     const [likedListings, setLikedListings] = useState([]);
     const [loadingLiked, setLoadingLiked] = useState(true);
     const [stats, setStats] = useState({ listings: 0, views: 0, inquiries: 0, sold: 0 });
+
+    const [editing, setEditing] = useState(false);
+    const [editForm, setEditForm] = useState({
+        full_name: '', phone: '', location: '', language: 'English'
+    });
 
     const fetchStats = React.useCallback(async () => {
         if (!currentUser) return;
@@ -70,6 +75,25 @@ export default function ProfilePage() {
         toast.success('Signed out. See you soon! 👋');
     }
 
+    async function saveProfile() {
+        if (!editForm.full_name.trim()) {
+            toast.error('Name is required'); return;
+        }
+        const { error } = await supabase
+            .from('profiles')
+            .update({
+                full_name: editForm.full_name.trim(),
+                phone: editForm.phone.trim(),
+                location: editForm.location.trim(),
+                language: editForm.language,
+            })
+            .eq('id', currentUser.id);
+        if (error) { toast.error('Failed to update profile'); return; }
+        await loadProfile(currentUser.id);
+        setEditing(false);
+        toast.success('Profile updated! ✓');
+    }
+
     const menuItems = [
         { icon: '📋', label: 'My Listings', sub: 'View & manage your listings', action: () => navigate('/my-listings') },
         { icon: '🔔', label: 'Notifications', sub: 'Buyer inquiries & alerts', action: () => navigate('/notifications') },
@@ -91,34 +115,88 @@ export default function ProfilePage() {
                         <span className="p-bdg">✓ OTP Verified</span>
                     </div>
                 </div>
-                <div className="p-stats">
-                    <div className="pst"><div className="n">{stats.listings}</div><div className="l">Listings</div></div>
-                    <div className="pst"><div className="n">{stats.inquiries}</div><div className="l">Inquiries</div></div>
-                    <div className="pst"><div className="n">{stats.sold}</div><div className="l">Sold</div></div>
-                </div>
-                <div className="prof-body">
-                    {menuItems.map((m, i) => (
-                        <div key={i} className="prof-mi" onClick={m.action}>
-                            <div className="pmi-l">
-                                <div className="pmi-ic-box">{m.icon}</div>
-                                <div>
-                                    <div className="pmi-lbl">{m.label}</div>
-                                    <div style={{ fontSize: 11, color: 'var(--g3)', marginTop: 1 }}>{m.sub}</div>
-                                </div>
-                            </div>
-                            <span className="pmi-r">›</span>
-                        </div>
-                    ))}
-                    <div className="prof-mi" onClick={handleSignOut}>
-                        <div className="pmi-l">
-                            <div className="pmi-ic-box" style={{ color: 'var(--red)', background: 'var(--red-light)' }}>🚪</div>
+
+                {editing ? (
+                    <div className="section-card" style={{ margin: '16px' }}>
+                        <h4>Edit Profile</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             <div>
-                                <div className="pmi-lbl" style={{ color: 'var(--red)' }}>Sign Out</div>
-                                <div style={{ fontSize: 11, color: 'var(--red)', opacity: 0.7 }}>Securely leave your account</div>
+                                <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--g3)', textTransform: 'uppercase' }}>Full Name *</label>
+                                <input
+                                    value={editForm.full_name}
+                                    onChange={e => setEditForm({ ...editForm, full_name: e.target.value })}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--g5)' }}
+                                />
+                            </div>
+                            <div>
+                                <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--g3)', textTransform: 'uppercase' }}>Phone</label>
+                                <input
+                                    value={editForm.phone}
+                                    onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--g5)' }}
+                                />
+                            </div>
+                            <div>
+                                <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--g3)', textTransform: 'uppercase' }}>Location</label>
+                                <input
+                                    value={editForm.location}
+                                    onChange={e => setEditForm({ ...editForm, location: e.target.value })}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--g5)' }}
+                                />
+                            </div>
+                            <div>
+                                <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--g3)', textTransform: 'uppercase' }}>Language</label>
+                                <select
+                                    value={editForm.language}
+                                    onChange={e => setEditForm({ ...editForm, language: e.target.value })}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--g5)' }}
+                                >
+                                    <option>English</option>
+                                    <option>Tamil</option>
+                                    <option>Hindi</option>
+                                    <option>Telugu</option>
+                                    <option>Kannada</option>
+                                    <option>Malayalam</option>
+                                </select>
+                            </div>
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                <button className="btn-primary" style={{ flex: 1 }} onClick={saveProfile}>Save</button>
+                                <button className="btn-secondary" style={{ flex: 1 }} onClick={() => setEditing(false)}>Cancel</button>
                             </div>
                         </div>
                     </div>
-                </div>
+                ) : (
+                    <>
+                        <div className="p-stats">
+                            <div className="pst"><div className="n">{stats.listings}</div><div className="l">Listings</div></div>
+                            <div className="pst"><div className="n">{stats.inquiries}</div><div className="l">Inquiries</div></div>
+                            <div className="pst"><div className="n">{stats.sold}</div><div className="l">Sold</div></div>
+                        </div>
+                        <div className="prof-body">
+                            {menuItems.map((m, i) => (
+                                <div key={i} className="prof-mi" onClick={m.action}>
+                                    <div className="pmi-l">
+                                        <div className="pmi-ic-box">{m.icon}</div>
+                                        <div>
+                                            <div className="pmi-lbl">{m.label}</div>
+                                            <div style={{ fontSize: 11, color: 'var(--g3)', marginTop: 1 }}>{m.sub}</div>
+                                        </div>
+                                    </div>
+                                    <span className="pmi-r">›</span>
+                                </div>
+                            ))}
+                            <div className="prof-mi" onClick={handleSignOut}>
+                                <div className="pmi-l">
+                                    <div className="pmi-ic-box" style={{ color: 'var(--red)', background: 'var(--red-light)' }}>🚪</div>
+                                    <div>
+                                        <div className="pmi-lbl" style={{ color: 'var(--red)' }}>Sign Out</div>
+                                        <div style={{ fontSize: 11, color: 'var(--red)', opacity: 0.7 }}>Securely leave your account</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
 
             {/* Right — Quick Actions */}
@@ -139,7 +217,23 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="section-card">
-                    <h4>Account Details</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                        <h4 style={{ marginBottom: 0 }}>Account Details</h4>
+                        <button
+                            style={{ background: 'none', border: 'none', color: 'var(--green)', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}
+                            onClick={() => {
+                                setEditForm({
+                                    full_name: p.full_name || '',
+                                    phone: p.phone || '',
+                                    location: p.location || '',
+                                    language: p.language || 'English'
+                                });
+                                setEditing(true);
+                            }}
+                        >
+                            ✏️ Edit
+                        </button>
+                    </div>
                     <div className="prof-detail-row">
                         <span>📱 Phone</span>
                         <span>{p.phone || '—'}</span>
@@ -173,7 +267,7 @@ export default function ProfilePage() {
                         </div>
                     )}
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

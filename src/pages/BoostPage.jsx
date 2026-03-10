@@ -33,7 +33,7 @@ export default function BoostPage() {
                         <button
                             className="bc-btn"
                             style={{ background: t.bg, color: t.color, border: `1.5px solid ${t.color}33` }}
-                            onClick={() => { toast.success(`Boosting with ${t.name} plan!`); navigate('/payment'); }}
+                            onClick={() => { toast.success(`Boosting with ${t.name} plan!`); navigate('/payment', { state: { tier: { name: t.name, price: parseInt(t.price.replace('₹', '')) } } }); }}
                         >
                             {t.recommended ? '🚀 ' : ''}Boost Now
                         </button>

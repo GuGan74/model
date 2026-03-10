@@ -1,0 +1,22 @@
+{
+    "name": "PashuBazaar",
+    "short_name": "PashuBazaar",
+    "description": "Buy & Sell Animals with Full Trust",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#1a7a3c",
+    "theme_color": "#1a7a3c",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/og-image.png",
+            "sizes": "640x640",
+            "type": "image/png"
+        },
+        {
+            "src": "/og-image.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

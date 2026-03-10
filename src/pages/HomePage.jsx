@@ -15,7 +15,6 @@ export default function HomePage() {
     const { listings, loading, hasMore, refetch, loadMore } = useListings();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('all');
-    const [filtered, setFiltered] = useState([]);
     const [stats, setStats] = useState({ farmers: '1,200', listings: '450' });
     const [loadingMore, setLoadingMore] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -27,12 +26,7 @@ export default function HomePage() {
     const listingIds = listings.map(l => l.id);
     const { likedIds, toggleFavorite } = useFavorites(currentUser?.id, listingIds);
 
-    useEffect(() => {
-        refetch();
-        fetchStats();
-    }, []);
-
-    async function fetchStats() {
+    const fetchStats = React.useCallback(async () => {
         try {
             const [listingRes, farmerRes] = await Promise.all([
                 supabase.from('listings').select('id', { count: 'exact', head: true }).eq('status', 'active'),
@@ -43,7 +37,15 @@ export default function HomePage() {
         } catch (err) {
             console.error('Error fetching stats:', err);
         }
-    }
+    }, []);
+
+    useEffect(() => {
+        // Use an IIFE for initial load to avoid "setState in effect" warnings
+        (async () => {
+            refetch();
+            await fetchStats();
+        })();
+    }, [refetch, fetchStats]);
 
     async function handleLoadMore() {
         setLoadingMore(true);
@@ -51,8 +53,8 @@ export default function HomePage() {
         setLoadingMore(false);
     }
 
-    // Filtering logic — includes live search query
-    useEffect(() => {
+    // Filtering logic — computed via useMemo to avoid extra renders/effects
+    const filteredListings = React.useMemo(() => {
         let result = [...listings];
         if (activeTab !== 'all') {
             if (activeTab === 'pets') result = result.filter(l => ['dog', 'cat', 'bird'].includes(l.category));
@@ -70,7 +72,7 @@ export default function HomePage() {
                 (l.category || '').toLowerCase().includes(q)
             );
         }
-        setFiltered(result);
+        return result;
     }, [listings, activeTab, searchQuery]);
 
     function handleSearchKeyDown(e) {
@@ -216,8 +218,8 @@ export default function HomePage() {
                                             <h2 className="cs-title">NEWLY ADDED LIVESTOCK</h2>
                                         </div>
                                         <div className="cs-arrows">
-                                            <button className="arrow-btn" onClick={() => scrollRow('new', -1)}>❮</button>
-                                            <button className="arrow-btn" onClick={() => scrollRow('new', 1)}>❯</button>
+                                            <button className="arrow-btn" aria-label="Scroll left" onClick={() => scrollRow('new', -1)}>❮</button>
+                                            <button className="arrow-btn" aria-label="Scroll right" onClick={() => scrollRow('new', 1)}>❯</button>
                                         </div>
                                     </div>
                                     <div className="cs-row" ref={el => (rowRefs.current['new'] = el)}>
@@ -250,8 +252,8 @@ export default function HomePage() {
                                                     <span className="eye-icon">👁</span> VIEW ALL
                                                 </button>
                                                 <div className="cs-arrows">
-                                                    <button className="arrow-btn" onClick={() => scrollRow(cat.id, -1)}>❮</button>
-                                                    <button className="arrow-btn" onClick={() => scrollRow(cat.id, 1)}>❯</button>
+                                                    <button className="arrow-btn" aria-label="Scroll left" onClick={() => scrollRow(cat.id, -1)}>❮</button>
+                                                    <button className="arrow-btn" aria-label="Scroll right" onClick={() => scrollRow(cat.id, 1)}>❯</button>
                                                 </div>
                                             </div>
                                             <div className="cs-row" ref={el => (rowRefs.current[cat.id] = el)}>
@@ -284,8 +286,8 @@ export default function HomePage() {
                                                     <span className="eye-icon">👁</span> VIEW ALL
                                                 </button>
                                                 <div className="cs-arrows">
-                                                    <button className="arrow-btn" onClick={() => scrollRow('pets', -1)}>❮</button>
-                                                    <button className="arrow-btn" onClick={() => scrollRow('pets', 1)}>❯</button>
+                                                    <button className="arrow-btn" aria-label="Scroll left" onClick={() => scrollRow('pets', -1)}>❮</button>
+                                                    <button className="arrow-btn" aria-label="Scroll right" onClick={() => scrollRow('pets', 1)}>❯</button>
                                                 </div>
                                             </div>
                                             <div className="cs-row" ref={el => (rowRefs.current['pets'] = el)}>
@@ -339,11 +341,11 @@ export default function HomePage() {
                                 </div>
                                 {loading ? (
                                     <div className="cards-grid">{renderSkeletons(6)}</div>
-                                ) : filtered.length === 0 ? (
+                                ) : filteredListings.length === 0 ? (
                                     <div className="ls-empty">No listings match this category.</div>
                                 ) : (
                                     <div className="cards-grid">
-                                        {filtered.map(listing => (
+                                        {filteredListings.map(listing => (
                                             <ListingCard
                                                 key={listing.id}
                                                 listing={listing}
