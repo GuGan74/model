@@ -10,7 +10,7 @@ const BG_MAP = {
     poultry: '#fff3e8', dog: '#f0ebff', cat: '#fff0f6', bird: '#e3f8ff',
 };
 
-export default function ListingCard({ listing }) {
+const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedProp = false, onToggleFavorite }) {
     const navigate = useNavigate();
 
     const {
@@ -18,9 +18,11 @@ export default function ListingCard({ listing }) {
         milk_yield_liters, age_years, is_vaccinated, for_adoption, image_url,
         user_id: owner_id
     } = listing;
+
     const { currentUser, currentProfile } = useAuth();
-    const [isLiked, setIsLiked] = React.useState(false);
-    const [likeCount, setLikeCount] = React.useState(0);
+    // Use prop-driven liked state (from parent batch query), with local override capability
+    const [localLiked, setLocalLiked] = React.useState(null);
+    const isLiked = localLiked !== null ? localLiked : isLikedProp;
 
     const bg = BG_MAP[category] || '#f7f8fa';
 
@@ -31,21 +33,6 @@ export default function ListingCard({ listing }) {
 
     const isPet = ['dog', 'cat', 'bird'].includes(category);
 
-    const checkIfLiked = React.useCallback(async () => {
-        if (!currentUser || (String(id).startsWith('d') && String(id).length < 10)) return;
-        const { data, error } = await supabase
-            .from('favorites')
-            .select('id')
-            .eq('user_id', currentUser.id)
-            .eq('listing_id', id);
-
-        if (data && data.length > 0) setIsLiked(true);
-    }, [currentUser, id]);
-
-    React.useEffect(() => {
-        checkIfLiked();
-    }, [checkIfLiked]);
-
     async function handleLike(e) {
         e.stopPropagation();
         if (!currentUser) {
@@ -53,45 +40,24 @@ export default function ListingCard({ listing }) {
             return;
         }
 
-        if (isLiked) {
-            if (String(id).startsWith('d') && String(id).length < 10) {
-                setIsLiked(false);
-                toast.success('Removed from favorites');
-                return;
-            }
-            const { error } = await supabase
-                .from('favorites')
-                .delete()
-                .eq('user_id', currentUser.id)
-                .eq('listing_id', id);
-            if (!error) setIsLiked(false);
-        } else {
-            if (String(id).startsWith('d') && String(id).length < 10) {
-                setIsLiked(true);
-                toast.success('Added to favorites! ❤️');
-                toast('Owner notified! (Demo Mode)');
-                return;
-            }
-            const { error } = await supabase
-                .from('favorites')
-                .insert({ user_id: currentUser.id, listing_id: id });
-            if (!error) {
-                setIsLiked(true);
-                toast.success('Added to favorites!');
+        // Optimistic update
+        setLocalLiked(!isLiked);
 
-                // Notify Owner
-                const targetUid = owner_id || currentUser.id;
-                await supabase.from('notifications').insert({
-                    user_id: targetUid,
-                    actor_id: currentUser.id,
-                    type: 'like',
-                    icon: '❤️',
-                    title: 'New Like on your listing!',
-                    message: `${currentProfile?.full_name || 'Someone'} liked your ${title}.`,
-                    metadata: { listing_id: id }
-                });
+        if (onToggleFavorite) {
+            await onToggleFavorite(id, listing, currentProfile);
+        } else {
+            // Fallback: direct DB call if no parent handler
+            const isDemo = String(id).startsWith('d') && String(id).length < 10;
+            if (isLiked) {
+                if (!isDemo) await supabase.from('favorites').delete().eq('user_id', currentUser.id).eq('listing_id', id);
+                toast.success('Removed from favorites');
+            } else {
+                if (!isDemo) await supabase.from('favorites').insert({ user_id: currentUser.id, listing_id: id });
+                toast.success('Added to favorites! ❤️');
             }
         }
+
+        toast.success(isLiked ? 'Removed from favorites' : 'Added to favorites! ❤️');
     }
 
     return (
@@ -119,6 +85,9 @@ export default function ListingCard({ listing }) {
                         src={image_url}
                         alt={title}
                         className="lc-img-actual"
+                        loading="lazy"
+                        width={480}
+                        height={320}
                         onError={e => { e.target.classList.add('hide'); e.target.parentElement.classList.add('show-emoji'); }}
                     />
                 ) : null}
@@ -201,10 +170,12 @@ export default function ListingCard({ listing }) {
                         }
                         navigate(`/listing/${id}`);
                     }}>
-                        💬 Reach Seller
+                        📞 Call Seller
                     </button>
                 </div>
             </div>
         </div>
     );
-}
+});
+
+export default ListingCard;

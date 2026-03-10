@@ -1,56 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
+import { useListings } from '../hooks/useListings';
+import { useFavorites } from '../hooks/useFavorites';
+import { CATEGORIES } from '../constants/index';
 import ListingCard from '../components/ListingCard';
+import SkeletonCard from '../components/SkeletonCard';
+import SEOHead from '../components/SEOHead';
 import './HomePage.css';
 
-// Fallback demo listings for when DB is empty or in demo mode
-const DEMO_LISTINGS = [
-    { id: 'd1', title: 'Pure Gir Cow', category: 'cow', breed: 'Gir', age_years: 4, price: 65000, location: 'Coimbatore', state: 'Tamil Nadu', milk_yield_liters: 13, is_vaccinated: true, for_adoption: false, image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Gir_cattle.jpg/480px-Gir_cattle.jpg', created_at: new Date().toISOString() },
-    { id: 'd2', title: 'Murrah Buffalo', category: 'buffalo', breed: 'Murrah', age_years: 5, price: 85000, location: 'Ludhiana', state: 'Punjab', milk_yield_liters: 18, is_vaccinated: true, for_adoption: false, image_url: null, created_at: new Date().toISOString() },
-    { id: 'd3', title: 'Barbari Goat', category: 'goat', breed: 'Barbari', age_years: 2, price: 12400, location: 'Jaipur', state: 'Rajasthan', milk_yield_liters: null, is_vaccinated: false, for_adoption: false, image_url: null, created_at: new Date().toISOString() },
-    { id: 'd4', title: 'HF Pure Breed', category: 'cow', breed: 'HF', age_years: 3.5, price: 120000, location: 'Anand', state: 'Gujarat', milk_yield_liters: 28, is_vaccinated: true, for_adoption: false, image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Cow_female_black_white.jpg/480px-Cow_female_black_white.jpg', created_at: new Date().toISOString() },
-    { id: 'd5', title: 'Marwari Sheep', category: 'sheep', breed: 'Marwari', age_years: 1.5, price: 18500, location: 'Jodhpur', state: 'Rajasthan', milk_yield_liters: null, is_vaccinated: true, for_adoption: false, image_url: null, created_at: new Date().toISOString() },
-    { id: 'd6', title: 'Sahiwal Bull', category: 'cow', breed: 'Sahiwal', age_years: 4, price: 72000, location: 'Hisar', state: 'Haryana', milk_yield_liters: null, is_vaccinated: true, for_adoption: false, image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Sahiwal_cow.jpg/480px-Sahiwal_cow.jpg', created_at: new Date().toISOString() }
-];
-
-const CATEGORIES = [
-    { id: 'all', emoji: '🎛️', label: 'All Animals' },
-    { id: 'cow', emoji: '🐄', label: 'Cow' },
-    { id: 'buffalo', emoji: '🦬', label: 'Buffalo' },
-    { id: 'goat', emoji: '🐐', label: 'Goat' },
-    { id: 'sheep', emoji: '🐑', label: 'Sheep' },
-    { id: 'poultry', emoji: '🐓', label: 'Poultry' },
-    { id: 'pets', emoji: '🐾', label: 'Pets' },
-    { id: 'dogs', emoji: '🐕', label: 'Dogs' },
-    { id: 'cats', emoji: '🐈', label: 'Cats' },
-    { id: 'birds', emoji: '🦜', label: 'Birds' },
-];
-
-const SESSION_KEY = 'pb_listings_cache';
-
 export default function HomePage() {
-    // Pre-populate with cached or demo data so the UI is never blank
-    const cachedRaw = sessionStorage.getItem(SESSION_KEY);
-    const initialListings = cachedRaw ? JSON.parse(cachedRaw) : DEMO_LISTINGS;
-
-    const [listings, setListings] = useState(initialListings);
-    const [filtered, setFiltered] = useState([]);
-    const [loading, setLoading] = useState(!cachedRaw); // skip spinner if we have cache
+    const { currentUser } = useAuth();
+    const { listings, loading, hasMore, refetch, loadMore } = useListings();
     const [activeTab, setActiveTab] = useState('all');
-    const [searchQuery] = useState('');
+    const [filtered, setFiltered] = useState([]);
     const [stats, setStats] = useState({ farmers: '1,200', listings: '450' });
+    const [loadingMore, setLoadingMore] = useState(false);
 
-    const [filters] = useState({ types: [], priceMin: 0, priceMax: 999999 });
-    const [sort] = useState('newest');
+    // Refs for scroll rows (instead of DOM traversal)
+    const rowRefs = useRef({});
+
+    // Batch-fetch all liked IDs in one query (no N+1)
+    const listingIds = listings.map(l => l.id);
+    const { likedIds, toggleFavorite } = useFavorites(currentUser?.id, listingIds);
 
     useEffect(() => {
-        // Run both fetches in parallel
-        Promise.all([fetchListings(), fetchStats()]);
+        refetch();
+        fetchStats();
     }, []);
 
     async function fetchStats() {
         try {
-            // Fetch both counts in parallel
             const [listingRes, farmerRes] = await Promise.all([
                 supabase.from('listings').select('id', { count: 'exact', head: true }).eq('status', 'active'),
                 supabase.from('profiles').select('id', { count: 'exact', head: true }),
@@ -62,109 +42,50 @@ export default function HomePage() {
         }
     }
 
-    async function fetchListings() {
-        // Only show loading spinner if we have no cache
-        const hasCachedData = Boolean(sessionStorage.getItem(SESSION_KEY));
-        if (!hasCachedData) setLoading(true);
-        try {
-            // Race the DB query against a 5-second timeout
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('timeout')), 5000)
-            );
-            const queryPromise = supabase
-                .from('listings')
-                .select('id,title,category,breed,age_years,price,location,state,milk_yield_liters,is_vaccinated,is_promoted,for_adoption,image_url,created_at')
-                .eq('status', 'active')
-                .limit(100);
-
-            const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
-
-            let allListings = [];
-            if (error || !data || data.length === 0) {
-                allListings = DEMO_LISTINGS;
-            } else {
-                allListings = data.length > 3 ? data : [...data, ...DEMO_LISTINGS.slice(data.length)];
-            }
-
-            // Sort: Promoted > Vaccinated > Newest
-            allListings.sort((a, b) => {
-                if (a.is_promoted && !b.is_promoted) return -1;
-                if (!a.is_promoted && b.is_promoted) return 1;
-                if (a.is_vaccinated && !b.is_vaccinated) return -1;
-                if (!a.is_vaccinated && b.is_vaccinated) return 1;
-                return new Date(b.created_at) - new Date(a.created_at);
-            });
-
-            // Cache for instant revisits within the same session
-            try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(allListings)); } catch (_) { }
-            setListings(allListings);
-        } catch (err) {
-            console.error('Error fetching listings:', err);
-            if (!hasCachedData) setListings(DEMO_LISTINGS);
-        } finally {
-            setLoading(false);
-        }
+    async function handleLoadMore() {
+        setLoadingMore(true);
+        await loadMore();
+        setLoadingMore(false);
     }
 
-    // Apply filtering logic
+    // Filtering logic
     useEffect(() => {
         let result = [...listings];
-
         if (activeTab !== 'all') {
-            if (activeTab === 'pets') {
-                result = result.filter(l => ['dog', 'cat', 'bird'].includes(l.category));
-            } else if (activeTab === 'dogs') {
-                result = result.filter(l => l.category === 'dog');
-            } else if (activeTab === 'cats') {
-                result = result.filter(l => l.category === 'cat');
-            } else if (activeTab === 'birds') {
-                result = result.filter(l => l.category === 'bird');
-            } else {
-                result = result.filter(l => l.category === activeTab);
-            }
+            if (activeTab === 'pets') result = result.filter(l => ['dog', 'cat', 'bird'].includes(l.category));
+            else if (activeTab === 'dogs') result = result.filter(l => l.category === 'dog');
+            else if (activeTab === 'cats') result = result.filter(l => l.category === 'cat');
+            else if (activeTab === 'birds') result = result.filter(l => l.category === 'bird');
+            else result = result.filter(l => l.category === activeTab);
         }
-
-        if (searchQuery) {
-            const q = searchQuery.toLowerCase();
-            result = result.filter(l => (l.title || '').toLowerCase().includes(q) || (l.location || '').toLowerCase().includes(q));
-        }
-
-        if (filters.types.length > 0) {
-            result = result.filter(l => filters.types.includes(l.category));
-        }
-
-        if (sort === 'price-asc') result.sort((a, b) => a.price - b.price);
-        else if (sort === 'price-desc') result.sort((a, b) => b.price - a.price);
-        else {
-            // Default newest sort also respects priority
-            result.sort((a, b) => {
-                if (a.is_promoted && !b.is_promoted) return -1;
-                if (!a.is_promoted && b.is_promoted) return 1;
-                if (a.is_vaccinated && !b.is_vaccinated) return -1;
-                if (!a.is_vaccinated && b.is_vaccinated) return 1;
-                return new Date(b.created_at) - new Date(a.created_at);
-            });
-        }
-
-        // Price Filter Logic
-        if (filters.priceMax < 999999 || filters.priceMin > 0) {
-            result = result.filter(l => l.price >= filters.priceMin && l.price <= filters.priceMax);
-        }
-
         setFiltered(result);
-    }, [listings, activeTab, searchQuery, filters, sort]);
+    }, [listings, activeTab]);
 
+    function scrollRow(key, dir) {
+        const row = rowRefs.current[key];
+        if (row) row.scrollBy({ left: dir * 300, behavior: 'smooth' });
+    }
+
+    function renderSkeletons(count = 4) {
+        return Array.from({ length: count }).map((_, i) => (
+            <div key={i} className="cs-card-wrapper">
+                <SkeletonCard />
+            </div>
+        ));
+    }
 
     return (
         <div className="home-layout">
-
+            <SEOHead
+                title="Buy & Sell Cattle in India | PashuBazaar"
+                description="India's trusted marketplace for cows, buffaloes, goats, sheep and pets. Verified listings from farmers across Tamil Nadu, Punjab, Haryana and more."
+            />
             <div className="home-container">
-                {/* HERO BANNER SECTION */}
+                {/* HERO BANNER */}
                 <div className="new-hero-banner">
                     <div className="nh-content">
                         <h1 className="nh-title">Buy &amp; Sell Cattle<br /><span className="nh-yellow">With Full Trust</span></h1>
                         <p className="nh-sub">Connecting farmers across India with verified livestock listings. Every animal is health-checked and documented.</p>
-
                         <div className="nh-actions">
                             <button className="nh-btn-primary">Get Started</button>
                             <button className="nh-btn-outline">How It Works</button>
@@ -197,7 +118,7 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* CATEGORY ICON STRIP */}
+                {/* CATEGORY STRIP */}
                 <div className="category-strip">
                     {CATEGORIES.map(c => (
                         <div
@@ -212,15 +133,8 @@ export default function HomePage() {
                 </div>
 
                 <div className="home-main-body">
-
-                    {/* Redesigned Listings Sections */}
                     <div className="listings-container">
-                        {loading ? (
-                            <div style={{ padding: '40px', textAlign: 'center' }}>
-                                <div className="spinner dark" style={{ margin: '0 auto' }} />
-                                <p style={{ marginTop: '12px', color: 'var(--g3)' }}>Loading amazing livestock for you...</p>
-                            </div>
-                        ) : activeTab === 'all' ? (
+                        {activeTab === 'all' ? (
                             <>
                                 {/* NEWLY ADDED LIVESTOCK */}
                                 <div className="category-section">
@@ -230,30 +144,29 @@ export default function HomePage() {
                                             <h2 className="cs-title">NEWLY ADDED LIVESTOCK</h2>
                                         </div>
                                         <div className="cs-arrows">
-                                            <button className="arrow-btn" onClick={(e) => {
-                                                const row = e.target.closest('.category-section').querySelector('.cs-row');
-                                                row.scrollBy({ left: -300, behavior: 'smooth' });
-                                            }}>❮</button>
-                                            <button className="arrow-btn" onClick={(e) => {
-                                                const row = e.target.closest('.category-section').querySelector('.cs-row');
-                                                row.scrollBy({ left: 300, behavior: 'smooth' });
-                                            }}>❯</button>
+                                            <button className="arrow-btn" onClick={() => scrollRow('new', -1)}>❮</button>
+                                            <button className="arrow-btn" onClick={() => scrollRow('new', 1)}>❯</button>
                                         </div>
                                     </div>
-                                    <div className="cs-row">
-                                        {listings.slice(0, 10).map(listing => (
-                                            <div key={listing.id} className="cs-card-wrapper">
-                                                <ListingCard listing={listing} />
-                                            </div>
-                                        ))}
+                                    <div className="cs-row" ref={el => (rowRefs.current['new'] = el)}>
+                                        {loading
+                                            ? renderSkeletons(4)
+                                            : listings.slice(0, 10).map(listing => (
+                                                <div key={listing.id} className="cs-card-wrapper">
+                                                    <ListingCard
+                                                        listing={listing}
+                                                        isLiked={likedIds.has(listing.id)}
+                                                        onToggleFavorite={toggleFavorite}
+                                                    />
+                                                </div>
+                                            ))}
                                     </div>
                                 </div>
 
-                                {/* CATEGORY SPECIFIC SECTIONS */}
-                                {CATEGORIES.filter(c => c.id !== 'all' && c.id !== 'pets').map(cat => {
+                                {/* CATEGORY-SPECIFIC SECTIONS */}
+                                {!loading && CATEGORIES.filter(c => c.id !== 'all' && c.id !== 'pets').map(cat => {
                                     const catListings = listings.filter(l => l.category === cat.id);
                                     if (catListings.length === 0) return null;
-
                                     return (
                                         <div key={cat.id} className="category-section">
                                             <div className="cs-header">
@@ -265,20 +178,18 @@ export default function HomePage() {
                                                     <span className="eye-icon">👁</span> VIEW ALL
                                                 </button>
                                                 <div className="cs-arrows">
-                                                    <button className="arrow-btn" onClick={(e) => {
-                                                        const row = e.target.closest('.category-section').querySelector('.cs-row');
-                                                        row.scrollBy({ left: -300, behavior: 'smooth' });
-                                                    }}>❮</button>
-                                                    <button className="arrow-btn" onClick={(e) => {
-                                                        const row = e.target.closest('.category-section').querySelector('.cs-row');
-                                                        row.scrollBy({ left: 300, behavior: 'smooth' });
-                                                    }}>❯</button>
+                                                    <button className="arrow-btn" onClick={() => scrollRow(cat.id, -1)}>❮</button>
+                                                    <button className="arrow-btn" onClick={() => scrollRow(cat.id, 1)}>❯</button>
                                                 </div>
                                             </div>
-                                            <div className="cs-row">
+                                            <div className="cs-row" ref={el => (rowRefs.current[cat.id] = el)}>
                                                 {catListings.slice(0, 8).map(listing => (
                                                     <div key={listing.id} className="cs-card-wrapper">
-                                                        <ListingCard listing={listing} />
+                                                        <ListingCard
+                                                            listing={listing}
+                                                            isLiked={likedIds.has(listing.id)}
+                                                            onToggleFavorite={toggleFavorite}
+                                                        />
                                                     </div>
                                                 ))}
                                             </div>
@@ -287,7 +198,7 @@ export default function HomePage() {
                                 })}
 
                                 {/* PETS SECTION */}
-                                {(() => {
+                                {!loading && (() => {
                                     const petListings = listings.filter(l => ['dog', 'cat', 'bird'].includes(l.category));
                                     if (petListings.length === 0) return null;
                                     return (
@@ -295,32 +206,48 @@ export default function HomePage() {
                                             <div className="cs-header">
                                                 <div className="cs-title-group">
                                                     <div className="cs-icon-tag">🐾</div>
-                                                    <h2 className="cs-title">PETS & OTHERS</h2>
+                                                    <h2 className="cs-title">PETS &amp; OTHERS</h2>
                                                 </div>
                                                 <button className="cs-view-all" onClick={() => setActiveTab('pets')}>
                                                     <span className="eye-icon">👁</span> VIEW ALL
                                                 </button>
                                                 <div className="cs-arrows">
-                                                    <button className="arrow-btn" onClick={(e) => {
-                                                        const row = e.target.closest('.category-section').querySelector('.cs-row');
-                                                        row.scrollBy({ left: -300, behavior: 'smooth' });
-                                                    }}>❮</button>
-                                                    <button className="arrow-btn" onClick={(e) => {
-                                                        const row = e.target.closest('.category-section').querySelector('.cs-row');
-                                                        row.scrollBy({ left: 300, behavior: 'smooth' });
-                                                    }}>❯</button>
+                                                    <button className="arrow-btn" onClick={() => scrollRow('pets', -1)}>❮</button>
+                                                    <button className="arrow-btn" onClick={() => scrollRow('pets', 1)}>❯</button>
                                                 </div>
                                             </div>
-                                            <div className="cs-row">
+                                            <div className="cs-row" ref={el => (rowRefs.current['pets'] = el)}>
                                                 {petListings.map(listing => (
                                                     <div key={listing.id} className="cs-card-wrapper">
-                                                        <ListingCard listing={listing} />
+                                                        <ListingCard
+                                                            listing={listing}
+                                                            isLiked={likedIds.has(listing.id)}
+                                                            onToggleFavorite={toggleFavorite}
+                                                        />
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
                                     );
                                 })()}
+
+                                {/* LOAD MORE */}
+                                {!loading && hasMore && (
+                                    <div style={{ textAlign: 'center', padding: '20px 0 32px' }}>
+                                        <button
+                                            onClick={handleLoadMore}
+                                            disabled={loadingMore}
+                                            style={{
+                                                padding: '12px 32px', background: '#1a7a3c', color: 'white',
+                                                border: 'none', borderRadius: 12, fontWeight: 800,
+                                                fontSize: 14, cursor: 'pointer', fontFamily: 'Nunito, sans-serif',
+                                                opacity: loadingMore ? 0.7 : 1
+                                            }}
+                                        >
+                                            {loadingMore ? 'Loading…' : '🔽 Load More'}
+                                        </button>
+                                    </div>
+                                )}
                             </>
                         ) : (
                             /* GRID VIEW FOR SPECIFIC CATEGORY */
@@ -338,12 +265,19 @@ export default function HomePage() {
                                         ❮ BACK TO HOME
                                     </button>
                                 </div>
-                                {filtered.length === 0 ? (
+                                {loading ? (
+                                    <div className="cards-grid">{renderSkeletons(6)}</div>
+                                ) : filtered.length === 0 ? (
                                     <div className="ls-empty">No listings match this category.</div>
                                 ) : (
                                     <div className="cards-grid">
                                         {filtered.map(listing => (
-                                            <ListingCard key={listing.id} listing={listing} />
+                                            <ListingCard
+                                                key={listing.id}
+                                                listing={listing}
+                                                isLiked={likedIds.has(listing.id)}
+                                                onToggleFavorite={toggleFavorite}
+                                            />
                                         ))}
                                     </div>
                                 )}
@@ -351,7 +285,7 @@ export default function HomePage() {
                         )}
                     </div>
                 </div>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 }

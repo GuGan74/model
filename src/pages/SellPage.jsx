@@ -2,25 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { LIVESTOCK_CATS, PET_CATS } from '../constants/index';
 import toast from 'react-hot-toast';
 import './SellPage.css';
-
-const LIVESTOCK_CATS = [
-    { id: 'cow', label: '🐄', name: 'Cow' },
-    { id: 'buffalo', label: '🦬', name: 'Buffalo' },
-    { id: 'goat', label: '🐐', name: 'Goat' },
-    { id: 'sheep', label: '🐑', name: 'Sheep' },
-    { id: 'poultry', label: '🐓', name: 'Poultry' },
-    { id: 'other', label: '🐾', name: 'Other' },
-];
-const PET_CATS = [
-    { id: 'dog', label: '🐕', name: 'Dogs' },
-    { id: 'cat', label: '🐈', name: 'Cats' },
-    { id: 'bird', label: '🦜', name: 'Birds' },
-    { id: 'fish', label: '🐠', name: 'Fish' },
-    { id: 'rabbit', label: '🐇', name: 'Rabbit' },
-    { id: 'other-pet', label: '🐾', name: 'Other' },
-];
 
 const STEPS = ['Animal Type', 'Details', 'Photos', 'Pricing'];
 
@@ -29,6 +13,7 @@ export default function SellPage() {
     const { currentUser, currentProfile } = useAuth();
     const [step, setStep] = useState(1);
     const [submitting, setSubmitting] = useState(false);
+    const [fieldErrors, setFieldErrors] = useState({});
 
     // Form data
     const [listingType, setListingType] = useState('livestock'); // livestock | pet
@@ -53,6 +38,17 @@ export default function SellPage() {
 
     function setF(key, val) { setForm(f => ({ ...f, [key]: val })); }
 
+    function validate() {
+        const errs = {};
+        if (form.title.trim().length < 5) errs.title = 'Title must be at least 5 characters';
+        if (form.title.trim().length > 100) errs.title = 'Title must be under 100 characters';
+        if (!form.for_adoption && Number(form.price) <= 0) errs.price = 'Price must be greater than 0';
+        if (form.location.trim().length < 3) errs.location = 'Location must be at least 3 characters';
+        if (form.description.length > 1000) errs.description = 'Description must be under 1000 characters';
+        setFieldErrors(errs);
+        return Object.keys(errs).length === 0;
+    }
+
     function canGoNext() {
         if (step === 1) return form.category !== '';
         if (step === 2) return form.title.trim().length > 2 && form.breed.trim().length > 1;
@@ -63,6 +59,7 @@ export default function SellPage() {
 
     async function handleSubmit() {
         if (!currentUser) { toast.error('Please log in first'); navigate('/'); return; }
+        if (!validate()) { toast.error('Please fix the errors below'); return; }
         setSubmitting(true);
         try {
             const payload = {
@@ -179,6 +176,7 @@ export default function SellPage() {
                             <div className="ff">
                                 <label>Listing Title *</label>
                                 <input placeholder="e.g. HF Cow — High Milk Yield" value={form.title} onChange={e => setF('title', e.target.value)} />
+                                {fieldErrors.title && <div style={{ color: '#e63946', fontSize: 12, marginTop: 4 }}>⚠️ {fieldErrors.title}</div>}
                             </div>
                             <div className="ff">
                                 <label>Breed *</label>
@@ -302,6 +300,7 @@ export default function SellPage() {
                             <div className="ff">
                                 <label>City / Village *</label>
                                 <input placeholder="e.g. Coimbatore" value={form.location} onChange={e => setF('location', e.target.value)} />
+                                {fieldErrors.location && <div style={{ color: '#e63946', fontSize: 12, marginTop: 4 }}>⚠️ {fieldErrors.location}</div>}
                             </div>
                             <div className="ff">
                                 <label>State</label>
@@ -348,10 +347,13 @@ export default function SellPage() {
                                 placeholder="Describe the animal — health, temperament, milk history, reason for selling..."
                                 value={form.description}
                                 onChange={e => setF('description', e.target.value)}
-                                maxLength={600}
+                                maxLength={1000}
                                 style={{ height: 120 }}
                             />
-                            <div style={{ textAlign: 'right', fontSize: 11, color: 'var(--g3)', marginTop: 4 }}>{form.description.length}/600</div>
+                            <div style={{ textAlign: 'right', fontSize: 11, color: form.description.length > 950 ? '#e63946' : 'var(--g3)', marginTop: 4 }}>
+                                {form.description.length}/1000
+                            </div>
+                            {fieldErrors.description && <div style={{ color: '#e63946', fontSize: 12, marginTop: 4 }}>⚠️ {fieldErrors.description}</div>}
                         </div>
                     </div>
                 </div>

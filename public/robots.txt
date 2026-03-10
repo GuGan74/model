@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://model-mauve.vercel.app/sitemap.xml

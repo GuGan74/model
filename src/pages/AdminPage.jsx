@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import './AdminPage.css';
 
-const ADMIN_EMAIL = 'admin@gmail.com';
-const ADMIN_PASS = '12gugan*#';
-
 export default function AdminPage() {
     const navigate = useNavigate();
+    const { currentProfile, isLoggedIn, loading: authLoading } = useAuth();
     const [authenticated, setAuthenticated] = useState(() => {
         try { return localStorage.getItem('pb_admin') === 'true'; } catch { return false; }
     });
@@ -24,6 +23,11 @@ export default function AdminPage() {
     const [users, setUsers] = useState([]);
     const [reports, setReports] = useState([]);
     const [loadingData, setLoadingData] = useState(false);
+
+    // Redirect non-admin users
+    if (!authLoading && isLoggedIn && currentProfile && currentProfile.role !== 'admin' && !authenticated) {
+        return <Navigate to="/" />;
+    }
 
     useEffect(() => {
         if (authenticated) fetchDashboardData();
@@ -101,20 +105,32 @@ export default function AdminPage() {
         setStats(s => ({ ...s, reports: s.reports - 1 }));
     }
 
-    function handleLogin(e) {
+    async function handleLogin(e) {
         e.preventDefault();
         setLogging(true);
         setLoginErr('');
-        setTimeout(() => {
-            if (email.trim() === ADMIN_EMAIL && password === ADMIN_PASS) {
-                localStorage.setItem('pb_admin', 'true');
-                setAuthenticated(true);
-                toast.success('Admin access granted ✓');
+        try {
+            // Try Supabase auth first
+            const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+            if (!error && data?.user) {
+                // Check if this user has admin role in profiles
+                const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
+                if (profile?.role === 'admin') {
+                    localStorage.setItem('pb_admin', 'true');
+                    setAuthenticated(true);
+                    toast.success('Admin access granted ✓');
+                } else {
+                    await supabase.auth.signOut();
+                    setLoginErr('Access denied — admin role required');
+                }
             } else {
                 setLoginErr('Invalid email or password');
             }
+        } catch (err) {
+            setLoginErr('Login failed: ' + err.message);
+        } finally {
             setLogging(false);
-        }, 600);
+        }
     }
 
     function handleLogout() {

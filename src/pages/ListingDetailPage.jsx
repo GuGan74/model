@@ -2,23 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { DEMO_MAP } from '../data/demoData';
+import SEOHead from '../components/SEOHead';
 import toast from 'react-hot-toast';
 import './ListingDetailPage.css';
-
-const DEMO_MAP = {
-    d1: { id: 'd1', title: 'Pure Gir Cow', category: 'cow', breed: 'Gir', age_years: 4, price: 65000, location: 'Coimbatore', state: 'Tamil Nadu', milk_yield_liters: 13, is_vaccinated: true, is_verified: true, is_promoted: true, description: 'Excellent Gir cow in peak lactation. Consistent 13L daily. Vaccinated, gentle temperament, all documents available.', image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Gir_cattle.jpg/480px-Gir_cattle.jpg' },
-    d2: { id: 'd2', title: 'Murrah Buffalo', category: 'buffalo', breed: 'Murrah', age_years: 5, price: 85000, location: 'Ludhiana', state: 'Punjab', milk_yield_liters: 18, is_vaccinated: true, is_verified: true, description: 'Top quality Murrah buffalo. High milk yield and healthy.', image_url: null },
-    d3: { id: 'd3', title: 'Barbari Goat', category: 'goat', breed: 'Barbari', age_years: 2, price: 12400, location: 'Jaipur', state: 'Rajasthan', is_vaccinated: false, is_verified: true, description: 'Healthy Barbari goat, perfect for breeding.', image_url: null },
-    d4: { id: 'd4', title: 'HF Pure Breed', category: 'cow', breed: 'HF', age_years: 3.5, price: 120000, location: 'Anand', state: 'Gujarat', milk_yield_liters: 28, is_vaccinated: true, is_verified: true, description: 'High-yielding HF cow. Well-maintained and vaccinated.', image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Cow_female_black_white.jpg/480px-Cow_female_black_white.jpg' },
-    d5: { id: 'd5', title: 'Marwari Sheep', category: 'sheep', breed: 'Marwari', age_years: 1.5, price: 18500, location: 'Jodhpur', state: 'Rajasthan', is_vaccinated: true, is_verified: true, description: 'Healthy Marwari sheep.', image_url: null },
-    d6: { id: 'd6', title: 'Sahiwal Bull', category: 'cow', breed: 'Sahiwal', age_years: 4, price: 72000, location: 'Hisar', state: 'Haryana', is_vaccinated: true, is_verified: true, description: 'Strong Sahiwal bull for breeding.', image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Sahiwal_cow.jpg/480px-Sahiwal_cow.jpg' }
-};
 
 export default function ListingDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { currentUser, currentProfile } = useAuth();
     const [listing, setListing] = useState(null);
+    const [sellerPhone, setSellerPhone] = useState(null);
     const [loading, setLoading] = useState(true);
     const [reporting, setReporting] = useState(false);
     const [imgError, setImgError] = useState(false);
@@ -26,7 +20,6 @@ export default function ListingDetailPage() {
 
     const checkIfLiked = React.useCallback(async () => {
         if (!currentUser) return;
-        // Even for demo, check local state or just return if not in DB
         if (String(id).startsWith('d') && String(id).length < 10) return;
 
         const { data } = await supabase
@@ -45,6 +38,17 @@ export default function ListingDetailPage() {
         }
         const { data } = await supabase.from('listings').select('*').eq('id', id).single();
         setListing(data);
+
+        // Fetch seller phone
+        if (data?.user_id) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('phone')
+                .eq('id', data.user_id)
+                .single();
+            if (profile?.phone) setSellerPhone(profile.phone);
+        }
+
         setLoading(false);
     }, [id]);
 
@@ -60,32 +64,21 @@ export default function ListingDetailPage() {
 
         if (isLiked) {
             if (String(id).startsWith('d') && String(id).length < 10) {
-                setIsLiked(false);
-                toast.success('Removed from Favorites');
-                return;
+                setIsLiked(false); toast.success('Removed from Favorites'); return;
             }
-            const { error } = await supabase
-                .from('favorites')
-                .delete()
-                .eq('user_id', currentUser.id)
-                .eq('listing_id', id);
+            const { error } = await supabase.from('favorites').delete()
+                .eq('user_id', currentUser.id).eq('listing_id', id);
             if (!error) setIsLiked(false);
         } else {
             if (String(id).startsWith('d') && String(id).length < 10) {
-                setIsLiked(true);
-                toast.success('Added to Favorites ❤️');
-                // Mock notification for demo
-                toast('Owner notified! (Demo Mode)');
-                return;
+                setIsLiked(true); toast.success('Added to Favorites ❤️');
+                toast('Owner notified! (Demo Mode)'); return;
             }
-            const { error } = await supabase
-                .from('favorites')
+            const { error } = await supabase.from('favorites')
                 .insert({ user_id: currentUser.id, listing_id: id });
             if (!error) {
                 setIsLiked(true);
                 toast.success('Added to Favorites ❤️');
-
-                // Notify Owner
                 const targetUid = listing.user_id || currentUser.id;
                 await supabase.from('notifications').insert({
                     user_id: targetUid,
@@ -100,30 +93,22 @@ export default function ListingDetailPage() {
         }
     }
 
-
     async function handleReport() {
         if (!currentUser) { toast.error('Please log in to report'); return; }
-
         const reason = window.prompt("Why are you reporting this listing? (e.g. Fake, Spam, Sold)");
         if (!reason) return;
-
         if (String(id).startsWith('d') && String(id).length < 10) {
-            toast.success('Report submitted (Demo mode) ✅');
-            return;
+            toast.success('Report submitted (Demo mode) ✅'); return;
         }
-
         setReporting(true);
         try {
             const { error } = await supabase.from('reports').insert({
-                listing_id: id,
-                reporter_id: currentUser.id,
-                reason: reason
+                listing_id: id, reporter_id: currentUser.id, reason
             });
             if (error) throw error;
             toast.success('Thank you. Report submitted for review.');
         } catch (err) {
             console.error('Report error:', err);
-            // Default to success for better UX if table doesn't exist yet
             toast.success('Thank you. Your report has been submitted.');
         } finally {
             setReporting(false);
@@ -136,8 +121,42 @@ export default function ListingDetailPage() {
     const isPet = ['dog', 'cat', 'bird'].includes(listing.category);
     const emoji = { cow: '🐄', buffalo: '🦬', goat: '🐐', sheep: '🐑', poultry: '🐓', dog: '🐕', cat: '🐈', bird: '🦜' }[listing.category] || '🐾';
 
+    // WhatsApp link using seller phone if available
+    const phone = sellerPhone ? sellerPhone.replace(/\D/g, '').replace(/^91/, '') : null;
+    const waMsg = encodeURIComponent(`Hi, I saw your listing for ${listing.title} on PashuBazaar. Is it still available?`);
+    const waLink = phone
+        ? `https://wa.me/91${phone}?text=${waMsg}`
+        : `https://wa.me/?text=${waMsg}`;
+
+    // JSON-LD structured data for Product schema
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": listing.title,
+        "description": listing.description || `${listing.breed}, ${listing.age_years} years old`,
+        "image": listing.image_url || '',
+        "offers": {
+            "@type": "Offer",
+            "priceCurrency": "INR",
+            "price": listing.for_adoption ? 0 : listing.price,
+            "availability": "https://schema.org/InStock",
+            "url": `https://model-mauve.vercel.app/listing/${listing.id}`
+        }
+    };
+
     return (
         <div className="det-page">
+            <SEOHead
+                title={`${listing.title} for sale in ${listing.location} | PashuBazaar`}
+                description={`${listing.breed || ''}, ${listing.age_years ? listing.age_years + ' years old' : ''}. Price: ${listing.for_adoption ? 'Free' : '₹' + Number(listing.price).toLocaleString('en-IN')}. Located in ${listing.location}${listing.state ? ', ' + listing.state : ''}.`}
+                imageUrl={listing.image_url}
+                url={`https://model-mauve.vercel.app/listing/${listing.id}`}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+
             <div className="det-layout">
                 {/* LEFT */}
                 <div className="det-left">
@@ -156,6 +175,7 @@ export default function ListingDetailPage() {
                                 alt={listing.title}
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 onError={() => setImgError(true)}
+                                loading="lazy"
                             />
                         ) : (
                             <div className="det-img-fallback">
@@ -222,8 +242,6 @@ export default function ListingDetailPage() {
                             onClick={async () => {
                                 if (!currentUser) { toast.error('Please log in to contact seller'); return; }
                                 toast('Connecting to seller… (demo mode)');
-
-                                // Notify Owner
                                 if (listing.user_id && listing.user_id !== currentUser.id) {
                                     await supabase.from('notifications').insert({
                                         user_id: listing.user_id,
@@ -239,28 +257,24 @@ export default function ListingDetailPage() {
                         >
                             💬 Reach Seller
                         </button>
-                        <button
+                        <a
+                            href={waLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="btn-wwa"
-                            onClick={() => window.open(`https://wa.me/?text=Hi, I'm interested in your listing: ${listing.title} on PashuBazaar`, '_blank')}
+                            style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}
                         >
                             💬 WhatsApp Seller
-                        </button>
+                        </a>
                         <button
                             className={`btn-fav-large ${isLiked ? 'active' : ''}`}
                             onClick={handleToggleLike}
                             style={{
-                                width: '100%',
-                                marginTop: '10px',
-                                padding: '14px',
-                                borderRadius: '12px',
-                                background: isLiked ? '#fff0f0' : 'white',
-                                color: isLiked ? '#e63946' : '#666',
-                                fontWeight: 800,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '8px',
-                                cursor: 'pointer',
+                                width: '100%', marginTop: '10px', padding: '14px',
+                                borderRadius: '12px', background: isLiked ? '#fff0f0' : 'white',
+                                color: isLiked ? '#e63946' : '#666', fontWeight: 800,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                gap: '8px', cursor: 'pointer',
                                 border: isLiked ? '1px solid #fecaca' : '1px solid #e5e7eb',
                                 transition: '0.2s'
                             }}

@@ -30,7 +30,7 @@ export default function ProfilePage() {
                 listings: listingsRes.count || 0,
                 inquiries: inquiriesRes.count || 0,
                 sold: soldRes.count || 0,
-                views: Math.floor(Math.random() * 200) + 50 // Dynamic mock for views
+                views: 0 // listing_views table not yet created
             });
         } catch (err) {
             console.error('Stats fetch error:', err);
@@ -93,7 +93,6 @@ export default function ProfilePage() {
                 </div>
                 <div className="p-stats">
                     <div className="pst"><div className="n">{stats.listings}</div><div className="l">Listings</div></div>
-                    <div className="pst"><div className="n">{stats.views}</div><div className="l">Views</div></div>
                     <div className="pst"><div className="n">{stats.inquiries}</div><div className="l">Inquiries</div></div>
                     <div className="pst"><div className="n">{stats.sold}</div><div className="l">Sold</div></div>
                 </div>
