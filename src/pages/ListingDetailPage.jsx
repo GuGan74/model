@@ -6,7 +6,12 @@ import toast from 'react-hot-toast';
 import './ListingDetailPage.css';
 
 const DEMO_MAP = {
-    d1: { id: 'd1', title: 'HF Cow — High Milk Yield', category: 'cow', breed: 'HF Holstein', age_years: 4, price: 65000, location: 'Coimbatore', state: 'Tamil Nadu', milk_yield_liters: 18, is_vaccinated: true, is_verified: true, is_pregnant: true, is_promoted: true, description: 'Excellent HF Holstein cow in peak lactation. Consistent 18L daily. Vaccinated, gentle temperament, all documents available.', image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Cow_female_black_white.jpg/480px-Cow_female_black_white.jpg' },
+    d1: { id: 'd1', title: 'Pure Gir Cow', category: 'cow', breed: 'Gir', age_years: 4, price: 65000, location: 'Coimbatore', state: 'Tamil Nadu', milk_yield_liters: 13, is_vaccinated: true, is_verified: true, is_promoted: true, description: 'Excellent Gir cow in peak lactation. Consistent 13L daily. Vaccinated, gentle temperament, all documents available.', image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Gir_cattle.jpg/480px-Gir_cattle.jpg' },
+    d2: { id: 'd2', title: 'Murrah Buffalo', category: 'buffalo', breed: 'Murrah', age_years: 5, price: 85000, location: 'Ludhiana', state: 'Punjab', milk_yield_liters: 18, is_vaccinated: true, is_verified: true, description: 'Top quality Murrah buffalo. High milk yield and healthy.', image_url: null },
+    d3: { id: 'd3', title: 'Barbari Goat', category: 'goat', breed: 'Barbari', age_years: 2, price: 12400, location: 'Jaipur', state: 'Rajasthan', is_vaccinated: false, is_verified: true, description: 'Healthy Barbari goat, perfect for breeding.', image_url: null },
+    d4: { id: 'd4', title: 'HF Pure Breed', category: 'cow', breed: 'HF', age_years: 3.5, price: 120000, location: 'Anand', state: 'Gujarat', milk_yield_liters: 28, is_vaccinated: true, is_verified: true, description: 'High-yielding HF cow. Well-maintained and vaccinated.', image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Cow_female_black_white.jpg/480px-Cow_female_black_white.jpg' },
+    d5: { id: 'd5', title: 'Marwari Sheep', category: 'sheep', breed: 'Marwari', age_years: 1.5, price: 18500, location: 'Jodhpur', state: 'Rajasthan', is_vaccinated: true, is_verified: true, description: 'Healthy Marwari sheep.', image_url: null },
+    d6: { id: 'd6', title: 'Sahiwal Bull', category: 'cow', breed: 'Sahiwal', age_years: 4, price: 72000, location: 'Hisar', state: 'Haryana', is_vaccinated: true, is_verified: true, description: 'Strong Sahiwal bull for breeding.', image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Sahiwal_cow.jpg/480px-Sahiwal_cow.jpg' }
 };
 
 export default function ListingDetailPage() {
@@ -17,6 +22,7 @@ export default function ListingDetailPage() {
     const [loading, setLoading] = useState(true);
     const [reporting, setReporting] = useState(false);
     const [imgError, setImgError] = useState(false);
+    const [isLiked, setIsLiked] = useState(false);
 
     const checkIfLiked = React.useCallback(async () => {
         if (!currentUser) return;

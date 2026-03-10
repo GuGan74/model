@@ -26,10 +26,16 @@ const CATEGORIES = [
     { id: 'birds', emoji: '🦜', label: 'Birds' },
 ];
 
+const SESSION_KEY = 'pb_listings_cache';
+
 export default function HomePage() {
-    const [listings, setListings] = useState([]);
+    // Pre-populate with cached or demo data so the UI is never blank
+    const cachedRaw = sessionStorage.getItem(SESSION_KEY);
+    const initialListings = cachedRaw ? JSON.parse(cachedRaw) : DEMO_LISTINGS;
+
+    const [listings, setListings] = useState(initialListings);
     const [filtered, setFiltered] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!cachedRaw); // skip spinner if we have cache
     const [activeTab, setActiveTab] = useState('all');
     const [searchQuery] = useState('');
     const [stats, setStats] = useState({ farmers: '1,200', listings: '450' });
@@ -38,45 +44,49 @@ export default function HomePage() {
     const [sort] = useState('newest');
 
     useEffect(() => {
-        fetchListings();
-        fetchStats();
+        // Run both fetches in parallel
+        Promise.all([fetchListings(), fetchStats()]);
     }, []);
 
     async function fetchStats() {
         try {
-            const { count: listingCount } = await supabase
-                .from('listings')
-                .select('*', { count: 'exact', head: true })
-                .eq('status', 'active');
-
-            const { count: farmerCount } = await supabase
-                .from('profiles')
-                .select('*', { count: 'exact', head: true });
-
-            if (listingCount !== null) setStats(s => ({ ...s, listings: listingCount.toLocaleString() }));
-            if (farmerCount !== null) setStats(s => ({ ...s, farmers: farmerCount.toLocaleString() }));
+            // Fetch both counts in parallel
+            const [listingRes, farmerRes] = await Promise.all([
+                supabase.from('listings').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+                supabase.from('profiles').select('id', { count: 'exact', head: true }),
+            ]);
+            if (listingRes.count !== null) setStats(s => ({ ...s, listings: listingRes.count.toLocaleString() }));
+            if (farmerRes.count !== null) setStats(s => ({ ...s, farmers: farmerRes.count.toLocaleString() }));
         } catch (err) {
             console.error('Error fetching stats:', err);
         }
     }
 
     async function fetchListings() {
-        setLoading(true);
+        // Only show loading spinner if we have no cache
+        const hasCachedData = Boolean(sessionStorage.getItem(SESSION_KEY));
+        if (!hasCachedData) setLoading(true);
         try {
-            const { data, error } = await supabase
+            // Race the DB query against a 5-second timeout
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('timeout')), 5000)
+            );
+            const queryPromise = supabase
                 .from('listings')
-                .select('*')
-                .eq('status', 'active');
+                .select('id,title,category,breed,age_years,price,location,state,milk_yield_liters,is_vaccinated,is_promoted,for_adoption,image_url,created_at')
+                .eq('status', 'active')
+                .limit(100);
+
+            const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
 
             let allListings = [];
             if (error || !data || data.length === 0) {
                 allListings = DEMO_LISTINGS;
             } else {
-                // Show real listings first, then fallback to demo if we have very few
                 allListings = data.length > 3 ? data : [...data, ...DEMO_LISTINGS.slice(data.length)];
             }
 
-            // Apply priority sorting: Promoted > Vaccinated > Newest
+            // Sort: Promoted > Vaccinated > Newest
             allListings.sort((a, b) => {
                 if (a.is_promoted && !b.is_promoted) return -1;
                 if (!a.is_promoted && b.is_promoted) return 1;
@@ -85,10 +95,12 @@ export default function HomePage() {
                 return new Date(b.created_at) - new Date(a.created_at);
             });
 
+            // Cache for instant revisits within the same session
+            try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(allListings)); } catch (_) { }
             setListings(allListings);
         } catch (err) {
             console.error('Error fetching listings:', err);
-            setListings(DEMO_LISTINGS);
+            if (!hasCachedData) setListings(DEMO_LISTINGS);
         } finally {
             setLoading(false);
         }
