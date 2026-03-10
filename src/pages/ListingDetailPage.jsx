@@ -17,7 +17,7 @@ export default function ListingDetailPage() {
     const [sellerJoinDate, setSellerJoinDate] = useState(null);
     const [loading, setLoading] = useState(true);
     const [reporting, setReporting] = useState(false);
-    const [imgError, setImgError] = useState(false);
+
     const [isLiked, setIsLiked] = useState(false);
 
     const checkIfLiked = React.useCallback(async () => {
@@ -123,7 +123,7 @@ export default function ListingDetailPage() {
     if (!listing) return <div style={{ padding: 40, textAlign: 'center' }}>Listing not found. <button onClick={() => navigate('/')}>Go Home</button></div>;
 
     const isPet = ['dog', 'cat', 'bird'].includes(listing.category);
-    const emoji = { cow: '🐄', buffalo: '🦬', goat: '🐐', sheep: '🐑', poultry: '🐓', dog: '🐕', cat: '🐈', bird: '🦜' }[listing.category] || '🐾';
+
 
     // WhatsApp link using seller phone if available
     const phone = sellerPhone ? sellerPhone.replace(/\D/g, '').replace(/^91/, '') : null;
@@ -172,19 +172,26 @@ export default function ListingDetailPage() {
                         <span>{listing.title}</span>
                     </div>
 
-                    <div className={`det-gallery${isPet ? ' pt' : ' lv'}`}>
-                        {(listing.image_url && !imgError) ? (
+                    <div className="det-img-wrap">
+                        {listing.image_url ? (
                             <img
                                 src={listing.image_url}
                                 alt={listing.title}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                onError={() => setImgError(true)}
-                                loading="lazy"
+                                className="det-img"
+                                style={{ objectFit: 'cover', objectPosition: 'center' }}
+                                onError={e => { e.target.style.display = 'none'; }}
                             />
                         ) : (
-                            <div className="det-img-fallback">
-                                <div style={{ fontSize: 140, filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.1))' }}>{emoji}</div>
-                                <div style={{ fontSize: 16, color: 'var(--g3)', fontWeight: 500 }}>Image not available</div>
+                            <div className="det-img det-img-placeholder">
+                                <span style={{ fontSize: 80 }}>
+                                    {listing.category === 'cow' ? '🐄' :
+                                        listing.category === 'buffalo' ? '🦬' :
+                                            listing.category === 'goat' ? '🐐' :
+                                                listing.category === 'sheep' ? '🐑' :
+                                                    listing.category === 'dog' ? '🐕' :
+                                                        listing.category === 'cat' ? '🐈' :
+                                                            listing.category === 'bird' ? '🦜' : '🐾'}
+                                </span>
                             </div>
                         )}
                         <div className="gal-badges">
