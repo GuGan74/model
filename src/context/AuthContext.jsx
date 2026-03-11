@@ -3,9 +3,10 @@ import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
-// Demo mode: reads from VITE_DEMO_MODE env variable
-// Set VITE_DEMO_MODE=false in production Vercel env vars for real OTP
-const isDemoMode = () => import.meta.env.VITE_DEMO_MODE === 'true';
+// Demo mode: always ON (Twilio / Supabase Phone Auth not configured)
+// TODO: change back to env-based check when real SMS is configured:
+// const isDemoMode = () => import.meta.env.VITE_DEMO_MODE === 'true';
+const isDemoMode = () => true;
 
 export function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState(null);

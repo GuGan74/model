@@ -62,6 +62,7 @@ export default function SplashPage() {
             toast.success('OTP sent to ' + formatted);
         }
         setStep(2);
+
     }
 
     async function handleVerifyOTP(token) {
@@ -196,15 +197,35 @@ export default function SplashPage() {
                                 </div>
                             </div>
 
+                            <div style={{
+                                background: 'linear-gradient(135deg, #fff8e1, #fff3cd)',
+                                border: '1.5px solid #f59e0b',
+                                borderRadius: 12,
+                                padding: '12px 16px',
+                                marginBottom: 16,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 10,
+                            }}>
+                                <span style={{ fontSize: 22 }}>📱</span>
+                                <div>
+                                    <div style={{ fontWeight: 800, fontSize: 13, color: '#92400e' }}>
+                                        Demo Mode — No real SMS sent
+                                    </div>
+                                    <div style={{ fontSize: 12, color: '#78350f', marginTop: 2 }}>
+                                        Use OTP: <strong style={{
+                                            fontSize: 18,
+                                            letterSpacing: 4,
+                                            color: '#1a7a3c',
+                                            fontFamily: 'monospace'
+                                        }}>1 2 3 4 5 6</strong>
+                                    </div>
+                                </div>
+                            </div>
+
                             <button className="btn-send-otp" onClick={handleSendOTP} disabled={loading}>
                                 {loading ? <span className="spinner" style={{ borderColor: 'rgba(0,0,0,0.2)', borderTopColor: '#000', width: 20, height: 20 }} /> : 'Send OTP →'}
                             </button>
-
-                            {demoMode && (
-                                <div className="demo-banner" style={{ background: 'rgba(255,180,0,0.15)', color: '#b27b00', padding: 8, borderRadius: 8, fontSize: 11, textAlign: 'center', marginBottom: 20, border: '1px solid rgba(255,180,0,0.3)' }}>
-                                    Demo Mode · OTP is <strong>1 2 3 4 5 6</strong>
-                                </div>
-                            )}
 
                             <div className="login-legal">
                                 By continuing, you agree to PashuBazaar's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
@@ -215,7 +236,32 @@ export default function SplashPage() {
                     {step === 2 && (
                         <div className="otp-screen">
                             <h2 className="form-header-title">Verify Phone</h2>
-                            <p className="form-header-sub" style={{ marginBottom: 20 }}>Enter the 6-digit OTP sent to <strong>{otpPhone}</strong></p>
+                            <p className="form-header-sub" style={{ marginBottom: 12 }}>Enter the 6-digit OTP for <strong>{otpPhone}</strong></p>
+
+                            <div style={{
+                                background: '#e8f5e9',
+                                border: '2px solid #1a7a3c',
+                                borderRadius: 14,
+                                padding: '14px 20px',
+                                marginBottom: 24,
+                                textAlign: 'center',
+                            }}>
+                                <div style={{ fontSize: 12, color: '#2e7d32', fontWeight: 700, marginBottom: 4 }}>
+                                    📱 DEMO OTP — type this exactly:
+                                </div>
+                                <div style={{
+                                    fontSize: 36,
+                                    fontWeight: 900,
+                                    letterSpacing: 10,
+                                    color: '#1a7a3c',
+                                    fontFamily: 'monospace',
+                                }}>
+                                    123456
+                                </div>
+                                <div style={{ fontSize: 11, color: '#4caf50', marginTop: 4 }}>
+                                    No real SMS is sent in demo mode
+                                </div>
+                            </div>
 
                             <div style={{ maxWidth: 360, margin: '0 auto 30px' }}>
                                 <OTPInput onComplete={handleVerifyOTP} />
@@ -226,6 +272,28 @@ export default function SplashPage() {
                                     <span className="spinner" style={{ borderTopColor: '#194628' }} />
                                 </div>
                             )}
+
+                            <button
+                                onClick={() => handleVerifyOTP('123456')}
+                                disabled={loading}
+                                style={{
+                                    background: '#1a7a3c',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: 12,
+                                    padding: '14px 32px',
+                                    fontSize: 16,
+                                    fontWeight: 800,
+                                    cursor: 'pointer',
+                                    width: '100%',
+                                    maxWidth: 360,
+                                    margin: '0 auto 16px',
+                                    display: 'block',
+                                    opacity: loading ? 0.7 : 1,
+                                }}
+                            >
+                                ✅ Use Demo OTP (123456) — Sign In
+                            </button>
 
                             <button
                                 onClick={() => setStep(1)}
