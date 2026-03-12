@@ -712,3 +712,137 @@
         gap: 12px;
     }
 }
+
+/* ═══════════════════════════════════════════════════
+   MOBILE COMPACT MODE — max-width: 640px
+   Goal: hero + stats + search + strip all fit above fold
+   so listings are visible without any scrolling
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+    /* ── Hero: shrink drastically ── */
+    .new-hero-banner {
+        padding: 16px 16px;
+        border-radius: 14px;
+        margin-bottom: 10px;
+    }
+
+    .nh-title {
+        font-size: 20px;
+        line-height: 1.2;
+        margin-bottom: 4px;
+    }
+
+    .nh-sub {
+        font-size: 11px;
+        line-height: 1.4;
+        margin-bottom: 10px;
+        /* Cut to 2 lines max */
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        overflow: hidden;
+    }
+
+    .nh-actions {
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .nh-btn-primary,
+    .nh-btn-outline {
+        font-size: 11px;
+        padding: 7px 14px;
+        width: auto;
+        max-width: none;
+    }
+
+    /* ── Stats row: show as single horizontal strip ── */
+    .stats-row {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        margin-bottom: 10px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding-bottom: 0;
+    }
+
+    .stats-row::-webkit-scrollbar {
+        display: none;
+    }
+
+    .stat-card {
+        flex: 0 0 auto;
+        padding: 8px 12px;
+        border-radius: 12px;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .sc-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .sc-val {
+        font-size: 14px;
+        line-height: 1;
+    }
+
+    .sc-lbl {
+        font-size: 9px;
+        white-space: nowrap;
+    }
+
+    /* ── Search bar: compact ── */
+    .home-container>div[style*="background: white"] {
+        padding: 7px 12px !important;
+        margin-bottom: 8px !important;
+        border-radius: 10px !important;
+    }
+
+    /* ── Category strip: smaller pills ── */
+    .category-strip {
+        gap: 7px;
+        padding-bottom: 8px;
+        margin-bottom: 12px;
+    }
+
+    .cat-icon-card {
+        padding: 8px 10px;
+        border-radius: 12px;
+        min-width: 58px;
+        gap: 4px;
+    }
+
+    .cat-icon-circle {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+
+    .cat-icon-lbl {
+        font-size: 9px;
+    }
+
+    /* ── Section headers: compact ── */
+    .cs-title {
+        font-size: 12px;
+    }
+
+    .cs-icon-tag {
+        font-size: 14px;
+    }
+
+    .cs-header {
+        margin-bottom: 8px;
+    }
+
+    .category-section {
+        margin-bottom: 20px;
+    }
+}
