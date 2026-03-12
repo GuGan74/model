@@ -245,11 +245,11 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="section-card" style={{ marginTop: 16 }}>
-                    <h4>❤️ Liked Animals</h4>
+                    <h4>❤️ Liked Cattle</h4>
                     {loadingLiked ? (
                         <div style={{ padding: 20, textAlign: 'center' }}><div className="spinner dark" /></div>
                     ) : likedListings.length === 0 ? (
-                        <p style={{ fontSize: 13, color: 'var(--g3)', textAlign: 'center', padding: '20px 0' }}>You haven't liked any animals yet.</p>
+                        <p style={{ fontSize: 13, color: 'var(--g3)', textAlign: 'center', padding: '20px 0' }}>You haven't liked any cattle yet.</p>
                     ) : (
                         <div className="liked-animals-grid">
                             {likedListings.map(l => (

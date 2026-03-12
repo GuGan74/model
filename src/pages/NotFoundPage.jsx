@@ -11,7 +11,7 @@ export default function NotFoundPage() {
         }}>
             <div style={{ fontSize: 90, marginBottom: 16 }}>🐄💨</div>
             <h1 style={{ fontSize: 28, fontWeight: 900, color: '#1a3c28', marginBottom: 8 }}>
-                Oops! This animal has wandered off...
+                Oops! This cattle has wandered off...
             </h1>
             <p style={{ color: '#6b7280', marginBottom: 28, maxWidth: 380, fontSize: 15 }}>
                 The page you're looking for doesn't exist or has moved.

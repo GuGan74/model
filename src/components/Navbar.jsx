@@ -16,7 +16,7 @@ export default function Navbar() {
     const initials = (currentProfile?.full_name || 'U').slice(0, 2).toUpperCase();
 
     const navLinks = [
-        { label: '🛒 Buy Animals', path: '/' },
+        { label: '🛒 Buy Cattle', path: '/' },
         { label: '📊 Price Trends', path: '/price-trends' },
         { label: '🔔 Alerts', path: '/notifications' },
         { label: '👤 Profile', path: '/profile' },
@@ -80,7 +80,7 @@ export default function Navbar() {
                         )}
                         {isLoggedIn && (
                             <button className="btn-sell-nav hide-mobile" onClick={() => navigate('/sell')}>
-                                + Sell Animal
+                                + Sell Cattle
                             </button>
                         )}
                         {/* Hamburger */}

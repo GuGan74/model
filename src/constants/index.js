@@ -1,7 +1,7 @@
 // Centralized constants to avoid duplication across pages
 
 export const CATEGORIES = [
-    { id: 'all', emoji: '🎛️', label: 'All Animals' },
+    { id: 'all', emoji: '🎛️', label: 'All Cattle' },
     { id: 'cow', emoji: '🐄', label: 'Cow' },
     { id: 'buffalo', emoji: '🦬', label: 'Buffalo' },
     { id: 'goat', emoji: '🐐', label: 'Goat' },
@@ -32,7 +32,7 @@ export const PET_CATS = [
 ];
 
 export const FILTER_PILLS = [
-    { id: 'all', label: 'All Animals' },
+    { id: 'all', label: 'All Cattle' },
     { id: 'cow', label: '🐄 Cow' },
     { id: 'buffalo', label: '🦬 Buffalo' },
     { id: 'goat', label: '🐐 Goat' },

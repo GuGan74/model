@@ -140,7 +140,7 @@ export default function HomePage() {
                 <div className="new-hero-banner">
                     <div className="nh-content">
                         <h1 className="nh-title">Buy &amp; Sell Cattle<br /><span className="nh-yellow">With Full Trust</span></h1>
-                        <p className="nh-sub">Connecting farmers across India with verified livestock listings. Every animal is health-checked and documented.</p>
+                        <p className="nh-sub">Connecting farmers across India with verified cattle listings. Every cattle is health-checked and documented.</p>
                         <div className="nh-actions">
                             {!isBuyer && (
                                 <button
@@ -247,12 +247,12 @@ export default function HomePage() {
                     <div className="listings-container">
                         {activeTab === 'all' ? (
                             <>
-                                {/* NEWLY ADDED LIVESTOCK */}
+                                {/* NEWLY ADDED CATTLE */}
                                 <div className="category-section">
                                     <div className="cs-header">
                                         <div className="cs-title-group">
                                             <div className="cs-icon-tag">⏳</div>
-                                            <h2 className="cs-title">NEWLY ADDED LIVESTOCK</h2>
+                                            <h2 className="cs-title">NEWLY ADDED CATTLE</h2>
                                         </div>
                                         <div className="cs-arrows">
                                             <button className="arrow-btn" aria-label="Scroll left" onClick={() => scrollRow('new', -1)}>❮</button>

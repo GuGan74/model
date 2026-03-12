@@ -16,7 +16,7 @@ export default function BoostPage() {
         <div className="boost-wrap">
             <div className="boost-hero">
                 <h2>⚡ Boost Your Listing</h2>
-                <p>Get your animal in front of thousands of serious buyers instantly</p>
+                <p>Get your cattle in front of thousands of serious buyers instantly</p>
             </div>
             <div className="boost-grid">
                 {TIERS.map(t => (

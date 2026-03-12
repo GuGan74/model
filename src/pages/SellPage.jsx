@@ -19,7 +19,7 @@ const INDIAN_STATES = [
     'Daman & Diu', 'Lakshadweep'
 ];
 
-const STEPS = ['Animal Type', 'Details', 'Photos', 'Pricing'];
+const STEPS = ['Cattle Type', 'Details', 'Photos', 'Pricing'];
 
 export default function SellPage() {
     const navigate = useNavigate();
@@ -202,7 +202,7 @@ export default function SellPage() {
                 <button className="btn-back" onClick={() => step > 1 ? setStep(s => s - 1) : navigate(isEditing ? '/mylisting' : '/')}>←</button>
                 <div>
                     <div className="sell-ttl">
-                        {isEditing ? '✏️ Edit Listing' : (listingType === 'livestock' ? '🐄 Sell Livestock' : '🐾 Sell Pet')}
+                        {isEditing ? '✏️ Edit Listing' : (listingType === 'livestock' ? '🐄 Sell Cattle' : '🐾 Sell Pet')}
                     </div>
                     <div className="sell-sub">Step {step} of {STEPS.length}: {STEPS[step - 1]}</div>
                 </div>
@@ -229,7 +229,7 @@ export default function SellPage() {
                     <div className="fs ga">
                         <h3>📂 Listing Type</h3>
                         <div className="toggle-row" style={{ marginBottom: 20 }}>
-                            <button className={`tbtn${listingType === 'livestock' ? ' act' : ''}`} onClick={() => { setListingType('livestock'); setF('category', ''); }}>🐄 Livestock</button>
+                            <button className={`tbtn${listingType === 'livestock' ? ' act' : ''}`} onClick={() => { setListingType('livestock'); setF('category', ''); }}>🐄 Cattle</button>
                             <button className={`tbtn${listingType === 'pet' ? ' act pu' : ''}`} onClick={() => { setListingType('pet'); setF('category', ''); }}>🐾 Pet</button>
                         </div>
                     </div>
@@ -251,11 +251,11 @@ export default function SellPage() {
                 </div>
             )}
 
-            {/* STEP 2: Animal Details */}
+            {/* STEP 2: Cattle Details */}
             {step === 2 && (
                 <div className="animate-fadeIn">
                     <div className="fs ga">
-                        <h3>📝 Animal Details</h3>
+                        <h3>📝 Cattle Details</h3>
                         <div className="fg">
                             <div className="ff">
                                 <label>Listing Title *</label>
@@ -320,7 +320,7 @@ export default function SellPage() {
                             <div className="photo-preview-wrap">
                                 <img
                                     src={form.image_url}
-                                    alt="Animal preview"
+                                    alt="Cattle preview"
                                     className="photo-preview-img"
                                 />
                                 <div className="photo-preview-bar">
@@ -386,7 +386,7 @@ export default function SellPage() {
                     </div>
                     <div className="fs ya" style={{ textAlign: 'center' }}>
                         <h3>🤖 ML Verification (Optional)</h3>
-                        <p style={{ fontSize: 13, color: 'var(--g3)', marginBottom: 14 }}>Use AI to verify your animal and get a trust badge — increases buyer confidence by 78%.</p>
+                        <p style={{ fontSize: 13, color: 'var(--g3)', marginBottom: 14 }}>Use AI to verify your cattle and get a trust badge — increases buyer confidence by 78%.</p>
                         <button className="btn-primary" style={{ width: '100%' }} onClick={() => toast('ML Verification: Demo mode — auto-passed! ✓', { icon: '🤖' })}>
                             📷 Start ML Verification
                         </button>
@@ -469,7 +469,7 @@ export default function SellPage() {
                         <h3>✍️ Description</h3>
                         <div className="ff">
                             <textarea
-                                placeholder="Describe the animal — health, temperament, milk history, reason for selling..."
+                                placeholder="Describe the cattle — health, temperament, milk history, reason for selling..."
                                 value={form.description}
                                 onChange={e => setF('description', e.target.value)}
                                 maxLength={1000}

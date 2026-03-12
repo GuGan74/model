@@ -56,9 +56,10 @@ function LoginGuard({ children }) {
 
 function AppRoutes() {
   const { isLoggedIn, isGuest, loading } = useAuth();
-  // Read localStorage directly as sync fallback
-  // This prevents the async state update race condition
-  const isGuestSync = isGuest || localStorage.getItem('pb_guest') === 'true';
+  // Sync fallback: read localStorage directly to avoid
+  // the React async state update race condition
+  const isGuestNow = isGuest ||
+    localStorage.getItem('pb_guest') === 'true';
 
   // Loading splash
   if (loading) {
@@ -85,7 +86,7 @@ function AppRoutes() {
   }
 
   // ── Neither logged in NOR guest → Onboarding ──────────
-  if (!isLoggedIn && !isGuestSync) {
+  if (!isLoggedIn && !isGuestNow) {
     return (
       <>
         <Toaster position="top-center" />
