@@ -228,3 +228,58 @@
 .lc-btn-call:hover {
     background: #11331D;
 }
+
+@media (max-width: 640px) {
+    .listing-card {
+        border-radius: 12px;
+    }
+
+    .lc-img-box {
+        height: 130px;
+    }
+
+    .lc-emoji {
+        font-size: 44px;
+    }
+
+    .lc-title {
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .lc-price {
+        font-size: 14px;
+    }
+
+    .lc-meta {
+        font-size: 10px;
+    }
+
+    .lc-body {
+        padding: 8px 10px 10px;
+    }
+
+    .lc-badge {
+        font-size: 8px;
+        padding: 3px 6px;
+    }
+
+    .lc-heart {
+        width: 26px;
+        height: 26px;
+        font-size: 13px;
+    }
+
+    .lc-btn-row {
+        gap: 5px;
+        padding: 0 8px 8px;
+    }
+
+    .lc-btn {
+        font-size: 10px;
+        padding: 6px 4px;
+    }
+}

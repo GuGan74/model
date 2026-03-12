@@ -427,6 +427,12 @@
     margin-left: 20px;
 }
 
+@media (max-width: 640px) {
+    .cs-arrows {
+        display: none;
+    }
+}
+
 .arrow-btn {
     width: 32px;
     height: 32px;
@@ -466,6 +472,25 @@
 
 .cs-card-wrapper {
     flex: 0 0 280px;
+    /* desktop default */
+}
+
+/* Mobile: show exactly 2 cards at once */
+@media (max-width: 640px) {
+    .cs-row {
+        gap: 10px;
+        padding-left: 16px;
+        padding-right: 16px;
+        /* snap to cards like a proper slider */
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .cs-card-wrapper {
+        /* 2 cards + gap: (100vw - 32px padding - 10px gap) / 2 */
+        flex: 0 0 calc(50vw - 21px);
+        scroll-snap-align: start;
+    }
 }
 
 /* PRICE RANGE Slider Update */
