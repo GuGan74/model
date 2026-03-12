@@ -19,7 +19,7 @@
 
 /* HERO BANNER */
 .new-hero-banner {
-    background: url('../assets/istockphoto.webp') no-repeat center right / cover;
+    background: url('../assets/istockphoto.webp') no-repeat center center / cover;
     background-color: #1A3E25;
     border-radius: 24px;
     overflow: hidden;
@@ -27,22 +27,28 @@
     padding: 60px 48px;
     margin-bottom: 24px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    min-height: 220px;
 }
 
 @media (max-width: 767px) {
     .new-hero-banner {
-        padding: 40px 24px;
+        padding: 28px 20px;
         text-align: center;
-        background: #1A3E25;
-        /* Use solid color on mobile to ensure readability if image doesn't fit well */
+        /* KEEP the image on mobile — just reposition it */
+        background: url('../assets/istockphoto.webp') no-repeat center center / cover;
+        background-color: #1A3E25;
     }
 
     .new-hero-banner::before {
-        background: linear-gradient(180deg, rgba(25, 70, 40, 0.9), rgba(25, 70, 40, 0.7));
+        /* Stronger overlay on mobile for text readability */
+        background: linear-gradient(180deg,
+                rgba(25, 70, 40, 0.88) 0%,
+                rgba(25, 70, 40, 0.72) 60%,
+                rgba(25, 70, 40, 0.50) 100%);
     }
 }
 
-/* Optional overlay if image is too bright */
+/* Dark overlay so text is always readable over image */
 .new-hero-banner::before {
     content: '';
     position: absolute;
@@ -50,7 +56,10 @@
     left: 0;
     bottom: 0;
     right: 0;
-    background: linear-gradient(90deg, #194628 0%, #194628 40%, transparent 100%);
+    background: linear-gradient(90deg,
+            rgba(25, 70, 40, 0.92) 0%,
+            rgba(25, 70, 40, 0.75) 45%,
+            rgba(25, 70, 40, 0.30) 100%);
     pointer-events: none;
 }
 
