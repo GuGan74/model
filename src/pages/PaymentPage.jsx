@@ -1,152 +1,334 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import './PaymentPage.css';
 
 export default function PaymentPage() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { currentUser } = useAuth(); // eslint-disable-line no-unused-vars
 
-    // Read tier from BoostPage navigation state, fallback to Basic
-    const tier = location.state?.tier || { name: 'Basic', price: 50 };
-    const amount = tier.price;
+    const {
+        purpose,           // 'listing_fee' | 'boost_fee'
+        listingPayload,    // the listing data from SellPage
+        listingFee,        // { name, price } — ₹50
+        boostTier,         // { name, price } or null
+        isEditing,
+        editingId,
+        savedListingId,    // set after listing_fee paid, before boost_fee
+    } = location.state || {};
+
+    // Which payment are we on?
+    const isBoostPayment = purpose === 'boost_fee';
+    const currentTier = isBoostPayment ? boostTier : (listingFee || { name: 'Listing Fee', price: 50 });
+    const amount = currentTier?.price || 50;
 
     const [payStep, setPayStep] = useState('idle');
     const [selected, setSelected] = useState('upi');
     const [txnId, setTxnId] = useState('');
 
+    async function saveListingToDB(payload) {
+        try {
+            if (isEditing && editingId) {
+                const { error } = await supabase
+                    .from('listings')
+                    .update({ ...payload, status: 'active' })
+                    .eq('id', editingId);
+                if (error) throw error;
+                return { id: editingId };
+            } else {
+                const { data, error } = await supabase
+                    .from('listings')
+                    .insert({ ...payload, status: 'active' })
+                    .select()
+                    .single();
+                if (error) throw error;
+                return data;
+            }
+        } catch {
+            // Demo fallback
+            return { ...payload, id: 'demo-' + Date.now() };
+        }
+    }
+
     async function handlePay() {
         setPayStep('processing');
         await new Promise(r => setTimeout(r, 1200));
-
         setPayStep('verifying');
         await new Promise(r => setTimeout(r, 900));
 
         const success = Math.random() < 0.9;
-        if (success) {
-            setTxnId('TXN' + Date.now());
-            setPayStep('success');
-            toast.success('Payment successful! 🎉');
-        } else {
+
+        if (!success) {
             setPayStep('failed');
-            toast.error('Payment failed');
+            toast.error('Payment failed. Please try again.');
+            return;
+        }
+
+        const generatedTxnId = 'TXN' + Date.now();
+        setTxnId(generatedTxnId);
+
+        if (!isBoostPayment) {
+            // ── LISTING FEE PAID ──────────────────────────
+            if (boostTier) {
+                // Boost was selected — save listing first,
+                // then go to boost payment
+                const savedListing = await saveListingToDB(listingPayload);
+                setPayStep('success');
+                toast.success('Listing fee paid! Now pay for boost →');
+                // After 1.5s auto-advance to boost payment
+                setTimeout(() => {
+                    navigate('/payment', {
+                        replace: true,
+                        state: {
+                            purpose: 'boost_fee',
+                            listingPayload,
+                            listingFee,
+                            boostTier,
+                            savedListingId: savedListing.id,
+                            isEditing,
+                            editingId,
+                        }
+                    });
+                }, 1500);
+            } else {
+                // No boost — save listing and go to success
+                const savedListing = await saveListingToDB(listingPayload);
+                setPayStep('success');
+                toast.success('Payment successful! Listing published 🎉');
+                setTimeout(() => {
+                    navigate('/success', {
+                        replace: true,
+                        state: { listing: savedListing }
+                    });
+                }, 1500);
+            }
+        } else {
+            // ── BOOST FEE PAID ────────────────────────────
+            // Mark listing as promoted in DB
+            try {
+                await supabase
+                    .from('listings')
+                    .update({ is_promoted: true, status: 'active' })
+                    .eq('id', savedListingId);
+            } catch { /* demo fallback */ }
+
+            setPayStep('success');
+            toast.success('Boost activated! Your listing is now promoted ⚡');
+            setTimeout(() => {
+                navigate('/success', {
+                    replace: true,
+                    state: {
+                        listing: { ...listingPayload, id: savedListingId },
+                        boosted: true,
+                    }
+                });
+            }, 1500);
         }
     }
 
+    // ── SUCCESS screen ─────────────────────────────────────
     if (payStep === 'success') {
         return (
             <div className="pay-wrap" style={{ textAlign: 'center', padding: '60px 20px' }}>
-                <div style={{ fontSize: 60, marginBottom: 20 }}>✅</div>
-                <h2>Payment Successful!</h2>
-                <div style={{ margin: '20px 0', background: 'var(--green-light)', padding: 20, borderRadius: 12 }}>
-                    <div style={{ fontSize: 13, color: 'var(--g3)' }}>Transaction ID: {txnId}</div>
-                    <div style={{ fontSize: 18, fontWeight: 800, marginTop: 10 }}>Amount: ₹{amount}</div>
+                <div style={{ fontSize: 60, marginBottom: 16 }}>
+                    {isBoostPayment ? '⚡' : '✅'}
                 </div>
-                <button className="btn-primary" onClick={() => navigate('/my-listings')}>Go to My Listings →</button>
+                <h2 style={{ fontFamily: 'Poppins,sans-serif', marginBottom: 8 }}>
+                    {isBoostPayment ? 'Boost Activated!' : 'Payment Successful!'}
+                </h2>
+                <p style={{ color: '#666', fontSize: 14 }}>
+                    {isBoostPayment
+                        ? 'Your listing is now promoted and will appear at the top.'
+                        : boostTier
+                            ? 'Listing fee paid! Proceeding to boost payment…'
+                            : 'Your listing is now live on PashuBazaar.'}
+                </p>
+                <div style={{
+                    margin: '20px auto', background: '#e8f5e9',
+                    padding: '16px 24px', borderRadius: 12,
+                    maxWidth: 300
+                }}>
+                    <div style={{ fontSize: 12, color: '#666' }}>
+                        Transaction ID: {txnId}
+                    </div>
+                    <div style={{
+                        fontSize: 20, fontWeight: 800,
+                        color: '#1a7a3c', marginTop: 6
+                    }}>
+                        ₹{amount} Paid
+                    </div>
+                </div>
+                {!boostTier || isBoostPayment ? (
+                    <button
+                        className="btn-primary"
+                        onClick={() => navigate('/mylisting')}
+                    >
+                        View My Listings →
+                    </button>
+                ) : (
+                    <div style={{ fontSize: 13, color: '#888' }}>
+                        Redirecting to boost payment…
+                    </div>
+                )}
             </div>
         );
     }
 
+    // ── FAILED screen ──────────────────────────────────────
     if (payStep === 'failed') {
         return (
             <div className="pay-wrap" style={{ textAlign: 'center', padding: '60px 20px' }}>
-                <div style={{ fontSize: 60, marginBottom: 20 }}>❌</div>
+                <div style={{ fontSize: 60, marginBottom: 16 }}>❌</div>
                 <h2>Payment Failed</h2>
-                <p style={{ color: 'var(--g3)', marginTop: 10 }}>Your bank declined the transaction. Please try again.</p>
-                <div style={{ marginTop: 30 }}>
-                    <button className="btn-primary" onClick={() => setPayStep('idle')}>Try Again</button>
-                    <button className="btn-secondary" style={{ marginLeft: 10 }} onClick={() => navigate(-1)}>Cancel</button>
+                <p style={{ color: '#888', marginTop: 8 }}>
+                    Your bank declined the transaction. Please try again.
+                </p>
+                <div style={{
+                    marginTop: 30, display: 'flex', gap: 12,
+                    justifyContent: 'center'
+                }}>
+                    <button className="btn-primary"
+                        onClick={() => setPayStep('idle')}>
+                        Try Again
+                    </button>
+                    <button className="btn-secondary"
+                        onClick={() => navigate('/sell')}>
+                        Back to Listing
+                    </button>
                 </div>
             </div>
         );
     }
 
+    // ── MAIN payment UI ────────────────────────────────────
     return (
         <div className="pay-wrap">
-            <div className="pay-hero">
-                <h2>💰 Boost Payment</h2>
-                <p>Boosting your listing with {tier.name} plan</p>
+            {/* Header */}
+            <div className="pay-header">
+                <div style={{ fontSize: 28 }}>
+                    {isBoostPayment ? '⚡' : '🚀'}
+                </div>
+                <h2 className="pay-title">
+                    {isBoostPayment ? 'Boost Payment' : 'Listing Fee'}
+                </h2>
+                <p className="pay-sub">
+                    {isBoostPayment
+                        ? `Boosting your listing with ${boostTier?.name} plan`
+                        : 'Pay ₹50 to publish your listing on PashuBazaar'}
+                </p>
             </div>
 
-            <div className="pay-amt-card">
+            {/* Progress indicator for 2-step payment */}
+            {boostTier && (
+                <div style={{
+                    display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', gap: 8,
+                    margin: '0 auto 20px', maxWidth: 320,
+                }}>
+                    <div style={{
+                        display: 'flex', alignItems: 'center',
+                        justifyContent: 'center',
+                        width: 28, height: 28, borderRadius: '50%',
+                        background: '#1a7a3c', color: 'white',
+                        fontSize: 13, fontWeight: 800,
+                    }}>
+                        {isBoostPayment ? '✓' : '1'}
+                    </div>
+                    <div style={{
+                        flex: 1, height: 2,
+                        background: isBoostPayment ? '#1a7a3c' : '#e5e7eb',
+                        maxWidth: 60,
+                    }} />
+                    <div style={{
+                        display: 'flex', alignItems: 'center',
+                        justifyContent: 'center',
+                        width: 28, height: 28, borderRadius: '50%',
+                        background: isBoostPayment ? '#1a7a3c' : '#e5e7eb',
+                        color: isBoostPayment ? 'white' : '#999',
+                        fontSize: 13, fontWeight: 800,
+                    }}>2</div>
+                    <div style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>
+                        {isBoostPayment
+                            ? 'Step 2: Boost fee'
+                            : 'Step 1: Listing fee'}
+                    </div>
+                </div>
+            )}
+
+            {/* Amount */}
+            <div className="pay-amount-card">
                 <div className="pay-big">₹{amount}</div>
-                <div className="pay-sub">Total Amount to Pay</div>
+                <div className="pay-total-lbl">
+                    {isBoostPayment
+                        ? `${boostTier?.name} Boost Plan`
+                        : 'Listing Publication Fee'}
+                </div>
             </div>
 
-            <div className="pay-methods">
-                <h3>Choose Payment Method</h3>
+            {/* Payment methods */}
+            <div className="pay-methods-card">
+                <div className="pay-methods-title">Choose Payment Method</div>
 
-                <div className={`pay-method${selected === 'upi' ? ' sel' : ''}`} onClick={() => setSelected('upi')}>
-                    <div className="pm-ic">📱</div>
-                    <div style={{ flex: 1 }}>
-                        <div className="pm-nm">UPI</div>
-                        <div className="pm-sb">GPay, PhonePe, Paytm</div>
-                    </div>
-                </div>
-                {selected === 'upi' && (
-                    <div style={{ padding: '0 16px 16px' }}>
-                        <input placeholder="Enter UPI ID (e.g. name@okhdfcbank)" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--g5)' }} />
-                    </div>
-                )}
-
-                <div className={`pay-method${selected === 'card' ? ' sel' : ''}`} onClick={() => setSelected('card')}>
-                    <div className="pm-ic">💳</div>
-                    <div style={{ flex: 1 }}>
-                        <div className="pm-nm">Credit/Debit Card</div>
-                        <div className="pm-sb">Visa, Mastercard, RuPay</div>
-                    </div>
-                </div>
-                {selected === 'card' && (
-                    <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <input placeholder="Card Number" style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--g5)' }} />
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <input placeholder="MM/YY" style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid var(--g5)' }} />
-                            <input placeholder="CVV" type="password" style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid var(--g5)' }} />
+                {['upi', 'card', 'netbanking'].map(method => (
+                    <div
+                        key={method}
+                        className={`pay-method-row ${selected === method ? 'active' : ''}`}
+                        onClick={() => setSelected(method)}
+                    >
+                        <span style={{ fontSize: 22 }}>
+                            {method === 'upi' ? '📱'
+                                : method === 'card' ? '💳' : '🏦'}
+                        </span>
+                        <div>
+                            <div className="pm-name">
+                                {method === 'upi' ? 'UPI'
+                                    : method === 'card' ? 'Credit/Debit Card'
+                                        : 'Net Banking'}
+                            </div>
+                            <div className="pm-sub">
+                                {method === 'upi' ? 'GPay, PhonePe, Paytm'
+                                    : method === 'card' ? 'Visa, Mastercard, RuPay'
+                                        : 'All major banks'}
+                            </div>
                         </div>
                     </div>
-                )}
+                ))}
 
-                <div className={`pay-method${selected === 'net' ? ' sel' : ''}`} onClick={() => setSelected('net')}>
-                    <div className="pm-ic">🏦</div>
-                    <div style={{ flex: 1 }}>
-                        <div className="pm-nm">Net Banking</div>
-                        <div className="pm-sb">All major banks</div>
-                    </div>
-                </div>
+                {selected === 'upi' && (
+                    <input
+                        className="pay-upi-input"
+                        placeholder="Enter UPI ID (e.g. name@okhdfcbank)"
+                        style={{ marginTop: 10, padding: 10, width: '100%', border: '1px solid #ccc', borderRadius: 8 }}
+                    />
+                )}
             </div>
 
-            <div className="pay-secure" style={{ textAlign: 'center', fontSize: 12, color: 'var(--g3)', margin: '20px 0' }}>
+            <div className="pay-secure-note" style={{ textAlign: 'center', margin: '20px 0', fontSize: 12, color: '#888' }}>
                 🔒 256-bit SSL secured · Razorpay powered
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {payStep === 'idle' ? (
-                    <button className="btn-primary" style={{ width: '100%', padding: '14px', fontSize: 16 }} onClick={handlePay}>
-                        Pay ₹{amount} →
-                    </button>
-                ) : (
-                    <div style={{ padding: '16px', background: 'var(--green-light)', borderRadius: '12px', border: '1px solid var(--green)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: payStep === 'processing' || payStep === 'verifying' ? 'var(--green)' : 'var(--g3)' }}>
-                            <div className={`spinner ${payStep === 'processing' ? 'dark' : ''}`} style={{ borderColor: payStep === 'processing' ? 'var(--green)' : 'transparent', borderTopColor: 'var(--green)' }}></div>
-                            <span style={{ fontWeight: 800 }}>Connecting to payment gateway...</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px', color: payStep === 'verifying' ? 'var(--green)' : 'var(--g4)' }}>
-                            <div style={{ width: '18px', textAlign: 'center' }}>{payStep === 'verifying' ? '🔄' : '⬤'}</div>
-                            <span style={{ fontWeight: payStep === 'verifying' ? 800 : 400 }}>Processing ₹{amount}...</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px', color: 'var(--g4)' }}>
-                            <div style={{ width: '18px', textAlign: 'center' }}>⬤</div>
-                            <span>Waiting for bank confirmation...</span>
-                        </div>
-                    </div>
-                )}
+            {/* Pay button */}
+            <button
+                className="btn-primary"
+                style={{ width: '100%', padding: '16px', fontSize: 16, marginBottom: 10 }}
+                onClick={handlePay}
+                disabled={payStep === 'processing' || payStep === 'verifying'}
+            >
+                {payStep === 'processing' ? '⏳ Processing…'
+                    : payStep === 'verifying' ? '🔍 Verifying…'
+                        : `Pay ₹${amount} →`}
+            </button>
 
-                {payStep === 'idle' && (
-                    <button className="btn-secondary" style={{ width: '100%', padding: '12px' }} onClick={() => navigate(-1)}>
-                        ← Cancel Payment
-                    </button>
-                )}
-            </div>
+            <button
+                className="btn-secondary"
+                style={{ width: '100%', padding: '16px', fontSize: 16 }}
+                onClick={() => navigate('/sell')}
+            >
+                ← Cancel Payment
+            </button>
         </div>
     );
 }

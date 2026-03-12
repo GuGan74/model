@@ -26,7 +26,7 @@ export default function SellPage() {
     const location = useLocation();
     const { currentUser, currentProfile } = useAuth();
     const [step, setStep] = useState(1);
-    const [submitting, setSubmitting] = useState(false);
+    const [submitting] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [fieldErrors, setFieldErrors] = useState({});
@@ -56,7 +56,9 @@ export default function SellPage() {
     useEffect(() => {
         if (location.state?.editListing) {
             const l = location.state.editListing;
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsEditing(true);
+             
             setEditingId(l.id);
             // Determine listing type
             const isPet = ['dog', 'cat', 'bird'].includes(l.category);
@@ -127,72 +129,54 @@ export default function SellPage() {
     }
 
     async function handleSubmit() {
-        if (!currentUser) { toast.error('Please log in first'); navigate('/'); return; }
+        if (!currentUser) {
+            toast.error('Please log in first');
+            navigate('/');
+            return;
+        }
         const result = validate();
         if (!result.ok) {
-            // Jump back to the step where the error lives
             if (result.field === 'title') setStep(2);
             toast.error('⚠️ ' + result.msg, { duration: 4000 });
             return;
         }
-        setSubmitting(true);
-        try {
-            const payload = {
-                user_id: currentUser.id,
-                title: form.title.trim(),
-                category: form.category,
-                breed: form.breed.trim(),
-                age_years: Number(form.age_years) || null,
-                weight_kg: Number(form.weight_kg) || null,
-                milk_yield_liters: Number(form.milk_yield_liters) || null,
-                is_vaccinated: form.is_vaccinated,
-                is_pregnant: form.is_pregnant,
-                price: form.for_adoption ? 0 : Number(form.price),
-                location: form.location.trim(),
-                state: form.state.trim(),
-                description: form.description.trim(),
-                image_url: form.image_url || null,
-                for_adoption: form.for_adoption,
-                is_promoted: form.is_promoted,
-                status: 'active', // Active immediately (seller posts directly)
-                created_at: new Date().toISOString(),
-            };
 
-            // Try insert to Supabase
-            if (isEditing) {
-                const { error } = await supabase.from('listings').update(payload).eq('id', editingId);
-                if (error) throw error;
-                toast.success('Listing updated! 🎉');
-                navigate('/mylisting');
-            } else {
-                const { data, error } = await supabase.from('listings').insert(payload).select().single();
-                if (error) {
-                    // Demo mode — just navigate to success
-                    toast.success('Listing published! 🎉');
-                    navigate('/success', { state: { listing: { ...payload, id: 'demo-' + Date.now() } } });
-                    return;
-                }
-                toast.success('Listing published! 🎉');
-                if (payload.is_promoted) {
-                    await supabase.from('notifications').insert({
-                        user_id: currentUser.id,
-                        type: 'promote',
-                        icon: '⚡',
-                        title: 'Listing Promoted!',
-                        message: `Your ${payload.title} listing is now showing as a promoted listing.`,
-                        metadata: { listing_id: data.id }
-                    });
-                }
-                navigate('/success', { state: { listing: data } });
+        // Build the listing payload (do NOT save to DB yet)
+        const payload = {
+            user_id: currentUser.id,
+            title: form.title.trim(),
+            category: form.category,
+            breed: form.breed.trim(),
+            age_years: Number(form.age_years) || null,
+            weight_kg: Number(form.weight_kg) || null,
+            milk_yield_liters: Number(form.milk_yield_liters) || null,
+            is_vaccinated: form.is_vaccinated,
+            is_pregnant: form.is_pregnant,
+            price: form.for_adoption ? 0 : Number(form.price),
+            location: form.location.trim(),
+            state: form.state.trim(),
+            description: form.description.trim(),
+            image_url: form.image_url || null,
+            for_adoption: form.for_adoption,
+            is_promoted: form.is_promoted,
+            status: 'pending_payment',  // NOT active yet
+            created_at: new Date().toISOString(),
+        };
+
+        // Navigate to payment page with listing data
+        // Listing will be saved to DB ONLY after payment succeeds
+        navigate('/payment', {
+            state: {
+                purpose: 'listing_fee',
+                listingPayload: payload,
+                listingFee: { name: 'Listing Fee', price: 50 },
+                boostTier: form.is_promoted
+                    ? { name: 'Boost', price: 399 }
+                    : null,
+                isEditing,
+                editingId: editingId || null,
             }
-        } catch (err) {
-            console.error('Submit failed:', err);
-            // Demo fallback
-            toast.success(isEditing ? 'Listing updated! (Demo mode) ✓' : 'Listing published! (Demo mode) 🎉');
-            navigate(isEditing ? '/mylisting' : '/success', { state: { listing: { ...form, id: editingId || 'demo-' + Date.now() } } });
-        } finally {
-            setSubmitting(false);
-        }
+        });
     }
 
     return (
