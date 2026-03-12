@@ -34,7 +34,9 @@ export function AuthProvider({ children }) {
         try {
             localStorage.setItem('pb_guest', 'true');
             localStorage.setItem('pb_guest_prefs', JSON.stringify(prefs));
-        } catch { }
+        } catch (err) {
+            console.error('Failed to set guest preference:', err);
+        }
     }
 
     function clearGuestMode() {
@@ -43,7 +45,9 @@ export function AuthProvider({ children }) {
         try {
             localStorage.removeItem('pb_guest');
             localStorage.removeItem('pb_guest_prefs');
-        } catch { }
+        } catch (err) {
+            console.error('Failed to clear guest preference:', err);
+        }
     }
     // ────────────────────────────────────────────────────────
 

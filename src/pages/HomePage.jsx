@@ -50,7 +50,9 @@ export default function HomePage() {
     // Auto-set category tab based on guest's chosen category
     useEffect(() => {
         if (isGuest && guestPrefs?.category) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             if (guestPrefs.category === 'livestock') setActiveTab('all');
+             
             if (guestPrefs.category === 'pets') setActiveTab('pets');
         }
     }, [isGuest, guestPrefs?.category]); // re-run when prefs load

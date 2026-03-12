@@ -14,7 +14,9 @@ export default function OnboardingPage() {
             localStorage.setItem('pb_guest', 'true');
             localStorage.setItem('pb_guest_prefs',
                 JSON.stringify({ role, category }));
-        } catch { }
+        } catch (err) {
+            console.error('Failed to set guest preference', err);
+        }
         // Update React state (async — but localStorage already set)
         enterGuestMode({ role, category });
         // Navigate — App.jsx will re-read localStorage via

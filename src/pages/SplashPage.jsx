@@ -17,7 +17,7 @@ const DISTRICTS = [
 
 export default function SplashPage() {
     const navigate = useNavigate();
-    const { sendOTP, verifyOTP, signInWithGoogle, demoMode } = useAuth();
+    const { sendOTP, verifyOTP, signInWithGoogle } = useAuth();
 
     const [step, setStep] = useState(1); // 1 = register, 2 = OTP
     const [name, setName] = useState('');
