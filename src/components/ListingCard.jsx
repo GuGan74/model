@@ -19,7 +19,7 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
         user_id: owner_id
     } = listing;
 
-    const { currentUser, currentProfile } = useAuth();
+    const { currentUser, currentProfile, isLoggedIn } = useAuth();
     // Use prop-driven liked state (from parent batch query), with local override capability
     const [localLiked, setLocalLiked] = React.useState(null);
     const isLiked = localLiked !== null ? localLiked : isLikedProp;
@@ -72,7 +72,15 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
                     navigate(`/listing/${id}`);
                 }
             }}
-            onClick={() => navigate(`/listing/${id}`)}
+            onClick={() => {
+                if (!isLoggedIn) {
+                    sessionStorage.setItem('pb_redirect_after_login', `/listing/${id}`);
+                    toast('Sign in to view full listing details 🔐', { icon: '👆', duration: 2500 });
+                    setTimeout(() => navigate('/login'), 800);
+                    return;
+                }
+                navigate(`/listing/${id}`);
+            }}
         >
             {/* Image Box */}
             <div className={`lc-img-box${!image_url ? ' show-emoji' : ''}`} style={{ background: bg }}>
@@ -152,6 +160,12 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
                 <div className="lc-actions">
                     <button className="lc-btn-chat" onClick={async (e) => {
                         e.stopPropagation();
+                        if (!isLoggedIn) {
+                            sessionStorage.setItem('pb_redirect_after_login', `/listing/${id}`);
+                            toast('Sign in to contact sellers 🔐', { icon: '💬', duration: 2500 });
+                            setTimeout(() => navigate('/login'), 800);
+                            return;
+                        }
                         if (owner_id && currentUser && owner_id !== currentUser.id) {
                             await supabase.from('notifications').insert({
                                 user_id: owner_id,

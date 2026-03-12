@@ -1,11 +1,14 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import {
+  BrowserRouter, Routes, Route,
+  Navigate, useLocation,
+} from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
 
-// Eagerly loaded (critical path)
 import SplashPage from './pages/SplashPage';
+import OnboardingPage from './pages/OnboardingPage';
 import HomePage from './pages/HomePage';
 import ListingDetailPage from './pages/ListingDetailPage';
 import SearchPage from './pages/SearchPage';
@@ -17,51 +20,84 @@ import PaymentPage from './pages/PaymentPage';
 import SuccessPage from './pages/SuccessPage';
 import NotFoundPage from './pages/NotFoundPage';
 
-// Lazily loaded (heavy / less-visited pages)
 const AdminPage = React.lazy(() => import('./pages/AdminPage'));
 const PriceTrendsPage = React.lazy(() => import('./pages/PriceTrendsPage'));
 const BoostPage = React.lazy(() => import('./pages/BoostPage'));
 
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
-
 import './index.css';
 import './App.css';
 
 function LazyFallback() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
+    <div style={{
+      display: 'flex', alignItems: 'center',
+      justifyContent: 'center', minHeight: '40vh'
+    }}>
       <div className="spinner dark" style={{ margin: '0 auto' }} />
     </div>
   );
 }
 
-function AppRoutes() {
-  const { isLoggedIn, loading } = useAuth();
+// Saves the URL the user wanted, then sends them to login
+function LoginGuard({ children }) {
+  const { isLoggedIn } = useAuth();
+  const location = useLocation();
+  if (!isLoggedIn) {
+    sessionStorage.setItem(
+      'pb_redirect_after_login',
+      location.pathname + location.search
+    );
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+}
 
+function AppRoutes() {
+  const { isLoggedIn, isGuest, loading } = useAuth();
+  // Read localStorage directly as sync fallback
+  // This prevents the async state update race condition
+  const isGuestSync = isGuest || localStorage.getItem('pb_guest') === 'true';
+
+  // Loading splash
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'linear-gradient(135deg,#0f5228,#1a7a3c)' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center',
+        justifyContent: 'center', minHeight: '100vh',
+        background: 'linear-gradient(135deg,#0f5228,#1a7a3c)',
+      }}>
         <div style={{ textAlign: 'center', color: 'white' }}>
           <div style={{ fontSize: 64, marginBottom: 16 }}>🐄</div>
-          <div style={{ fontFamily: 'Poppins,sans-serif', fontSize: 28, fontWeight: 900 }}>PashuBazaar</div>
-          <div style={{ marginTop: 20 }}><div className="spinner" style={{ margin: '0 auto' }} /></div>
+          <div style={{
+            fontFamily: 'Poppins,sans-serif',
+            fontSize: 28, fontWeight: 900
+          }}>
+            PashuBazaar
+          </div>
+          <div style={{ marginTop: 20 }}>
+            <div className="spinner" style={{ margin: '0 auto' }} />
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!isLoggedIn) {
+  // ── Neither logged in NOR guest → Onboarding ──────────
+  if (!isLoggedIn && !isGuestSync) {
     return (
       <>
         <Toaster position="top-center" />
         <Routes>
-          <Route path="*" element={<SplashPage />} />
+          <Route path="/login" element={<SplashPage />} />
+          <Route path="*" element={<OnboardingPage />} />
         </Routes>
       </>
     );
   }
 
+  // ── Guest OR logged-in → full app ─────────────────────
   return (
     <>
       <Toaster position="top-center" />
@@ -69,18 +105,72 @@ function AppRoutes() {
       <div style={{ paddingBottom: 'var(--bottom-nav-h)' }}>
         <Suspense fallback={<LazyFallback />}>
           <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/listing/:id" element={<ListingDetailPage />} />
-            <Route path="/sell" element={<SellPage />} />
-            <Route path="/payment" element={<PaymentPage />} />
-            <Route path="/success" element={<SuccessPage />} />
-            <Route path="/boost" element={<BoostPage />} />
-            <Route path="/price-trends" element={<PriceTrendsPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/my-listings" element={<MyListingsPage />} />
-            <Route path="/notifications" element={<NotificationsPage />} />
-            <Route path="/admin" element={<AdminPage />} />
+            {/* FREE — guests browse without login */}
+            <Route path="/"
+              element={<HomePage />} />
+            <Route path="/search"
+              element={<SearchPage />} />
+            <Route path="/price-trends"
+              element={<PriceTrendsPage />} />
+            <Route path="/login"
+              element={<SplashPage />} />
+
+            {/* PROTECTED — login required */}
+            <Route path="/listing/:id"
+              element={
+                <LoginGuard>
+                  <ListingDetailPage />
+                </LoginGuard>
+              } />
+            <Route path="/sell"
+              element={
+                <LoginGuard>
+                  <SellPage />
+                </LoginGuard>
+              } />
+            <Route path="/profile"
+              element={
+                <LoginGuard>
+                  <ProfilePage />
+                </LoginGuard>
+              } />
+            <Route path="/my-listings"
+              element={
+                <LoginGuard>
+                  <MyListingsPage />
+                </LoginGuard>
+              } />
+            <Route path="/notifications"
+              element={
+                <LoginGuard>
+                  <NotificationsPage />
+                </LoginGuard>
+              } />
+            <Route path="/payment"
+              element={
+                <LoginGuard>
+                  <PaymentPage />
+                </LoginGuard>
+              } />
+            <Route path="/success"
+              element={
+                <LoginGuard>
+                  <SuccessPage />
+                </LoginGuard>
+              } />
+            <Route path="/boost"
+              element={
+                <LoginGuard>
+                  <BoostPage />
+                </LoginGuard>
+              } />
+            <Route path="/admin"
+              element={
+                <LoginGuard>
+                  <AdminPage />
+                </LoginGuard>
+              } />
+
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>

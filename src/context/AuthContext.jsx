@@ -3,9 +3,6 @@ import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
-// Demo mode: always ON (Twilio / Supabase Phone Auth not configured)
-// TODO: change back to env-based check when real SMS is configured:
-// const isDemoMode = () => import.meta.env.VITE_DEMO_MODE === 'true';
 const isDemoMode = () => true;
 
 export function AuthProvider({ children }) {
@@ -15,20 +12,53 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
     const [userRole, setUserRole] = useState('user');
     const [demoMode] = useState(isDemoMode());
+    const [regData, setRegData] = useState({
+        name: '', district: '', phone: '', email: ''
+    });
 
-    // Temp registration storage
-    const [regData, setRegData] = useState({ name: '', district: '', phone: '', email: '' });
+    // ── Guest mode ──────────────────────────────────────────
+    const [isGuest, setIsGuest] = useState(() => {
+        try { return localStorage.getItem('pb_guest') === 'true'; }
+        catch { return false; }
+    });
+    const [guestPrefs, setGuestPrefs] = useState(() => {
+        try {
+            const raw = localStorage.getItem('pb_guest_prefs');
+            return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+    });
+
+    function enterGuestMode(prefs = {}) {
+        setIsGuest(true);
+        setGuestPrefs(prefs);
+        try {
+            localStorage.setItem('pb_guest', 'true');
+            localStorage.setItem('pb_guest_prefs', JSON.stringify(prefs));
+        } catch { }
+    }
+
+    function clearGuestMode() {
+        setIsGuest(false);
+        setGuestPrefs(null);
+        try {
+            localStorage.removeItem('pb_guest');
+            localStorage.removeItem('pb_guest_prefs');
+        } catch { }
+    }
+    // ────────────────────────────────────────────────────────
 
     const loadProfile = React.useCallback(async (uid) => {
-        const { data } = await supabase.from('profiles').select('*').eq('id', uid).single();
+        const { data } = await supabase
+            .from('profiles').select('*').eq('id', uid).single();
         if (data) {
             setCurrentProfile(data);
             setUserRole(data.role || 'user');
         }
-    }, [setCurrentProfile, setUserRole]);
+    }, []);
 
     const ensureProfile = React.useCallback(async (user) => {
-        const { data: existing } = await supabase.from('profiles').select('id').eq('id', user.id).single();
+        const { data: existing } = await supabase
+            .from('profiles').select('id').eq('id', user.id).single();
         if (!existing) {
             const profileData = {
                 id: user.id,
@@ -45,23 +75,25 @@ export function AuthProvider({ children }) {
         } else {
             await loadProfile(user.id);
         }
-    }, [loadProfile, regData, userRole, setCurrentProfile]);
+    }, [loadProfile, regData, userRole]);
 
     useEffect(() => {
-        // Get initial session
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session) {
                 setCurrentUser(session.user);
                 loadProfile(session.user.id);
+                clearGuestMode();
                 setIsLoggedIn(true);
             } else {
-                // Check demo mode local storage
                 try {
-                    const demo = JSON.parse(localStorage.getItem('pb_demo') || 'null');
+                    const demo = JSON.parse(
+                        localStorage.getItem('pb_demo') || 'null'
+                    );
                     if (demo) {
                         setCurrentProfile(demo);
                         setCurrentUser({ id: demo.id, phone: demo.phone });
                         setUserRole(demo.role || 'user');
+                        clearGuestMode();
                         setIsLoggedIn(true);
                     }
                 } catch { /* ignore */ }
@@ -69,36 +101,35 @@ export function AuthProvider({ children }) {
             setLoading(false);
         });
 
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (event === 'SIGNED_IN' && session?.user) {
-                setCurrentUser(session.user);
-                await ensureProfile(session.user);
-                setIsLoggedIn(true);
-            } else if (event === 'SIGNED_OUT') {
-                setCurrentUser(null);
-                setCurrentProfile(null);
-                setIsLoggedIn(false);
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            async (event, session) => {
+                if (event === 'SIGNED_IN' && session?.user) {
+                    setCurrentUser(session.user);
+                    await ensureProfile(session.user);
+                    clearGuestMode();
+                    setIsLoggedIn(true);
+                } else if (event === 'SIGNED_OUT') {
+                    setCurrentUser(null);
+                    setCurrentProfile(null);
+                    setIsLoggedIn(false);
+                }
             }
-        });
+        );
 
         return () => subscription.unsubscribe();
     }, [loadProfile, ensureProfile]);
 
-
-
     async function sendOTP(phone, name, district, role, email) {
         setRegData({ name, district, phone, email });
         setUserRole(role || 'user');
-        // Always demo mode (Twilio not configured)
         return { error: null, demo: true };
     }
 
     async function verifyOTP(phone, token) {
         if (demoMode) {
             if (token === '123456') {
-                // Use a stable UUID-like ID based on phone so same user gets same ID
-                const uid = 'a0000000-0000-0000-0000-' + phone.replace(/\D/g, '').padStart(12, '0').slice(-12);
+                const uid = 'a0000000-0000-0000-0000-' +
+                    phone.replace(/\D/g, '').padStart(12, '0').slice(-12);
                 const profile = {
                     id: uid,
                     full_name: regData.name || 'Demo User',
@@ -109,27 +140,34 @@ export function AuthProvider({ children }) {
                     language: 'English',
                     created_at: new Date().toISOString(),
                 };
-                // Save profile to Supabase so listings can reference it
                 try {
-                    await supabase.from('profiles').upsert(profile, { onConflict: 'id' });
-                } catch { /* ignore if profiles table not ready */ }
-                try { localStorage.setItem('pb_demo', JSON.stringify(profile)); } catch { /* ignore */ }
+                    await supabase.from('profiles')
+                        .upsert(profile, { onConflict: 'id' });
+                } catch { /* ignore */ }
+                try {
+                    localStorage.setItem('pb_demo', JSON.stringify(profile));
+                } catch { /* ignore */ }
                 setCurrentUser({ id: uid, phone });
                 setCurrentProfile(profile);
+                clearGuestMode();
                 setIsLoggedIn(true);
                 return { error: null };
             } else {
                 return { error: { message: 'Wrong demo OTP — use 1 2 3 4 5 6' } };
             }
         }
-        const fullPhone = phone.startsWith('+91') ? phone : '+91' + phone.replace(/^91/, '');
-        const { error } = await supabase.auth.verifyOtp({ phone: fullPhone, token, type: 'sms' });
+        const fullPhone = phone.startsWith('+91')
+            ? phone : '+91' + phone.replace(/^91/, '');
+        const { error } = await supabase.auth.verifyOtp({
+            phone: fullPhone, token, type: 'sms'
+        });
         return { error };
     }
+
     async function signInWithGoogle() {
         if (demoMode) {
-            // Demo google login
-            const uid = 'd0000000-0000-0000-0000-' + Date.now().toString().slice(-12);
+            const uid = 'd0000000-0000-0000-0000-' +
+                Date.now().toString().slice(-12);
             const profile = {
                 id: uid,
                 full_name: 'Demo Google User',
@@ -140,9 +178,12 @@ export function AuthProvider({ children }) {
                 language: 'English',
                 created_at: new Date().toISOString(),
             };
-            try { localStorage.setItem('pb_demo', JSON.stringify(profile)); } catch { /* ignore */ }
+            try {
+                localStorage.setItem('pb_demo', JSON.stringify(profile));
+            } catch { /* ignore */ }
             setCurrentUser({ id: uid });
             setCurrentProfile(profile);
+            clearGuestMode();
             setIsLoggedIn(true);
             return { error: null };
         }
@@ -161,6 +202,7 @@ export function AuthProvider({ children }) {
             localStorage.removeItem('pb_demo');
             localStorage.removeItem('pb_sess');
         } catch { /* ignore */ }
+        clearGuestMode();
         setCurrentUser(null);
         setCurrentProfile(null);
         setIsLoggedIn(false);
@@ -187,6 +229,9 @@ export function AuthProvider({ children }) {
         setUserRole,
         regData,
         demoMode,
+        isGuest,
+        guestPrefs,
+        enterGuestMode,
         sendOTP,
         verifyOTP,
         signInWithGoogle,
@@ -195,7 +240,11 @@ export function AuthProvider({ children }) {
         loadProfile,
     };
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+        </AuthContext.Provider>
+    );
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

@@ -109,11 +109,13 @@ export default function SellPage() {
         const errs = {};
         if (form.title.trim().length < 5) errs.title = 'Title must be at least 5 characters';
         if (form.title.trim().length > 100) errs.title = 'Title must be under 100 characters';
-        if (!form.for_adoption && Number(form.price) <= 0) errs.price = 'Price must be greater than 0';
-        if (form.location.trim().length < 3) errs.location = 'Location must be at least 3 characters';
+        if (!form.for_adoption && Number(form.price) <= 0) errs.price = 'Please enter an asking price';
+        if (form.location.trim().length < 3) errs.location = 'Please enter a valid city or village';
         if (form.description.length > 1000) errs.description = 'Description must be under 1000 characters';
         setFieldErrors(errs);
-        return Object.keys(errs).length === 0;
+        // Return first error message, or null if all good
+        const firstErr = Object.values(errs)[0] || null;
+        return firstErr ? { ok: false, msg: firstErr, field: Object.keys(errs)[0] } : { ok: true };
     }
 
     function canGoNext() {
@@ -126,7 +128,13 @@ export default function SellPage() {
 
     async function handleSubmit() {
         if (!currentUser) { toast.error('Please log in first'); navigate('/'); return; }
-        if (!validate()) { toast.error('Please fix the errors below'); return; }
+        const result = validate();
+        if (!result.ok) {
+            // Jump back to the step where the error lives
+            if (result.field === 'title') setStep(2);
+            toast.error('⚠️ ' + result.msg, { duration: 4000 });
+            return;
+        }
         setSubmitting(true);
         try {
             const payload = {
@@ -297,14 +305,44 @@ export default function SellPage() {
                 <div className="animate-fadeIn">
                     <div className="fs ba">
                         <h3>📸 Add Photos</h3>
-                        <p style={{ fontSize: 13, color: 'var(--g3)', marginBottom: 14 }}>High quality photos increase buyer trust and get 3× more inquiries.</p>
-                        <label className="upload-zone" htmlFor="photo-upload">
-                            <div className="uz-ic">📷</div>
-                            <div>
-                                <div className="uz-title">Click to Upload Photo</div>
-                                <div className="uz-sub">JPG, PNG · Max 5MB · 1 photo</div>
+                        <p style={{ fontSize: 13, color: 'var(--g3)', marginBottom: 16 }}>
+                            High quality photos get 3× more buyer inquiries.
+                        </p>
+
+                        {/* Show upload zone OR large preview */}
+                        {!form.image_url ? (
+                            <label className="upload-zone-big" htmlFor="photo-upload">
+                                <div className="uzb-icon">📷</div>
+                                <div className="uzb-title">Tap to Upload Photo</div>
+                                <div className="uzb-sub">JPG or PNG · Max 5MB</div>
+                            </label>
+                        ) : (
+                            <div className="photo-preview-wrap">
+                                <img
+                                    src={form.image_url}
+                                    alt="Animal preview"
+                                    className="photo-preview-img"
+                                />
+                                <div className="photo-preview-bar">
+                                    <span style={{ color: 'var(--green)', fontWeight: 700, fontSize: 13 }}>
+                                        ✅ Photo uploaded successfully
+                                    </span>
+                                    <label
+                                        htmlFor="photo-upload"
+                                        style={{
+                                            cursor: 'pointer',
+                                            color: 'var(--blue)',
+                                            fontWeight: 700,
+                                            fontSize: 13,
+                                            textDecoration: 'underline',
+                                        }}
+                                    >
+                                        🔄 Change Photo
+                                    </label>
+                                </div>
                             </div>
-                        </label>
+                        )}
+
                         <input
                             id="photo-upload"
                             type="file"
@@ -314,11 +352,9 @@ export default function SellPage() {
                                 const file = e.target.files?.[0];
                                 if (!file) return;
                                 if (file.size > 5 * 1024 * 1024) {
-                                    toast.error('Image is too large. Max 5MB.');
+                                    toast.error('Image too large. Max 5MB.');
                                     return;
                                 }
-                                // Requires 'listing-images' bucket in Supabase Storage
-                                // with public access enabled.
                                 const tid = toast.loading('Uploading photo...');
                                 const url = await uploadImage(file);
                                 toast.dismiss(tid);
@@ -328,11 +364,23 @@ export default function SellPage() {
                                 }
                             }}
                         />
-                        {form.image_url && (
-                            <div className="file-uploaded">
-                                <span>✓</span>
-                                <span style={{ fontSize: 13, color: 'var(--green)', fontWeight: 700 }}>Photo uploaded successfully</span>
-                                <img src={form.image_url} alt="preview" style={{ width: 60, height: 40, objectFit: 'cover', borderRadius: 6, marginLeft: 'auto' }} />
+
+                        {/* Skip photo option */}
+                        {!form.image_url && (
+                            <div style={{ textAlign: 'center', marginTop: 12 }}>
+                                <span style={{ fontSize: 12, color: 'var(--g3)' }}>
+                                    No photo? No problem —{' '}
+                                </span>
+                                <button
+                                    style={{
+                                        background: 'none', border: 'none',
+                                        color: 'var(--g3)', fontSize: 12,
+                                        textDecoration: 'underline', cursor: 'pointer',
+                                    }}
+                                    onClick={() => setF('image_url', ' ')}
+                                >
+                                    skip for now
+                                </button>
                             </div>
                         )}
                     </div>

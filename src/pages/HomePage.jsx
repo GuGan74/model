@@ -11,7 +11,7 @@ import SEOHead from '../components/SEOHead';
 import './HomePage.css';
 
 export default function HomePage() {
-    const { currentUser } = useAuth();
+    const { currentUser, isGuest, guestPrefs } = useAuth();
     const { listings, loading, hasMore, refetch, loadMore } = useListings();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('all');
@@ -47,6 +47,16 @@ export default function HomePage() {
         })();
     }, [refetch, fetchStats]);
 
+    // Auto-set category tab based on guest's chosen category
+    useEffect(() => {
+        if (isGuest && guestPrefs?.category) {
+            if (guestPrefs.category === 'livestock') setActiveTab('all');
+            if (guestPrefs.category === 'pets') setActiveTab('pets');
+        }
+    }, [isGuest, guestPrefs?.category]); // re-run when prefs load
+
+    const isBuyer = isGuest && guestPrefs?.role === 'buyer';
+
     async function handleLoadMore() {
         setLoadingMore(true);
         await loadMore();
@@ -56,13 +66,37 @@ export default function HomePage() {
     // Filtering logic — computed via useMemo to avoid extra renders/effects
     const filteredListings = React.useMemo(() => {
         let result = [...listings];
-        if (activeTab !== 'all') {
-            if (activeTab === 'pets') result = result.filter(l => ['dog', 'cat', 'bird'].includes(l.category));
-            else if (activeTab === 'dogs') result = result.filter(l => l.category === 'dog');
-            else if (activeTab === 'cats') result = result.filter(l => l.category === 'cat');
-            else if (activeTab === 'birds') result = result.filter(l => l.category === 'bird');
-            else result = result.filter(l => l.category === activeTab);
+
+        // ── Guest category hard-filter ──────────────────────
+        // Applied FIRST, before tab filter, so guests can never
+        // see the wrong category no matter which tab they click.
+        if (isGuest && guestPrefs?.category === 'livestock') {
+            // livestock buyer → remove all pets
+            result = result.filter(
+                l => !['dog', 'cat', 'bird'].includes(l.category)
+            );
+        } else if (isGuest && guestPrefs?.category === 'pets') {
+            // pets buyer → keep only pets
+            result = result.filter(
+                l => ['dog', 'cat', 'bird'].includes(l.category)
+            );
         }
+
+        // ── Tab filter ──────────────────────────────────────
+        if (activeTab !== 'all') {
+            if (activeTab === 'pets')
+                result = result.filter(l => ['dog', 'cat', 'bird'].includes(l.category));
+            else if (activeTab === 'dogs')
+                result = result.filter(l => l.category === 'dog');
+            else if (activeTab === 'cats')
+                result = result.filter(l => l.category === 'cat');
+            else if (activeTab === 'birds')
+                result = result.filter(l => l.category === 'bird');
+            else
+                result = result.filter(l => l.category === activeTab);
+        }
+
+        // ── Search filter ───────────────────────────────────
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase();
             result = result.filter(l =>
@@ -72,8 +106,9 @@ export default function HomePage() {
                 (l.category || '').toLowerCase().includes(q)
             );
         }
+
         return result;
-    }, [listings, activeTab, searchQuery]);
+    }, [listings, activeTab, searchQuery, isGuest, guestPrefs]);
 
     function handleSearchKeyDown(e) {
         if (e.key === 'Enter' && searchQuery.trim()) {
@@ -107,12 +142,14 @@ export default function HomePage() {
                         <h1 className="nh-title">Buy &amp; Sell Cattle<br /><span className="nh-yellow">With Full Trust</span></h1>
                         <p className="nh-sub">Connecting farmers across India with verified livestock listings. Every animal is health-checked and documented.</p>
                         <div className="nh-actions">
-                            <button
-                                className="nh-btn-primary"
-                                onClick={() => navigate('/sell')}
-                            >
-                                Get Started
-                            </button>
+                            {!isBuyer && (
+                                <button
+                                    className="nh-btn-primary"
+                                    onClick={() => navigate('/sell')}
+                                >
+                                    Get Started
+                                </button>
+                            )}
                             <button
                                 className="nh-btn-outline"
                                 onClick={() => {
@@ -237,8 +274,8 @@ export default function HomePage() {
                                     </div>
                                 </div>
 
-                                {/* CATEGORY-SPECIFIC SECTIONS */}
-                                {!loading && CATEGORIES.filter(c => c.id !== 'all' && c.id !== 'pets').map(cat => {
+                                {/* CATEGORY-SPECIFIC SECTIONS — hidden for pets guests */}
+                                {!loading && !(isGuest && guestPrefs?.category === 'pets') && CATEGORIES.filter(c => c.id !== 'all' && c.id !== 'pets').map(cat => {
                                     const catListings = listings.filter(l => l.category === cat.id);
                                     if (catListings.length === 0) return null;
                                     return (
@@ -271,8 +308,8 @@ export default function HomePage() {
                                     );
                                 })}
 
-                                {/* PETS SECTION */}
-                                {!loading && (() => {
+                                {/* PETS SECTION — hidden for livestock guests */}
+                                {!loading && !(isGuest && guestPrefs?.category === 'livestock') && (() => {
                                     const petListings = listings.filter(l => ['dog', 'cat', 'bird'].includes(l.category));
                                     if (petListings.length === 0) return null;
                                     return (

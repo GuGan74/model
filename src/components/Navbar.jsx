@@ -10,7 +10,7 @@ const LANGUAGES = ['English', 'தமிழ்', 'తెలుగు', 'ಕನ�
 export default function Navbar() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { currentProfile, signOut } = useAuth();
+    const { currentProfile, signOut, isGuest, isLoggedIn } = useAuth();
     const [drawerOpen, setDrawerOpen] = useState(false);
 
     const initials = (currentProfile?.full_name || 'U').slice(0, 2).toUpperCase();
@@ -54,12 +54,35 @@ export default function Navbar() {
                         <select className="lang-sel hide-mobile">
                             {LANGUAGES.map(l => <option key={l}>{l}</option>)}
                         </select>
-                        <div className="nav-avatar" onClick={() => navigate('/profile')} title="My Profile">
-                            {initials}
-                        </div>
-                        <button className="btn-sell-nav hide-mobile" onClick={() => navigate('/sell')}>
-                            + Sell Animal
-                        </button>
+                        {/* Show avatar for logged-in, Sign In button for guests */}
+                        {isLoggedIn ? (
+                            <div className="nav-avatar" onClick={() => navigate('/profile')} title="My Profile">
+                                {initials}
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => navigate('/login')}
+                                style={{
+                                    background: '#1a7a3c',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: 20,
+                                    padding: '8px 18px',
+                                    fontWeight: 800,
+                                    fontSize: 13,
+                                    cursor: 'pointer',
+                                    fontFamily: 'Nunito, sans-serif',
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                Sign In
+                            </button>
+                        )}
+                        {isLoggedIn && (
+                            <button className="btn-sell-nav hide-mobile" onClick={() => navigate('/sell')}>
+                                + Sell Animal
+                            </button>
+                        )}
                         {/* Hamburger */}
                         <button
                             className="ham-btn hide-tablet-up"
@@ -93,7 +116,11 @@ export default function Navbar() {
                     <button className="mob-dl" onClick={() => { navigate('/sell'); setDrawerOpen(false); }} style={{ color: 'var(--green)', background: 'var(--green-light)' }}>
                         + Post New Listing
                     </button>
-                    <button className="mob-dl" onClick={handleSignOut} style={{ color: 'var(--red)' }}>🚪 Sign Out</button>
+                    {isLoggedIn ? (
+                        <button className="mob-dl" onClick={handleSignOut} style={{ color: 'var(--red)' }}>🚪 Sign Out</button>
+                    ) : (
+                        <button className="mob-dl" onClick={() => { navigate('/login'); setDrawerOpen(false); }} style={{ color: 'var(--green)', fontWeight: 800 }}>🔑 Sign In / Register</button>
+                    )}
                 </div>
             </div>
         </>

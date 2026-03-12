@@ -394,3 +394,81 @@
         display: none;
     }
 }
+
+/* ── Big upload zone (before photo chosen) ── */
+.upload-zone-big {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 2.5px dashed var(--blue);
+    border-radius: 16px;
+    padding: 48px 24px;
+    background: var(--blue-light);
+    cursor: pointer;
+    transition: 0.2s;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.upload-zone-big:hover {
+    border-color: var(--green);
+    background: var(--green-light);
+}
+
+.uzb-icon {
+    font-size: 52px;
+    line-height: 1;
+}
+
+.uzb-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--blue);
+}
+
+.uzb-sub {
+    font-size: 12px;
+    color: var(--g3);
+}
+
+/* ── Large image preview (after photo chosen) ── */
+.photo-preview-wrap {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 2px solid var(--green);
+    margin-bottom: 10px;
+    background: #000;
+}
+
+.photo-preview-img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.photo-preview-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--green-light);
+    border-top: 1px solid var(--green);
+}
+
+@media (max-width: 600px) {
+    .upload-zone-big {
+        padding: 36px 16px;
+    }
+
+    .photo-preview-img {
+        height: 200px;
+    }
+
+    .uzb-icon {
+        font-size: 40px;
+    }
+}

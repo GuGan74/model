@@ -73,6 +73,9 @@ export default function SplashPage() {
             toast.error(error.message || 'Wrong OTP — try again');
         } else {
             toast.success(`Welcome, ${name}! 🎉`);
+            const redirectTo = sessionStorage.getItem('pb_redirect_after_login') || '/';
+            sessionStorage.removeItem('pb_redirect_after_login');
+            navigate(redirectTo, { replace: true });
         }
     }
 
