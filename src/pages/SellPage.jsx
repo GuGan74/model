@@ -24,7 +24,7 @@ const STEPS = ['Cattle Type', 'Details', 'Photos', 'Pricing'];
 export default function SellPage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { currentUser, currentProfile } = useAuth();
+    const { currentUser, currentProfile, guestPrefs } = useAuth();
     const [step, setStep] = useState(1);
     const [submitting] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -52,13 +52,22 @@ export default function SellPage() {
         is_promoted: false,
     });
 
+    useEffect(() => {
+        if (isEditing) return; // don't override when editing
+        if (guestPrefs?.category === 'pets') {
+            setListingType('pet');
+        } else if (guestPrefs?.category === 'livestock') {
+            setListingType('livestock');
+        }
+    }, [guestPrefs?.category, isEditing]);
+
     // Check for edit mode on mount
     useEffect(() => {
         if (location.state?.editListing) {
             const l = location.state.editListing;
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsEditing(true);
-             
+
             setEditingId(l.id);
             // Determine listing type
             const isPet = ['dog', 'cat', 'bird'].includes(l.category);
@@ -87,24 +96,40 @@ export default function SellPage() {
     function setF(key, val) { setForm(f => ({ ...f, [key]: val })); }
 
     async function uploadImage(file) {
-        const ext = file.name.split('.').pop().toLowerCase();
-        const filename = `listings/${Date.now()}-${Math.random()
-            .toString(36).slice(2)}.${ext}`;
+        const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
+        const userId = currentUser?.id || 'public';
+        const filename = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-        const { error } = await supabase.storage
-            .from('listing-images')
-            .upload(filename, file, { cacheControl: '3600', upsert: false });
+        try {
+            const { error: uploadError } = await supabase.storage
+                .from('listing-images')
+                .upload(filename, file, {
+                    cacheControl: '3600',
+                    upsert: false,
+                    contentType: file.type || 'image/jpeg',
+                });
 
-        if (error) {
-            // Fallback: if bucket doesn't exist yet, use object URL
-            return URL.createObjectURL(file);
+            if (uploadError) {
+                console.error('Image upload failed:', uploadError.message);
+                if (uploadError.message?.includes('Bucket not found') ||
+                    uploadError.message?.includes('not found')) {
+                    toast.error('Storage not set up — run storage SQL in Supabase dashboard.', { duration: 7000 });
+                } else {
+                    toast.error('Image upload failed: ' + uploadError.message);
+                }
+                return null;
+            }
+
+            const { data } = supabase.storage
+                .from('listing-images')
+                .getPublicUrl(filename);
+
+            return data.publicUrl;
+        } catch (err) {
+            console.error('Unexpected upload error:', err);
+            toast.error('Image upload failed. Please try again.');
+            return null;
         }
-
-        const { data: { publicUrl } } = supabase.storage
-            .from('listing-images')
-            .getPublicUrl(filename);
-
-        return publicUrl;
     }
 
     function validate() {
@@ -213,8 +238,22 @@ export default function SellPage() {
                     <div className="fs ga">
                         <h3>📂 Listing Type</h3>
                         <div className="toggle-row" style={{ marginBottom: 20 }}>
-                            <button className={`tbtn${listingType === 'livestock' ? ' act' : ''}`} onClick={() => { setListingType('livestock'); setF('category', ''); }}>🐄 Cattle</button>
-                            <button className={`tbtn${listingType === 'pet' ? ' act pu' : ''}`} onClick={() => { setListingType('pet'); setF('category', ''); }}>🐾 Pet</button>
+                            {(guestPrefs?.category !== 'pets') && (
+                                <button
+                                    className={`tbtn${listingType === 'livestock' ? ' act' : ''}`}
+                                    onClick={() => { setListingType('livestock'); setF('category', ''); }}
+                                >
+                                    🐄 Cattle
+                                </button>
+                            )}
+                            {(guestPrefs?.category !== 'livestock') && (
+                                <button
+                                    className={`tbtn${listingType === 'pet' ? ' act pu' : ''}`}
+                                    onClick={() => { setListingType('pet'); setF('category', ''); }}
+                                >
+                                    🐾 Pet
+                                </button>
+                            )}
                         </div>
                     </div>
                     <div className="fs ga">

@@ -7,9 +7,6 @@ export default function OnboardingPage() {
     const { enterGuestMode } = useAuth();
 
     function go(role, category) {
-        // Write localStorage SYNCHRONOUSLY first — before
-        // React state updates — so App.jsx reads the correct
-        // value on the very next render after navigate()
         try {
             localStorage.setItem('pb_guest', 'true');
             localStorage.setItem('pb_guest_prefs',
@@ -17,11 +14,16 @@ export default function OnboardingPage() {
         } catch (err) {
             console.error('Failed to set guest preference', err);
         }
-        // Update React state (async — but localStorage already set)
         enterGuestMode({ role, category });
-        // Navigate — App.jsx will re-read localStorage via
-        // isGuestSync and show the full app immediately
-        navigate('/');
+
+        // Sellers go directly to sell page
+        // (LoginGuard will redirect them to login if not signed in,
+        //  then bring them back to /sell after sign in)
+        if (role === 'seller') {
+            navigate('/sell');
+        } else {
+            navigate('/');
+        }
     }
 
     const card = (onClick, bg, border, accent, icon, label, sub) => (

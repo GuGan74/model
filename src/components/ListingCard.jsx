@@ -108,7 +108,10 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
                         loading="lazy"
                         width={480}
                         height={320}
-                        onError={e => { e.target.classList.add('hide'); e.target.parentElement.classList.add('show-emoji'); }}
+                        onError={e => {
+                            e.target.style.display = 'none';
+                            e.target.parentElement.classList.add('show-emoji');
+                        }}
                     />
                 ) : null}
                 <div className="lc-emoji">{emoji}</div>

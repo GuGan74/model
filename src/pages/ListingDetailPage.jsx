@@ -179,7 +179,11 @@ export default function ListingDetailPage() {
                                 alt={listing.title}
                                 className="det-img"
                                 style={{ objectFit: 'cover', objectPosition: 'center' }}
-                                onError={e => { e.target.style.display = 'none'; }}
+                                onError={e => {
+                                    e.target.style.display = 'none';
+                                    const ph = e.target.parentElement.querySelector('.det-img-placeholder');
+                                    if (ph) ph.style.display = 'flex';
+                                }}
                             />
                         ) : (
                             <div className="det-img det-img-placeholder">

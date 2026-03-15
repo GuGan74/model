@@ -41,12 +41,14 @@ export function AuthProvider({ children }) {
 
     function clearGuestMode() {
         setIsGuest(false);
-        setGuestPrefs(null);
+        // DO NOT clear guestPrefs or pb_guest_prefs on login.
+        // Keep the category preference (livestock/pets) so the
+        // logged-in user still sees only their chosen category.
         try {
             localStorage.removeItem('pb_guest');
-            localStorage.removeItem('pb_guest_prefs');
+            // pb_guest_prefs intentionally kept — used post-login
         } catch (err) {
-            console.error('Failed to clear guest preference:', err);
+            console.error('Failed to clear guest mode flag:', err);
         }
     }
     // ────────────────────────────────────────────────────────
