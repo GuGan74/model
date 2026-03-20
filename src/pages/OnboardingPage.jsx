@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import logoImg from '../assets/kosalai-logo.png';
+import logoImg from '../assets/kosalai-logo-removebg-preview.png';
 
 export default function OnboardingPage() {
     const navigate = useNavigate();

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import OTPInput from '../components/OTPInput';
 import SEOHead from '../components/SEOHead';
-import logoImg from '../assets/kosalai-logo.png';
+import logoImg from '../assets/kosalai-logo-removebg-preview.png';
 import toast from 'react-hot-toast';
 import './SplashPage.css';
 

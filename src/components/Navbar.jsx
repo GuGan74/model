@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import cowLogo from '../assets/kosalai-logo.png';
+import cowLogo from '../assets/kosalai-logo-removebg-preview.png';
 import { FEATURES } from '../App';
 import './Navbar.css';
 
