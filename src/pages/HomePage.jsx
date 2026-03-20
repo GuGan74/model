@@ -198,8 +198,11 @@ export default function HomePage() {
                     ))}
                 </div>
 
-                {/* SORT / FILTER CONTROL BAR — sort LEFT, filter RIGHT */}
+                {/* SORT / FILTER CONTROL BAR — filter LEFT, sort RIGHT */}
                 <div className="hp-controls-bar">
+                    <button className="hp-filter-btn" onClick={() => navigate('/search')}>
+                        🎛️ Filters
+                    </button>
                     <div className="hp-sort-group">
                         <span style={{ fontSize: 13, color: '#6B7280', fontWeight: 600 }}>Sort:</span>
                         <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="hp-sort-select">
@@ -208,9 +211,6 @@ export default function HomePage() {
                             <option value="price_high">Price: High → Low</option>
                         </select>
                     </div>
-                    <button className="hp-filter-btn" onClick={() => navigate('/search')}>
-                        🎛️ Filters
-                    </button>
                 </div>
 
                 {/* LISTINGS 2×2 GRID */}
