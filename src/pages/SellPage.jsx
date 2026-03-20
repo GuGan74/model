@@ -323,7 +323,7 @@ export default function SellPage() {
                                 className={`tbtn toggle-btn${listingType === 'livestock' ? ' active' : ''}`}
                                 onClick={() => { setListingType('livestock'); setF('category', ''); }}
                             >
-                                🐄 Livestock
+                                🐄 Cattle
                             </button>
                         )}
                         {(guestPrefs?.category !== 'livestock') && (
@@ -337,7 +337,7 @@ export default function SellPage() {
                     </div>
                     <div>
                         <h4 style={{ marginBottom: 16, color: '#666' }}>
-                            {listingType === 'livestock' ? 'Select Livestock Type:' : 'Select Pet Type:'}
+                            {listingType === 'livestock' ? 'Select Cattle Type:' : 'Select Pet Type:'}
                         </h4>
                         <div className="category-grid">
                             {(listingType === 'livestock' ? LIVESTOCK_CATS : PET_CATS).map(c => (
