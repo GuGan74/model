@@ -484,20 +484,19 @@
     /* desktop default */
 }
 
-/* Mobile: show exactly 2 cards at once */
+/* Mobile: show compact cards so multiple fit on screen */
 @media (max-width: 640px) {
     .cs-row {
-        gap: 10px;
-        padding-left: 16px;
-        padding-right: 16px;
-        /* snap to cards like a proper slider */
+        gap: 12px;
+        padding-left: 12px;
+        padding-right: 12px;
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
     }
 
     .cs-card-wrapper {
-        /* 2 cards + gap: (100vw - 32px padding - 10px gap) / 2 */
-        flex: 0 0 calc(50vw - 21px);
+        flex: 0 0 160px;
+        /* Small width so 2.5 cards fit on a typical mobile screen */
         scroll-snap-align: start;
     }
 }

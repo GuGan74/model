@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import BackButton from '../components/BackButton';
 import toast from 'react-hot-toast';
 import './PaymentPage.css';
 
@@ -164,7 +165,7 @@ export default function PaymentPage() {
                 {!boostTier || isBoostPayment ? (
                     <button
                         className="btn-primary"
-                        onClick={() => navigate('/mylisting')}
+                        onClick={() => navigate('/my-listings')}
                     >
                         View My Listings →
                     </button>
@@ -270,46 +271,57 @@ export default function PaymentPage() {
             </div>
 
             {/* Payment methods */}
-            <div className="pay-methods-card" style={{ border: '2px solid #1a7a3c', background: '#f8fafc' }}>
-                <div className="pay-methods-title" style={{ fontSize: 18, color: '#1a7a3c' }}>Secure Payment Options</div>
-                <p style={{ fontSize: 13, color: '#64748b', marginBottom: 16 }}>Select your preferred payment method below to complete the secure transaction.</p>
+            <div className="pay-methods">
+                <h3 style={{ color: 'var(--green)' }}>🔒 Secure Payment Options</h3>
+                <p style={{ fontSize: 12, color: 'var(--g3)', marginBottom: 16 }}>Select your preferred payment method below.</p>
 
                 {['upi', 'card', 'netbanking'].map(method => (
                     <div
                         key={method}
-                        className={`pay-method-row ${selected === method ? 'active' : ''}`}
+                        className={`pay-method ${selected === method ? 'sel' : ''}`}
                         onClick={() => setSelected(method)}
                     >
-                        <span style={{ fontSize: 22 }}>
-                            {method === 'upi' ? '📱'
-                                : method === 'card' ? '💳' : '🏦'}
-                        </span>
+                        <div className="pm-ic">
+                            {method === 'upi' ? '📱' : method === 'card' ? '💳' : '🏦'}
+                        </div>
                         <div>
-                            <div className="pm-name">
-                                {method === 'upi' ? 'UPI'
-                                    : method === 'card' ? 'Credit/Debit Card'
+                            <div className="pm-nm">
+                                {method === 'upi' ? 'UPI / QR'
+                                    : method === 'card' ? 'Credit / Debit Card'
                                         : 'Net Banking'}
                             </div>
-                            <div className="pm-sub">
+                            <div className="pm-sb">
                                 {method === 'upi' ? 'GPay, PhonePe, Paytm'
                                     : method === 'card' ? 'Visa, Mastercard, RuPay'
-                                        : 'All major banks'}
+                                        : 'All major banks supported'}
                             </div>
                         </div>
+                        <div className={`pm-radio ${selected === method ? 'chk' : ''}`} />
                     </div>
                 ))}
 
                 {selected === 'upi' && (
-                    <input
-                        className="pay-upi-input"
-                        placeholder="Enter UPI ID (e.g. name@okhdfcbank)"
-                        style={{ marginTop: 10, padding: 10, width: '100%', border: '1px solid #ccc', borderRadius: 8 }}
-                    />
+                    <div style={{ marginTop: 12, animation: 'fadeInScale 0.2s ease-out' }}>
+                        <input
+                            className="pay-upi-input"
+                            placeholder="Enter UPI ID (e.g. 9876543210@ybl)"
+                            style={{
+                                padding: '12px 16px', width: '100%', border: '2px solid var(--green)',
+                                borderRadius: 10, fontSize: 14, outline: 'none',
+                                fontFamily: 'Nunito, sans-serif'
+                            }}
+                            autoFocus
+                        />
+                    </div>
                 )}
             </div>
 
-            <div className="pay-secure-note" style={{ textAlign: 'center', margin: '20px 0', fontSize: 12, color: '#888' }}>
-                🔒 256-bit SSL secured · Razorpay powered
+            <div className="pay-secure">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                256-bit SSL Secure · Razorpay Gateway
             </div>
 
             {/* Pay button */}

@@ -164,10 +164,14 @@
 
 /* STATS GRID */
 .lc-stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
     gap: 12px;
     margin-bottom: 20px;
+}
+
+.stat-col {
+    flex: 1;
+    min-width: 0;
 }
 
 .stat-lbl {
@@ -235,51 +239,68 @@
     }
 
     .lc-img-box {
-        height: 130px;
+        height: 110px;
     }
 
     .lc-emoji {
-        font-size: 44px;
+        font-size: 40px;
+    }
+
+    .lc-content {
+        padding: 10px;
+    }
+
+    .lc-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        margin-bottom: 6px;
     }
 
     .lc-title {
-        font-size: 12px;
-        font-weight: 800;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-size: 13px;
     }
 
     .lc-price {
         font-size: 14px;
+        color: var(--green);
     }
 
-    .lc-meta {
+    .lc-location {
         font-size: 10px;
+        margin-bottom: 10px;
     }
 
-    .lc-body {
-        padding: 8px 10px 10px;
+    .lc-stats-grid {
+        gap: 4px;
+        margin-bottom: 12px;
     }
 
-    .lc-badge {
+    .stat-lbl {
         font-size: 8px;
-        padding: 3px 6px;
+    }
+
+    .stat-val {
+        font-size: 11px;
+    }
+
+    .lc-actions {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .lc-btn-chat,
+    .lc-btn-call {
+        padding: 8px 0;
+        font-size: 11px;
+        border-radius: 8px;
+        width: 100%;
     }
 
     .lc-heart {
-        width: 26px;
-        height: 26px;
-        font-size: 13px;
-    }
-
-    .lc-btn-row {
-        gap: 5px;
-        padding: 0 8px 8px;
-    }
-
-    .lc-btn {
-        font-size: 10px;
-        padding: 6px 4px;
+        width: 24px;
+        height: 24px;
+        bottom: 8px;
+        left: 8px;
     }
 }

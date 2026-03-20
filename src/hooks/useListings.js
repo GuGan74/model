@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { DEMO_LISTINGS } from '../data/demoData';
 
-const SESSION_KEY = 'pb_listings_cache';
+const SESSION_KEY = 'pb_listings_cache_v2';
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const PAGE_SIZE = 20;
 
@@ -53,7 +53,7 @@ export function useListings() {
             );
             const queryPromise = supabase
                 .from('listings')
-                .select('id,title,category,breed,age_years,price,location,state,milk_yield_liters,is_vaccinated,is_promoted,for_adoption,image_url,created_at')
+                .select('id,title,category,breed,custom_breed,gender,is_trained,is_neutered,age_years,price,location,state,milk_yield_liters,is_vaccinated,is_promoted,for_adoption,image_url,created_at')
                 .eq('status', 'active')
                 .order('created_at', { ascending: false })
                 .range(currentOffset, currentOffset + PAGE_SIZE - 1);

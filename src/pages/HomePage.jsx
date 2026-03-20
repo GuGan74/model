@@ -414,7 +414,7 @@ export default function HomePage() {
                                         </div>
                                         <h2 className="cs-title"
                                             style={{ textTransform: 'uppercase' }}>
-                                            {CATEGORIES.find(c => c.id === activeTab)?.label}S
+                                            {CATEGORIES.find(c => c.id === activeTab)?.label}{activeTab !== 'pets' && activeTab !== 'all' && 'S'}
                                         </h2>
                                     </div>
                                     <button className="cs-view-all"

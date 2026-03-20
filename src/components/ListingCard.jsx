@@ -147,23 +147,20 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
                                 <div className="stat-lbl">AGE</div>
                                 <div className="stat-val">{age_years ? `${age_years} Years` : 'Unknown'}</div>
                             </div>
-                            {/* Balance row for horses, etc. */}
-                            {!['cow', 'buffalo', 'goat', 'sheep'].includes(category) && listing.gender && (
-                                <div className="stat-col">
-                                    <div className="stat-lbl">GENDER</div>
-                                    <div className="stat-val" style={{ textTransform: 'capitalize' }}>{listing.gender}</div>
-                                </div>
-                            )}
+                            <div className="stat-col">
+                                <div className="stat-lbl">GENDER</div>
+                                <div className="stat-val" style={{ textTransform: 'capitalize' }}>{listing.gender || 'Unknown'}</div>
+                            </div>
                         </>
                     ) : (
                         <>
                             <div className="stat-col">
-                                <div className="stat-lbl">TYPE</div>
-                                <div className="stat-val">Pet Adoption</div>
+                                <div className="stat-lbl">AGE</div>
+                                <div className="stat-val">{age_years ? `${age_years} Years` : 'Unknown'}</div>
                             </div>
                             <div className="stat-col">
-                                <div className="stat-lbl">AGE</div>
-                                <div className="stat-val">{age_years ? `${age_years} Years` : 'Puppy/Kitten'}</div>
+                                <div className="stat-lbl">GENDER</div>
+                                <div className="stat-val" style={{ textTransform: 'capitalize' }}>{listing.gender || 'Unknown'}</div>
                             </div>
                         </>
                     )}

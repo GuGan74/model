@@ -263,7 +263,7 @@ export default function SellPage() {
                         .eq('user_id', currentUser.id);
                     if (error) throw error;
                     toast.success('Listing updated! ✓');
-                    navigate('/mylisting');
+                    navigate('/my-listings');
                 } catch (err) {
                     console.error('Update error:', err);
                     toast.error('Failed to update listing.');
@@ -290,7 +290,7 @@ export default function SellPage() {
         <div className="sell-wrap">
             {/* Header */}
             <div className="sell-hd">
-                <button className="btn-back" onClick={() => step > 1 ? setStep(s => s - 1) : navigate(isEditing ? '/mylisting' : '/')}>←</button>
+                <button className="btn-back" onClick={() => step > 1 ? setStep(s => s - 1) : navigate(isEditing ? '/my-listings' : '/')}>←</button>
                 <div>
                     <div className="sell-ttl">
                         {isEditing ? '✏️ Edit Listing' : (listingType === 'livestock' ? '🐄 Sell Cattle' : '🐾 Sell Pet')}
@@ -423,25 +423,72 @@ export default function SellPage() {
                             )}
                         </div>
                     </div>
-                    <div className="fs oa">
-                        <h3>🩺 Health & Status</h3>
-                        <div className="toggle-row" style={{ flexWrap: 'wrap', gap: 12 }}>
-                            <button className={`tbtn${form.is_vaccinated ? ' act' : ''}`} style={{ flex: '1 1 45%' }} onClick={() => setF('is_vaccinated', !form.is_vaccinated)}>
-                                {form.is_vaccinated ? '💉 Vaccinated ✓' : '💉 Vaccinated?'}
-                            </button>
+                    <div className="fs oa" style={{ background: '#fff9f0', border: '1px solid #ffe8cc' }}>
+                        <h3 style={{ color: '#ea580c' }}>🩺 Health & Status</h3>
+                        <p style={{ fontSize: 12, color: '#9a3412', marginBottom: 14 }}>Tap to toggle the traits that apply to your animal.</p>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                            <div
+                                onClick={() => setF('is_vaccinated', !form.is_vaccinated)}
+                                style={{
+                                    padding: '16px', borderRadius: 12, cursor: 'pointer', transition: '0.2s',
+                                    border: form.is_vaccinated ? '2px solid #10b981' : '2px solid #fbd38d',
+                                    background: form.is_vaccinated ? '#ecfdf5' : 'white',
+                                    textAlign: 'center'
+                                }}
+                            >
+                                <div style={{ fontSize: 24, marginBottom: 4 }}>💉</div>
+                                <div style={{ fontSize: 13, fontWeight: 700, color: form.is_vaccinated ? '#059669' : '#c2410c' }}>
+                                    {form.is_vaccinated ? 'Vaccinated ✓' : 'Not Vaccinated'}
+                                </div>
+                            </div>
+
                             {showsPregnancyStatus(form.category) && form.gender === 'female' && (
-                                <button className={`tbtn${form.is_pregnant ? ' act' : ''}`} style={{ flex: '1 1 45%' }} onClick={() => setF('is_pregnant', !form.is_pregnant)}>
-                                    {form.is_pregnant ? '🤰 Pregnant ✓' : '🤰 Pregnant?'}
-                                </button>
+                                <div
+                                    onClick={() => setF('is_pregnant', !form.is_pregnant)}
+                                    style={{
+                                        padding: '16px', borderRadius: 12, cursor: 'pointer', transition: '0.2s',
+                                        border: form.is_pregnant ? '2px solid #8b5cf6' : '2px solid #fbd38d',
+                                        background: form.is_pregnant ? '#f5f3ff' : 'white',
+                                        textAlign: 'center'
+                                    }}
+                                >
+                                    <div style={{ fontSize: 24, marginBottom: 4 }}>🤰</div>
+                                    <div style={{ fontSize: 13, fontWeight: 700, color: form.is_pregnant ? '#6d28d9' : '#c2410c' }}>
+                                        {form.is_pregnant ? 'Currently Pregnant ✓' : 'Not Pregnant'}
+                                    </div>
+                                </div>
                             )}
+
                             {isPet(form.category) && (
                                 <>
-                                    <button className={`tbtn${form.is_trained ? ' act' : ''}`} style={{ flex: '1 1 45%' }} onClick={() => setF('is_trained', !form.is_trained)}>
-                                        {form.is_trained ? '🎓 Trained ✓' : '🎓 Trained?'}
-                                    </button>
-                                    <button className={`tbtn${form.is_neutered ? ' act' : ''}`} style={{ flex: '1 1 45%' }} onClick={() => setF('is_neutered', !form.is_neutered)}>
-                                        {form.is_neutered ? '✂️ Neutered ✓' : '✂️ Neutered?'}
-                                    </button>
+                                    <div
+                                        onClick={() => setF('is_trained', !form.is_trained)}
+                                        style={{
+                                            padding: '16px', borderRadius: 12, cursor: 'pointer', transition: '0.2s',
+                                            border: form.is_trained ? '2px solid #3b82f6' : '2px solid #fbd38d',
+                                            background: form.is_trained ? '#eff6ff' : 'white',
+                                            textAlign: 'center'
+                                        }}
+                                    >
+                                        <div style={{ fontSize: 24, marginBottom: 4 }}>🎓</div>
+                                        <div style={{ fontSize: 13, fontWeight: 700, color: form.is_trained ? '#1d4ed8' : '#c2410c' }}>
+                                            {form.is_trained ? 'Well Trained ✓' : 'Needs Training'}
+                                        </div>
+                                    </div>
+                                    <div
+                                        onClick={() => setF('is_neutered', !form.is_neutered)}
+                                        style={{
+                                            padding: '16px', borderRadius: 12, cursor: 'pointer', transition: '0.2s',
+                                            border: form.is_neutered ? '2px solid #6366f1' : '2px solid #fbd38d',
+                                            background: form.is_neutered ? '#eef2ff' : 'white',
+                                            textAlign: 'center'
+                                        }}
+                                    >
+                                        <div style={{ fontSize: 24, marginBottom: 4 }}>✂️</div>
+                                        <div style={{ fontSize: 13, fontWeight: 700, color: form.is_neutered ? '#4338ca' : '#c2410c' }}>
+                                            {form.is_neutered ? 'Spayed/Neutered ✓' : 'Not Neutered'}
+                                        </div>
+                                    </div>
                                 </>
                             )}
                         </div>
