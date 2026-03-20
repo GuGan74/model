@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import logoImg from '../assets/kosalai-logo.png';
 
 export default function OnboardingPage() {
     const navigate = useNavigate();
@@ -71,7 +72,7 @@ export default function OnboardingPage() {
                 display: 'flex', alignItems: 'center',
                 gap: 10, marginBottom: 24,
             }}>
-                <span style={{ fontSize: 34 }}>🐄</span>
+                {/* Removed cow emoji here per rebrand */}
                 <span style={{
                     fontFamily: 'Poppins,sans-serif',
                     fontSize: 24, fontWeight: 900, color: 'white',
@@ -87,7 +88,7 @@ export default function OnboardingPage() {
                 boxShadow: '0 24px 64px rgba(0,0,0,0.35)',
                 textAlign: 'center',
             }}>
-                <div style={{ fontSize: 44, marginBottom: 10 }}>🌾</div>
+                <img src={logoImg} alt="Kosalai Logo" style={{ height: 75, marginBottom: 12, objectFit: 'contain' }} />
                 <h1 style={{
                     fontFamily: 'Poppins,sans-serif', fontSize: 21,
                     fontWeight: 900, color: '#1a1a1a', margin: '0 0 6px',

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import OTPInput from '../components/OTPInput';
 import SEOHead from '../components/SEOHead';
+import logoImg from '../assets/kosalai-logo.png';
 import toast from 'react-hot-toast';
 import './SplashPage.css';
 
@@ -90,8 +91,7 @@ export default function SplashPage() {
             {/* LEFT / BRANDING PANEL */}
             <div className="splash-brand-panel">
                 <div className="brand-header">
-                    <div className="tractor-logo">🚜</div>
-                    <div className="brand-name">Kosalai</div>
+                    <img src={logoImg} alt="Kosalai Logo" style={{ height: 48, objectFit: 'contain' }} />
                 </div>
 
                 <h1 className="brand-title">South India's<br />trusted cattle<br />marketplace</h1>
@@ -131,7 +131,7 @@ export default function SplashPage() {
                 <div className="form-container">
                     {step === 1 && (
                         <div className="animate-fadeIn">
-                            <h2 className="form-header-title">Pashu<span>Bazaar</span></h2>
+                            <h2 className="form-header-title">Ko<span>salai</span></h2>
                             <p className="form-header-sub">South India's Trusted Cattle Marketplace</p>
 
                             <button className="btn-google-white" onClick={handleGoogleLogin}>
