@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import cowLogo from '../assets/istockphoto.webp';
+import cowLogo from '../assets/kosalai-logo.png';
 import { FEATURES } from '../App';
 import './Navbar.css';
 
@@ -35,7 +35,7 @@ export default function Navbar() {
             <nav className="navbar">
                 <div className="nav-inner">
                     <div className="nav-logo" onClick={() => navigate('/')}>
-                        <img src={cowLogo} className="nav-logo-icon" alt="Logo" style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: '50%' }} />
+                        <img src={cowLogo} className="nav-logo-icon" alt="Logo" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
                         <div className="nav-brand">Ko<span>salai</span></div>
                     </div>
 
@@ -111,7 +111,7 @@ export default function Navbar() {
             />
             <div className={`mob-drawer${drawerOpen ? ' open' : ''}`}>
                 <div className="mob-drawer-hd">
-                    <img src={cowLogo} className="nav-logo-icon" alt="Logo" style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: '50%' }} />
+                    <img src={cowLogo} className="nav-logo-icon" alt="Logo" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
                     <div className="nav-brand" style={{ fontSize: 16 }}>Ko<span>salai</span></div>
                     <button className="mob-close-btn" onClick={() => setDrawerOpen(false)}>✕</button>
                 </div>
