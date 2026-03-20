@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import cowLogo from '../assets/kosalai-logo-removebg-preview.png';
-import { FEATURES } from '../App';
 import './Navbar.css';
 
 
@@ -19,7 +18,6 @@ export default function Navbar() {
 
     const navLinks = [
         { label: t('navbar.buyCattle'), path: '/' },
-        ...(FEATURES.PRICE_TRENDS ? [{ label: t('navbar.priceTrends'), path: '/price-trends' }] : []),
         { label: t('navbar.alerts'), path: '/notifications' },
         { label: t('navbar.profile'), path: '/profile' },
     ];

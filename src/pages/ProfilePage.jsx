@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import ListingCard from '../components/ListingCard';
 import BackButton from '../components/BackButton';
-import { FEATURES } from '../App';
 import toast from 'react-hot-toast';
 import './ProfilePage.css';
 
@@ -99,8 +98,6 @@ export default function ProfilePage() {
     const menuItems = [
         { icon: '📋', label: 'My Listings', sub: 'View & manage your listings', action: () => navigate('/my-listings') },
         { icon: '🔔', label: 'Notifications', sub: 'Buyer inquiries & alerts', action: () => navigate('/notifications') },
-        ...(FEATURES.PRICE_TRENDS ? [{ icon: '📊', label: 'Price Trends', sub: 'Latest market prices', action: () => navigate('/price-trends') }] : []),
-        { icon: '⚡', label: 'Boost Listing', sub: 'Get more visibility', action: () => navigate('/boost') },
         { icon: '❓', label: 'Help & FAQ', sub: 'Support & guides', action: () => toast('Help coming soon!') },
         { icon: '🔐', label: 'Privacy Policy', sub: 'Terms & conditions', action: () => toast('Privacy policy') },
     ];
@@ -212,9 +209,6 @@ export default function ProfilePage() {
                         </button>
                         <button className="btn-secondary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => navigate('/my-listings')}>
                             📋 My Listings
-                        </button>
-                        <button className="btn-secondary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => navigate('/boost')}>
-                            ⚡ Boost a Listing
                         </button>
                     </div>
                 </div>

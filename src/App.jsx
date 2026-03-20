@@ -21,17 +21,12 @@ import SuccessPage from './pages/SuccessPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 const AdminPage = React.lazy(() => import('./pages/AdminPage'));
-const PriceTrendsPage = React.lazy(() => import('./pages/PriceTrendsPage'));
-
 import SellerProfilePage from './pages/SellerProfilePage';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
 import './index.css';
 import './App.css';
 
-export const FEATURES = {
-  PRICE_TRENDS: true, // Set to false to hide
-};
 
 function LazyFallback() {
   return (
@@ -115,10 +110,6 @@ function AppRoutes() {
               element={<HomePage />} />
             <Route path="/search"
               element={<SearchPage />} />
-            {FEATURES.PRICE_TRENDS && (
-              <Route path="/price-trends"
-                element={<PriceTrendsPage />} />
-            )}
             <Route path="/login"
               element={<SplashPage />} />
 

@@ -127,20 +127,7 @@ export default function SellerProfilePage() {
                     </div>
                 )}
 
-                {/* Action Buttons */}
-                {phone && (
-                    <div className="seller-action-btns">
-                        <a href={`tel:+91${phone}`} className="seller-btn-call">📞 Call</a>
-                        <a
-                            href={`https://wa.me/91${phone}?text=Hi, I found your cattle listing on Kosalai.`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="seller-btn-wa"
-                        >
-                            WhatsApp
-                        </a>
-                    </div>
-                )}
+
             </div>
 
             {/* Seller Listings */}

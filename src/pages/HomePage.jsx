@@ -66,6 +66,8 @@ export default function HomePage() {
 
     const categories = listingType === 'livestock' ? LIVESTOCK_CATEGORIES : PET_CATEGORIES;
 
+    const LIVESTOCK_IDS = ['cow', 'buffalo', 'goat', 'sheep', 'horse', 'poultry'];
+
     const fetchListings = useCallback(async () => {
         setLoading(true);
         try {
@@ -75,7 +77,7 @@ export default function HomePage() {
                 .eq('status', 'active');
 
             if (listingType === 'livestock') {
-                query = query.not('category', 'in', `(${PET_IDS.join(',')})`);
+                query = query.in('category', LIVESTOCK_IDS);
             } else {
                 query = query.in('category', PET_IDS);
             }
@@ -196,7 +198,7 @@ export default function HomePage() {
                     ))}
                 </div>
 
-                {/* SORT / FILTER CONTROL BAR */}
+                {/* SORT / FILTER CONTROL BAR — sort LEFT, filter RIGHT */}
                 <div className="hp-controls-bar">
                     <div className="hp-sort-group">
                         <span style={{ fontSize: 13, color: '#6B7280', fontWeight: 600 }}>Sort:</span>

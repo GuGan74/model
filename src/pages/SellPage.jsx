@@ -55,15 +55,17 @@ const STEPS = ['Cattle Type', 'Details', 'Photos', 'Pricing'];
 export default function SellPage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { currentUser, guestPrefs } = useAuth();
+    const { currentUser, guestPrefs, listingType: globalListingType } = useAuth();
     const [step, setStep] = useState(1);
     const [submitting, setSubmitting] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [fieldErrors, setFieldErrors] = useState({});
 
-    // Form data
-    const [listingType, setListingType] = useState('livestock');
+    // Use global toggle to decide if we start in livestock or pet mode
+    const [listingType, setListingType] = useState(() =>
+        globalListingType === 'pets' ? 'pet' : 'livestock'
+    );
     const [imageWarning, setImageWarning] = useState(false);
     const [form, setForm] = useState({
         category: '',
@@ -102,14 +104,15 @@ export default function SellPage() {
 
     useEffect(() => {
         if (isEditing) return;
+        // Sync with global toggle on mount
         startTransition(() => {
-            if (guestPrefs?.category === 'pets') {
+            if (guestPrefs?.category === 'pets' || globalListingType === 'pets') {
                 setListingType('pet');
-            } else if (guestPrefs?.category === 'livestock') {
+            } else {
                 setListingType('livestock');
             }
         });
-    }, [guestPrefs?.category, isEditing]);
+    }, [guestPrefs?.category, globalListingType, isEditing]);
 
     // Check for edit mode on mount
     useEffect(() => {
