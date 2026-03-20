@@ -207,7 +207,7 @@ export default function PaymentPage() {
     // ── MAIN payment UI ────────────────────────────────────
     return (
         <div className="pay-wrap">
-            <BackButton fallbackPath="/sell" />
+            <BackButton fallbackPath="/my-listings" />
             {/* Header */}
             <div className="pay-header">
                 <div style={{ fontSize: 28 }}>
@@ -339,7 +339,7 @@ export default function PaymentPage() {
             <button
                 className="btn-secondary"
                 style={{ width: '100%', padding: '16px', fontSize: 16 }}
-                onClick={() => navigate('/sell')}
+                onClick={() => navigate('/my-listings')}
             >
                 ← Cancel Payment
             </button>

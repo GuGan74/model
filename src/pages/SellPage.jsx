@@ -259,26 +259,51 @@ export default function SellPage() {
                 image_url: form.image_url || null,
                 for_adoption: form.for_adoption,
                 is_promoted: form.is_promoted,
-                status: 'pending_payment',
+                status: 'pending',
                 created_at: new Date().toISOString(),
             };
 
-            // BUG #7: In edit mode, update directly — no payment required
+            // BUG #7: In edit mode, update directly — no payment required ONLY if it is already active
             if (isEditing && editingId) {
-                try {
-                    const { error } = await supabase
-                        .from('listings')
-                        .update({ ...payload, status: 'active', created_at: undefined })
-                        .eq('id', editingId)
-                        .eq('user_id', currentUser.id);
-                    if (error) throw error;
-                    toast.success('Listing updated! ✓');
-                    navigate('/my-listings');
-                } catch (err) {
-                    console.error('Update error:', err);
-                    toast.error('Failed to update listing.');
+                if (location.state?.editListing?.status === 'active' || location.state?.editListing?.status === 'sold') {
+                    try {
+                        const { error } = await supabase
+                            .from('listings')
+                            .update({ ...payload, status: 'active', created_at: undefined })
+                            .eq('id', editingId)
+                            .eq('user_id', currentUser.id);
+                        if (error) throw error;
+                        toast.success('Listing updated! ✓');
+                        navigate('/my-listings');
+                    } catch (err) {
+                        console.error('Update error:', err);
+                        toast.error('Failed to update listing.');
+                    }
+                    return;
                 }
-                return;
+            }
+
+            // Create record as pending to prevent data loss on cancel
+            let newListingId = isEditing ? editingId : null;
+            if (!isEditing) {
+                try {
+                    const { data, error } = await supabase
+                        .from('listings')
+                        .insert(payload)
+                        .select()
+                        .single();
+                    if (error) throw error;
+                    newListingId = data.id;
+                } catch (err) {
+                    newListingId = 'd' + Date.now().toString().slice(-6);
+                }
+            } else {
+                try {
+                    await supabase
+                        .from('listings')
+                        .update({ ...payload, status: 'pending', created_at: undefined })
+                        .eq('id', editingId);
+                } catch (e) { }
             }
 
             navigate('/payment', {
@@ -287,8 +312,8 @@ export default function SellPage() {
                     listingPayload: payload,
                     listingFee: { name: 'Listing Fee', price: 50 },
                     boostTier: form.is_promoted ? BOOST_TIERS.find(t => t.name === form.boostPlanName) : null,
-                    isEditing: false,
-                    editingId: null,
+                    isEditing: true, // Tell PaymentPage to UPDATE the pending record
+                    editingId: newListingId,
                 }
             });
         } finally {
