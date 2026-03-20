@@ -1,0 +1,37 @@
+{
+    "navbar": {
+        "buyCattle": "🛒 Buy Cattle",
+        "priceTrends": "📊 Price Trends",
+        "alerts": "🔔 Alerts",
+        "profile": "👤 Profile",
+        "signIn": "Sign In",
+        "sellCattle": "+ Sell Cattle",
+        "myProfile": "My Profile",
+        "signOut": "🚪 Sign Out",
+        "signInRegister": "🔑 Sign In / Register",
+        "postNewListing": "+ Post New Listing"
+    },
+    "home": {
+        "heroTitle": "Buy & Sell Cattle",
+        "getStarted": "Get Started",
+        "howItWorks": "How It Works",
+        "registeredFarmers": "Registered Farmers",
+        "activeListings": "Active Listings",
+        "aiVerified": "AI Verified",
+        "search": "Search"
+    },
+    "listingCard": {
+        "reachSeller": "💬 Reach Seller",
+        "callSeller": "📞 Call Seller",
+        "addToFavorites": "Add to Favorites",
+        "addedToFavorites": "Added to favorites! ❤️",
+        "removedFromFavorites": "Removed from favorites"
+    },
+    "bottomNav": {
+        "home": "Home",
+        "search": "Search",
+        "sell": "Sell",
+        "alerts": "Alerts",
+        "profile": "Profile"
+    }
+}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import BackButton from '../components/BackButton';
 import toast from 'react-hot-toast';
 import './BoostPage.css';
 
@@ -14,6 +15,7 @@ export default function BoostPage() {
     const navigate = useNavigate();
     return (
         <div className="boost-wrap">
+            <BackButton fallbackPath="/" />
             <div className="boost-hero">
                 <h2>⚡ Boost Your Listing</h2>
                 <p>Get your cattle in front of thousands of serious buyers instantly</p>
@@ -40,9 +42,7 @@ export default function BoostPage() {
                     </div>
                 ))}
             </div>
-            <div style={{ textAlign: 'center', marginTop: 20 }}>
-                <button className="btn-secondary" onClick={() => navigate(-1)}>← Back</button>
-            </div>
+
         </div>
     );
 }

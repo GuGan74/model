@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import BackButton from '../components/BackButton';
 import './NotificationsPage.css';
 
 const MOCK_PRICE_ALERT = {
@@ -87,6 +88,7 @@ export default function NotificationsPage() {
 
     return (
         <div className="notif-wrap">
+            <BackButton fallbackPath="/" />
             <div className="notif-hd">
                 <h2>🔔 Notifications {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}</h2>
                 <button className="notif-mark" onClick={markAllRead}>Mark all read</button>

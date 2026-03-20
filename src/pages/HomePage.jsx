@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useListings } from '../hooks/useListings';
 import { useFavorites } from '../hooks/useFavorites';
 import { CATEGORIES } from '../constants/index';
+import { useTranslation } from 'react-i18next';
 import ListingCard from '../components/ListingCard';
 import SkeletonCard from '../components/SkeletonCard';
 import SEOHead from '../components/SEOHead';
@@ -25,6 +26,7 @@ function getActivePrefs(guestPrefs) {
 }
 
 export default function HomePage() {
+    const { t } = useTranslation();
     const { currentUser, isGuest, guestPrefs } = useAuth();
     const { listings, loading, hasMore, refetch, loadMore } = useListings();
     const navigate = useNavigate();
@@ -60,8 +62,10 @@ export default function HomePage() {
     // No isGuest check — works for guests AND logged-in users.
     useEffect(() => {
         const prefs = getActivePrefs(guestPrefs);
-        if (prefs?.category === 'livestock') setActiveTab('all');
-        if (prefs?.category === 'pets') setActiveTab('pets');
+        startTransition(() => {
+            if (prefs?.category === 'livestock') setActiveTab('all');
+            if (prefs?.category === 'pets') setActiveTab('pets');
+        });
     }, [guestPrefs?.category]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const isBuyer = isGuest && guestPrefs?.role === 'buyer';
@@ -152,6 +156,7 @@ export default function HomePage() {
 
     // Category strip — hide wrong-type tabs based on preference
     const visibleCategories = CATEGORIES.filter(c => {
+        if (c.id === 'pets') return false; // Hide redundant "Pets" icon from top strip
         if (isLivestock) return !PET_TAB_IDS.includes(c.id);
         if (isPets) return PET_TAB_IDS.includes(c.id) || c.id === 'all';
         return true;
@@ -161,7 +166,7 @@ export default function HomePage() {
         <div className="home-layout">
             <SEOHead
                 title="Buy & Sell Cattle in India | PashuBazaar"
-                description="India's trusted marketplace for cows, buffaloes, goats, sheep and pets."
+                description="India's trusted marketplace for cows, buffaloes, goats, horses and pets."
             />
             <div className="home-container">
 
@@ -169,7 +174,7 @@ export default function HomePage() {
                 <div className="new-hero-banner">
                     <div className="nh-content">
                         <h1 className="nh-title">
-                            Buy &amp; Sell Cattle<br />
+                            {t('home.heroTitle')}<br />
                             <span className="nh-yellow">With Full Trust</span>
                         </h1>
                         <p className="nh-sub">
@@ -181,7 +186,7 @@ export default function HomePage() {
                                     className="nh-btn-primary"
                                     onClick={() => navigate('/sell')}
                                 >
-                                    Get Started
+                                    {t('home.getStarted')}
                                 </button>
                             )}
                             <button
@@ -191,7 +196,7 @@ export default function HomePage() {
                                         ?.scrollIntoView({ behavior: 'smooth' });
                                 }}
                             >
-                                How It Works
+                                {t('home.howItWorks')}
                             </button>
                         </div>
                     </div>
@@ -203,21 +208,21 @@ export default function HomePage() {
                         <div className="sc-icon gray">👥</div>
                         <div className="sc-info">
                             <div className="sc-val">{stats.farmers}</div>
-                            <div className="sc-lbl">Registered Farmers</div>
+                            <div className="sc-lbl">{t('home.registeredFarmers')}</div>
                         </div>
                     </div>
                     <div className="stat-card">
                         <div className="sc-icon yellow">🗂</div>
                         <div className="sc-info">
                             <div className="sc-val">{stats.listings}</div>
-                            <div className="sc-lbl">Active Listings</div>
+                            <div className="sc-lbl">{t('home.activeListings')}</div>
                         </div>
                     </div>
                     <div className="stat-card">
                         <div className="sc-icon green">🛡</div>
                         <div className="sc-info">
                             <div className="sc-val">100%</div>
-                            <div className="sc-lbl">ML Verified</div>
+                            <div className="sc-lbl">{t('home.aiVerified')}</div>
                         </div>
                     </div>
                 </div>
@@ -260,7 +265,7 @@ export default function HomePage() {
                                 padding: '6px 14px', cursor: 'pointer',
                                 fontWeight: 700, fontSize: 13
                             }}
-                        >Search</button>
+                        >{t('home.search')}</button>
                     )}
                 </div>
 

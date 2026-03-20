@@ -1,0 +1,37 @@
+{
+    "navbar": {
+        "buyCattle": "🛒 पशु खरीदें",
+        "priceTrends": "📊 मूल्य रुझान",
+        "alerts": "🔔 सूचनाएं",
+        "profile": "👤 प्रोफ़ाइल",
+        "signIn": "लॉग इन करें",
+        "sellCattle": "+ पशु बेचें",
+        "myProfile": "मेरी प्रोफ़ाइल",
+        "signOut": "🚪 लॉग आउट",
+        "signInRegister": "🔑 लॉग इन / रजिस्टर",
+        "postNewListing": "+ नई सूची पोस्ट करें"
+    },
+    "home": {
+        "heroTitle": "पशु खरीदें और बेचें",
+        "getStarted": "शुरू करें",
+        "howItWorks": "यह कैसे काम करता है",
+        "registeredFarmers": "पंजीकृत किसान",
+        "activeListings": "सक्रिय सूचियां",
+        "aiVerified": "AI सत्यापित",
+        "search": "खोजें"
+    },
+    "listingCard": {
+        "reachSeller": "💬 विक्रेता से संपर्क करें",
+        "callSeller": "📞 विक्रेता को कॉल करें",
+        "addToFavorites": "पसंदीदा में जोड़ें",
+        "addedToFavorites": "पसंदीदा में जोड़ा गया! ❤️",
+        "removedFromFavorites": "पसंदीदा से हटाया गया"
+    },
+    "bottomNav": {
+        "home": "होम",
+        "search": "खोजें",
+        "sell": "बेचें",
+        "alerts": "सूचनाएं",
+        "profile": "प्रोफ़ाइल"
+    }
+}

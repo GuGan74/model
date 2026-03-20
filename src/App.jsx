@@ -29,6 +29,10 @@ import BottomNav from './components/BottomNav';
 import './index.css';
 import './App.css';
 
+export const FEATURES = {
+  PRICE_TRENDS: true, // Set to false to hide
+};
+
 function LazyFallback() {
   return (
     <div style={{
@@ -111,8 +115,10 @@ function AppRoutes() {
               element={<HomePage />} />
             <Route path="/search"
               element={<SearchPage />} />
-            <Route path="/price-trends"
-              element={<PriceTrendsPage />} />
+            {FEATURES.PRICE_TRENDS && (
+              <Route path="/price-trends"
+                element={<PriceTrendsPage />} />
+            )}
             <Route path="/login"
               element={<SplashPage />} />
 

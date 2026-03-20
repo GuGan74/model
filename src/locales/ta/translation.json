@@ -1,0 +1,37 @@
+{
+    "navbar": {
+        "buyCattle": "🛒 கால்நடைகளை வாங்குங்கள்",
+        "priceTrends": "📊 விலை போக்குகள்",
+        "alerts": "🔔 விழிப்பூட்டல்கள்",
+        "profile": "👤 சுயவிவரம்",
+        "signIn": "உள்நுழைய",
+        "sellCattle": "+ கால்நடைகளை விற்க",
+        "myProfile": "என் சுயவிவரம்",
+        "signOut": "🚪 வெளியேறு",
+        "signInRegister": "🔑 உள்நுழைய / பதிவு செய்ய",
+        "postNewListing": "+ புதிய பட்டியலை இடவும்"
+    },
+    "home": {
+        "heroTitle": "கால்நடைகளை வாங்கவும் விற்கவும்",
+        "getStarted": "தொடங்குங்கள்",
+        "howItWorks": "இது எப்படி வேலை செய்கிறது",
+        "registeredFarmers": "பதிவு செய்யப்பட்ட விவசாயிகள்",
+        "activeListings": "செயலில் உள்ள பட்டியல்கள்",
+        "aiVerified": "AI சரிபார்க்கப்பட்டது",
+        "search": "தேடுங்கள்"
+    },
+    "listingCard": {
+        "reachSeller": "💬 விற்பனையாளரை அணுகவும்",
+        "callSeller": "📞 விற்பனையாளரை அழைக்கவும்",
+        "addToFavorites": "பிடித்தவைகளில் சேர்க்க",
+        "addedToFavorites": "பிடித்தவைகளில் சேர்க்கப்பட்டது! ❤️",
+        "removedFromFavorites": "பிடித்தவைகளில் இருந்து அகற்றப்பட்டது"
+    },
+    "bottomNav": {
+        "home": "முகப்பு",
+        "search": "தேடு",
+        "sell": "விற்க",
+        "alerts": "விழிப்பூட்டல்கள்",
+        "profile": "சுயவிவரம்"
+    }
+}

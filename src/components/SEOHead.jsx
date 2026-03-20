@@ -6,7 +6,7 @@ const SITE_NAME = 'PashuBazaar';
 
 export default function SEOHead({ title, description, imageUrl, url }) {
     const fullTitle = title || 'Buy & Sell Cattle in India | PashuBazaar';
-    const fullDesc = description || "India's trusted marketplace for cows, buffaloes, goats, sheep and pets. Verified listings from farmers across India.";
+    const fullDesc = description || "India's trusted marketplace for cows, buffaloes, goats, horses and pets. Verified listings from farmers across India.";
     const image = imageUrl || DEFAULT_IMAGE;
     const canonical = url || 'https://model-mauve.vercel.app/';
 

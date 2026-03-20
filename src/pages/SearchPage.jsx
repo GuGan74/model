@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import ListingCard from '../components/ListingCard';
+import BackButton from '../components/BackButton';
 import SEOHead from '../components/SEOHead';
 import './SearchPage.css';
 
@@ -23,7 +24,6 @@ const DEMO_DATA = [
 ];
 
 export default function SearchPage() {
-    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [query, setQuery] = useState(searchParams.get('q') || '');
     const [results, setResults] = useState([]);
@@ -47,9 +47,11 @@ export default function SearchPage() {
                 if (p.prop === 'verified') q = q.eq('is_verified', true);
             });
             const { data } = await q.order('created_at', { ascending: false }).limit(40);
-            setResults(data && data.length > 0 ? data : DEMO_DATA.filter(d => !query || d.title.toLowerCase().includes(query.toLowerCase())));
+            let filtered = data && data.length > 0 ? data : DEMO_DATA.filter(d => !query || d.title.toLowerCase().includes(query.toLowerCase()));
+            setResults(filtered);
         } catch {
-            setResults(DEMO_DATA.filter(d => !query || d.title.toLowerCase().includes(query.toLowerCase())));
+            let fallback = DEMO_DATA.filter(d => !query || d.title.toLowerCase().includes(query.toLowerCase()));
+            setResults(fallback);
         } finally {
             setLoading(false);
         }
@@ -75,7 +77,7 @@ export default function SearchPage() {
                 url="https://model-mauve.vercel.app/search"
             />
             <div className="search-bar-top">
-                <button className="btn-secondary" style={{ padding: '9px 14px', flexShrink: 0 }} onClick={() => navigate('/')}>←</button>
+                <BackButton fallbackPath="/" className="" />
                 <div className="search-inp-wrap">
                     <span>🔍</span>
                     <input
@@ -88,16 +90,18 @@ export default function SearchPage() {
                 </div>
             </div>
 
-            <div className="filter-pills">
-                {FILTER_PILLS.map(p => (
-                    <button
-                        key={JSON.stringify(p)}
-                        className={`fpill${activePills.find(a => JSON.stringify(a) === JSON.stringify(p)) ? ' act' : ''}`}
-                        onClick={() => togglePill(p)}
-                    >
-                        {p.label}
-                    </button>
-                ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', margin: '0 16px 10px' }}>
+                <div className="filter-pills" style={{ flex: 1 }}>
+                    {FILTER_PILLS.map(p => (
+                        <button
+                            key={JSON.stringify(p)}
+                            className={`fpill${activePills.find(a => JSON.stringify(a) === JSON.stringify(p)) ? ' act' : ''}`}
+                            onClick={() => togglePill(p)}
+                        >
+                            {p.label}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             <div className="search-results">

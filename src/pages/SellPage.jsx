@@ -1,10 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, startTransition } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { LIVESTOCK_CATS, PET_CATS } from '../constants/index';
 import toast from 'react-hot-toast';
 import './SellPage.css';
+
+// Fix #4: Category-specific breed lists
+const BREED_OPTIONS = {
+    cow: ['HF Holstein', 'Jersey', 'Gir', 'Sahiwal', 'Red Sindhi', 'Tharparkar', 'Rathi', 'Kankrej', 'Ongole', 'Hariana', 'Crossbred HF', 'Crossbred Jersey', 'Indigenous Mixed', 'Other'],
+    buffalo: ['Murrah', 'Mehsana', 'Jaffarabadi', 'Surti', 'Nagpuri', 'Pandharpuri', 'Bhadawari', 'Nili-Ravi', 'Other'],
+    goat: ['Boer', 'Jamunapari', 'Barbari', 'Sirohi', 'Beetal', 'Black Bengal', 'Osmanabadi', 'Malabari', 'Crossbred', 'Other'],
+    sheep: ['Deccani', 'Madras Red', 'Nellore', 'Vembur', 'Bellary', 'Hassan', 'Mandya', 'Merino', 'Crossbred', 'Other'],
+    horse: ['Marwari', 'Kathiawari', 'Sindhi', 'Bhutia', 'Spiti', 'Zanskari', 'Manipuri', 'Thoroughbred', 'Arabian', 'Other'],
+    dog: ['Labrador Retriever', 'German Shepherd', 'Golden Retriever', 'Beagle', 'Bulldog', 'Poodle', 'Rottweiler', 'Pug', 'Doberman', 'Husky', 'Indian Pariah', 'Indie (Mixed)', 'Other'],
+    cat: ['Persian', 'Siamese', 'Maine Coon', 'British Shorthair', 'Indian Street Cat', 'Indie (Mixed)', 'Other'],
+    bird: ['Parrot', 'Cockatiel', 'Budgerigar (Budgie)', 'Lovebird', 'Canary', 'Finch', 'Pigeon', 'Dove', 'Other'],
+    fish: ['Goldfish', 'Koi', 'Betta (Fighting Fish)', 'Guppy', 'Molly', 'Angelfish', 'Oscar', 'Tetra', 'Catfish', 'Other'],
+    rabbit: ['Dutch', 'Flemish Giant', 'Lionhead', 'Mini Lop', 'English Angora', 'Indian White', 'Other'],
+};
+function getBreedOptions(category) {
+    return BREED_OPTIONS[category] || ['Other'];
+}
+
+// Fix #5 Helpers
+function isLivestock(category) { return ['cow', 'buffalo', 'goat', 'sheep', 'horse'].includes(category); }
+function isPet(category) { return ['dog', 'cat', 'bird', 'fish', 'rabbit'].includes(category); }
+function showsMilkYield(category) { return ['cow', 'buffalo', 'goat', 'sheep'].includes(category); }
+function showsPregnancyStatus(category) { return ['cow', 'buffalo', 'goat', 'horse'].includes(category); }
 
 const INDIAN_STATES = [
     'Tamil Nadu', 'Maharashtra', 'Uttar Pradesh', 'Rajasthan',
@@ -24,19 +47,24 @@ const STEPS = ['Cattle Type', 'Details', 'Photos', 'Pricing'];
 export default function SellPage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { currentUser, currentProfile, guestPrefs } = useAuth();
+    const { currentUser, guestPrefs } = useAuth();
     const [step, setStep] = useState(1);
-    const [submitting] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [fieldErrors, setFieldErrors] = useState({});
 
     // Form data
-    const [listingType, setListingType] = useState('livestock'); // livestock | pet
+    const [listingType, setListingType] = useState('livestock');
+    const [imageWarning, setImageWarning] = useState(false);
     const [form, setForm] = useState({
         category: '',
         title: '',
         breed: '',
+        customBreed: '', // NEW
+        gender: '',      // NEW
+        is_trained: false,  // NEW
+        is_neutered: false, // NEW
         age_years: '',
         weight_kg: '',
         milk_yield_liters: '',
@@ -44,7 +72,10 @@ export default function SellPage() {
         is_pregnant: false,
         purpose: 'dairy',
         price: '',
-        location: currentProfile?.location || '',
+        village: '',
+        taluk: '',
+        location: '',
+        landmark: '',
         state: '',
         description: '',
         image_url: '',
@@ -52,30 +83,42 @@ export default function SellPage() {
         is_promoted: false,
     });
 
+    function getWeightLimits(cat) {
+        if (['cow', 'buffalo'].includes(cat)) return { min: 50, max: 1500 };
+        if (['goat', 'sheep'].includes(cat)) return { min: 5, max: 150 };
+        if (cat === 'dog') return { min: 2, max: 100 };
+        if (cat === 'cat') return { min: 1, max: 15 };
+        return { min: 1, max: 1500 };
+    }
+
     useEffect(() => {
-        if (isEditing) return; // don't override when editing
-        if (guestPrefs?.category === 'pets') {
-            setListingType('pet');
-        } else if (guestPrefs?.category === 'livestock') {
-            setListingType('livestock');
-        }
+        if (isEditing) return;
+        startTransition(() => {
+            if (guestPrefs?.category === 'pets') {
+                setListingType('pet');
+            } else if (guestPrefs?.category === 'livestock') {
+                setListingType('livestock');
+            }
+        });
     }, [guestPrefs?.category, isEditing]);
 
     // Check for edit mode on mount
     useEffect(() => {
         if (location.state?.editListing) {
             const l = location.state.editListing;
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsEditing(true);
 
             setEditingId(l.id);
-            // Determine listing type
-            const isPet = ['dog', 'cat', 'bird'].includes(l.category);
-            setListingType(isPet ? 'pet' : 'livestock');
+            const isPet = ['dog', 'cat', 'bird', 'fish', 'rabbit'].includes(l.category);
+            setListingType(isPet(l.category) ? 'pet' : 'livestock');
             setForm({
                 category: l.category || '',
                 title: l.title || '',
                 breed: l.breed || '',
+                customBreed: l.custom_breed || '',
+                gender: l.gender || '',
+                is_trained: l.is_trained || false,
+                is_neutered: l.is_neutered || false,
                 age_years: l.age_years || '',
                 weight_kg: l.weight_kg || '',
                 milk_yield_liters: l.milk_yield_liters || '',
@@ -83,7 +126,10 @@ export default function SellPage() {
                 is_pregnant: l.is_pregnant || false,
                 purpose: l.purpose || 'dairy',
                 price: l.price || '',
+                village: l.village || '',
+                taluk: l.taluk || '',
                 location: l.location || '',
+                landmark: l.landmark || '',
                 state: l.state || '',
                 description: l.description || '',
                 image_url: l.image_url || '',
@@ -134,22 +180,32 @@ export default function SellPage() {
 
     function validate() {
         const errs = {};
+        if (!form.gender) errs.gender = 'Please select gender';
         if (form.title.trim().length < 5) errs.title = 'Title must be at least 5 characters';
+        if (form.breed === 'Other' && !form.customBreed.trim()) errs.breed = 'Please specify the custom breed';
+        if (!form.breed) errs.breed = 'Please select a breed';
         if (form.title.trim().length > 100) errs.title = 'Title must be under 100 characters';
         if (!form.for_adoption && Number(form.price) <= 0) errs.price = 'Please enter an asking price';
-        if (form.location.trim().length < 3) errs.location = 'Please enter a valid city or village';
+        if (form.location.trim().length < 3) errs.location = 'Please enter a valid city';
+        if (!form.state) errs.state = 'Please select your state';
         if (form.description.length > 1000) errs.description = 'Description must be under 1000 characters';
+        if (form.age_years !== '' && Number(form.age_years) > 25)
+            errs.age = 'Age must be 25 years or less';
+        if (form.weight_kg !== '') {
+            const { min, max } = getWeightLimits(form.category);
+            if (Number(form.weight_kg) < min || Number(form.weight_kg) > max)
+                errs.weight = `Weight must be ${min}–${max} kg for this animal`;
+        }
         setFieldErrors(errs);
-        // Return first error message, or null if all good
         const firstErr = Object.values(errs)[0] || null;
         return firstErr ? { ok: false, msg: firstErr, field: Object.keys(errs)[0] } : { ok: true };
     }
 
     function canGoNext() {
         if (step === 1) return form.category !== '';
-        if (step === 2) return form.title.trim().length > 2 && form.breed.trim().length > 1;
+        if (step === 2) return form.title.trim().length >= 5 && form.breed.trim().length >= 1 && !!form.gender;
         if (step === 3) return true;
-        if (step === 4) return (form.price !== '' || form.for_adoption) && form.location.trim().length > 2;
+        if (step === 4) return (form.price !== '' || form.for_adoption) && form.location.trim().length > 2 && !!form.state;
         return true;
     }
 
@@ -166,42 +222,68 @@ export default function SellPage() {
             return;
         }
 
-        // Build the listing payload (do NOT save to DB yet)
-        const payload = {
-            user_id: currentUser.id,
-            title: form.title.trim(),
-            category: form.category,
-            breed: form.breed.trim(),
-            age_years: Number(form.age_years) || null,
-            weight_kg: Number(form.weight_kg) || null,
-            milk_yield_liters: Number(form.milk_yield_liters) || null,
-            is_vaccinated: form.is_vaccinated,
-            is_pregnant: form.is_pregnant,
-            price: form.for_adoption ? 0 : Number(form.price),
-            location: form.location.trim(),
-            state: form.state.trim(),
-            description: form.description.trim(),
-            image_url: form.image_url || null,
-            for_adoption: form.for_adoption,
-            is_promoted: form.is_promoted,
-            status: 'pending_payment',  // NOT active yet
-            created_at: new Date().toISOString(),
-        };
+        setSubmitting(true);
+        try {
+            // Combine address sub-fields into location string
+            const locParts = [form.village.trim(), form.taluk.trim(), form.location.trim()].filter(Boolean);
+            const fullLocation = locParts.join(', ') || form.location.trim();
 
-        // Navigate to payment page with listing data
-        // Listing will be saved to DB ONLY after payment succeeds
-        navigate('/payment', {
-            state: {
-                purpose: 'listing_fee',
-                listingPayload: payload,
-                listingFee: { name: 'Listing Fee', price: 50 },
-                boostTier: form.is_promoted
-                    ? { name: 'Boost', price: 399 }
-                    : null,
-                isEditing,
-                editingId: editingId || null,
+            const payload = {
+                user_id: currentUser.id,
+                title: form.title.trim(),
+                category: form.category,
+                breed: form.breed === 'Other' ? (form.customBreed?.trim() || 'Other') : form.breed,
+                custom_breed: form.breed === 'Other' ? form.customBreed.trim() : null,
+                gender: form.gender,
+                is_trained: form.is_trained,
+                is_neutered: form.is_neutered,
+                age_years: Number(form.age_years) || null,
+                weight_kg: Number(form.weight_kg) || null,
+                milk_yield_liters: Number(form.milk_yield_liters) || null,
+                is_vaccinated: form.is_vaccinated,
+                is_pregnant: form.is_pregnant,
+                price: form.for_adoption ? 0 : Number(form.price),
+                location: fullLocation,
+                state: form.state.trim(),
+                description: form.description.trim(),
+                image_url: form.image_url || null,
+                for_adoption: form.for_adoption,
+                is_promoted: form.is_promoted,
+                status: 'pending_payment',
+                created_at: new Date().toISOString(),
+            };
+
+            // BUG #7: In edit mode, update directly — no payment required
+            if (isEditing && editingId) {
+                try {
+                    const { error } = await supabase
+                        .from('listings')
+                        .update({ ...payload, status: 'active', created_at: undefined })
+                        .eq('id', editingId)
+                        .eq('user_id', currentUser.id);
+                    if (error) throw error;
+                    toast.success('Listing updated! ✓');
+                    navigate('/mylisting');
+                } catch (err) {
+                    console.error('Update error:', err);
+                    toast.error('Failed to update listing.');
+                }
+                return;
             }
-        });
+
+            navigate('/payment', {
+                state: {
+                    purpose: 'listing_fee',
+                    listingPayload: payload,
+                    listingFee: { name: 'Listing Fee', price: 50 },
+                    boostTier: form.is_promoted ? { name: 'Boost', price: 399 } : null,
+                    isEditing: false,
+                    editingId: null,
+                }
+            });
+        } finally {
+            setSubmitting(false);
+        }
     }
 
     return (
@@ -232,42 +314,41 @@ export default function SellPage() {
                 ))}
             </div>
 
-            {/* STEP 1: Category */}
             {step === 1 && (
                 <div className="sell-section animate-fadeIn">
-                    <div className="fs ga">
-                        <h3>📂 Listing Type</h3>
-                        <div className="toggle-row" style={{ marginBottom: 20 }}>
-                            {(guestPrefs?.category !== 'pets') && (
-                                <button
-                                    className={`tbtn${listingType === 'livestock' ? ' act' : ''}`}
-                                    onClick={() => { setListingType('livestock'); setF('category', ''); }}
-                                >
-                                    🐄 Cattle
-                                </button>
-                            )}
-                            {(guestPrefs?.category !== 'livestock') && (
-                                <button
-                                    className={`tbtn${listingType === 'pet' ? ' act pu' : ''}`}
-                                    onClick={() => { setListingType('pet'); setF('category', ''); }}
-                                >
-                                    🐾 Pet
-                                </button>
-                            )}
-                        </div>
+                    <h3>📂 What are you selling?</h3>
+                    <div className="toggle-row" style={{ marginBottom: 30, marginTop: 15 }}>
+                        {(guestPrefs?.category !== 'pets') && (
+                            <button
+                                className={`tbtn toggle-btn${listingType === 'livestock' ? ' active' : ''}`}
+                                onClick={() => { setListingType('livestock'); setF('category', ''); }}
+                            >
+                                🐄 Livestock
+                            </button>
+                        )}
+                        {(guestPrefs?.category !== 'livestock') && (
+                            <button
+                                className={`tbtn toggle-btn${listingType === 'pet' ? ' active' : ''}`}
+                                onClick={() => { setListingType('pet'); setF('category', ''); }}
+                            >
+                                🐾 Pets
+                            </button>
+                        )}
                     </div>
-                    <div className="fs ga">
-                        <h3>🐾 Select Category</h3>
-                        <div className="cat-grid">
+                    <div>
+                        <h4 style={{ marginBottom: 16, color: '#666' }}>
+                            {listingType === 'livestock' ? 'Select Livestock Type:' : 'Select Pet Type:'}
+                        </h4>
+                        <div className="category-grid">
                             {(listingType === 'livestock' ? LIVESTOCK_CATS : PET_CATS).map(c => (
-                                <button
+                                <div
                                     key={c.id}
-                                    className={`cat-btn${form.category === c.id ? ' act' : ''}`}
+                                    className={`category-card${form.category === c.id ? ' selected' : ''}`}
                                     onClick={() => setF('category', c.id)}
                                 >
-                                    <span className="ic">{c.label}</span>
-                                    {c.name}
-                                </button>
+                                    <div className="cat-icon">{c.label}</div>
+                                    <div className="cat-name">{c.name}</div>
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -278,45 +359,90 @@ export default function SellPage() {
             {step === 2 && (
                 <div className="animate-fadeIn">
                     <div className="fs ga">
-                        <h3>📝 Cattle Details</h3>
+                        <h3>📝 {listingType === 'pet' ? 'Pet Details' : 'Cattle Details'}</h3>
                         <div className="fg">
                             <div className="ff">
                                 <label>Listing Title *</label>
-                                <input placeholder="e.g. HF Cow — High Milk Yield" value={form.title} onChange={e => setF('title', e.target.value)} />
-                                {fieldErrors.title && <div style={{ color: '#e63946', fontSize: 12, marginTop: 4 }}>⚠️ {fieldErrors.title}</div>}
+                                <input placeholder={listingType === 'pet' ? "e.g. Golden Retriever Puppy" : "e.g. HF Cow — High Milk Yield"} value={form.title} onChange={e => setF('title', e.target.value)} maxLength={100} />
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+                                    {fieldErrors.title ? <span style={{ color: '#e63946', fontSize: 12 }}>⚠️ {fieldErrors.title}</span> : <span />}
+                                    <span style={{ fontSize: 11, color: form.title.length < 5 ? '#e63946' : 'var(--g3)' }}>{form.title.length}/100 (min 5)</span>
+                                </div>
                             </div>
                             <div className="ff">
                                 <label>Breed *</label>
-                                <input placeholder="e.g. HF Holstein, Gir, Boer" value={form.breed} onChange={e => setF('breed', e.target.value)} />
+                                <select value={form.breed} onChange={(e) => setF('breed', e.target.value)} style={{ padding: '12px 14px', borderRadius: 8, border: '1.5px solid #ccc', outline: 'none' }}>
+                                    <option value="">Select Breed</option>
+                                    {getBreedOptions(form.category).map(b => (
+                                        <option key={b} value={b}>{b}</option>
+                                    ))}
+                                </select>
+                                {fieldErrors.breed && <div style={{ color: '#e63946', fontSize: 12, marginTop: 4 }}>⚠️ {fieldErrors.breed}</div>}
+                                {form.breed === 'Other' && (
+                                    <input type="text" placeholder="Please specify breed" value={form.customBreed} onChange={e => setF('customBreed', e.target.value)} style={{ marginTop: 8 }} />
+                                )}
                             </div>
                         </div>
+
+                        <div className="ff" style={{ marginTop: 15, marginBottom: 15 }}>
+                            <label>Gender *</label>
+                            <div className="radio-group" style={{ display: 'flex', gap: 16 }}>
+                                <label className="radio-option">
+                                    <input type="radio" name="gender" value="male" checked={form.gender === 'male'} onChange={(e) => setF('gender', e.target.value)} style={{ width: 18, height: 18 }} />
+                                    <span>🚹 Male</span>
+                                </label>
+                                <label className="radio-option">
+                                    <input type="radio" name="gender" value="female" checked={form.gender === 'female'} onChange={(e) => setF('gender', e.target.value)} style={{ width: 18, height: 18 }} />
+                                    <span>🚺 Female</span>
+                                </label>
+                            </div>
+                            {fieldErrors.gender && <span style={{ color: '#e63946', fontSize: 12, marginTop: 4, display: 'block' }}>⚠️ {fieldErrors.gender}</span>}
+                        </div>
+
                         <div className="fg3">
                             <div className="ff">
                                 <label>Age (Years)</label>
-                                <input type="number" placeholder="0" value={form.age_years} onChange={e => setF('age_years', e.target.value)} min={0} max={30} />
+                                <input type="number" placeholder="0" value={form.age_years} onChange={e => { const v = Math.min(25, Math.max(0, Number(e.target.value))); setF('age_years', v || ''); }} min={0} max={25} />
+                                <small style={{ fontSize: 11, color: 'var(--g3)' }}>Max 25 years</small>
+                                {fieldErrors.age && <div style={{ color: '#e63946', fontSize: 12, marginTop: 2 }}>⚠️ {fieldErrors.age}</div>}
                             </div>
                             <div className="ff">
                                 <label>Weight (kg)</label>
-                                <input type="number" placeholder="0" value={form.weight_kg} onChange={e => setF('weight_kg', e.target.value)} min={0} />
+                                <input type="number" placeholder="0" value={form.weight_kg} onChange={e => { const lim = getWeightLimits(form.category); const v = Math.min(lim.max, Math.max(0, Number(e.target.value))); setF('weight_kg', v || ''); }} min={0} max={getWeightLimits(form.category).max} />
+                                <small style={{ fontSize: 11, color: 'var(--g3)' }}>
+                                    {isLivestock(form.category) ? `Range: ${getWeightLimits(form.category).min}–${getWeightLimits(form.category).max} kg` : 'Enter approx weight'}
+                                </small>
+                                {fieldErrors.weight && <div style={{ color: '#e63946', fontSize: 12, marginTop: 2 }}>⚠️ {fieldErrors.weight}</div>}
                             </div>
-                            {['cow', 'buffalo', 'goat'].includes(form.category) && (
+                            {showsMilkYield(form.category) && (
                                 <div className="ff">
                                     <label>Milk Yield (L/day)</label>
                                     <input type="number" placeholder="0" value={form.milk_yield_liters} onChange={e => setF('milk_yield_liters', e.target.value)} min={0} />
+                                    <small style={{ fontSize: 11, color: 'var(--g3)' }}>Daily production</small>
                                 </div>
                             )}
                         </div>
                     </div>
                     <div className="fs oa">
                         <h3>🩺 Health & Status</h3>
-                        <div className="toggle-row">
-                            <button className={`tbtn${form.is_vaccinated ? ' act' : ''}`} onClick={() => setF('is_vaccinated', !form.is_vaccinated)}>
+                        <div className="toggle-row" style={{ flexWrap: 'wrap', gap: 12 }}>
+                            <button className={`tbtn${form.is_vaccinated ? ' act' : ''}`} style={{ flex: '1 1 45%' }} onClick={() => setF('is_vaccinated', !form.is_vaccinated)}>
                                 {form.is_vaccinated ? '💉 Vaccinated ✓' : '💉 Vaccinated?'}
                             </button>
-                            {['cow', 'buffalo', 'goat', 'sheep'].includes(form.category) && (
-                                <button className={`tbtn${form.is_pregnant ? ' act' : ''}`} onClick={() => setF('is_pregnant', !form.is_pregnant)}>
+                            {showsPregnancyStatus(form.category) && form.gender === 'female' && (
+                                <button className={`tbtn${form.is_pregnant ? ' act' : ''}`} style={{ flex: '1 1 45%' }} onClick={() => setF('is_pregnant', !form.is_pregnant)}>
                                     {form.is_pregnant ? '🤰 Pregnant ✓' : '🤰 Pregnant?'}
                                 </button>
+                            )}
+                            {isPet(form.category) && (
+                                <>
+                                    <button className={`tbtn${form.is_trained ? ' act' : ''}`} style={{ flex: '1 1 45%' }} onClick={() => setF('is_trained', !form.is_trained)}>
+                                        {form.is_trained ? '🎓 Trained ✓' : '🎓 Trained?'}
+                                    </button>
+                                    <button className={`tbtn${form.is_neutered ? ' act' : ''}`} style={{ flex: '1 1 45%' }} onClick={() => setF('is_neutered', !form.is_neutered)}>
+                                        {form.is_neutered ? '✂️ Neutered ✓' : '✂️ Neutered?'}
+                                    </button>
+                                </>
                             )}
                         </div>
                     </div>
@@ -366,23 +492,52 @@ export default function SellPage() {
                             </div>
                         )}
 
+                        {/* Image verification warning */}
+                        {imageWarning && (
+                            <div style={{ background: '#fff8e1', border: '1px solid #f9a825', borderRadius: 10, padding: '10px 14px', marginBottom: 14, fontSize: 13, color: '#856404', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                                <span style={{ fontSize: 18 }}>⚠️</span>
+                                <span>Please ensure the uploaded image shows a <strong>{form.category || 'matching animal'}</strong>. Mismatched images may be rejected during review.</span>
+                            </div>
+                        )}
+
                         <input
                             id="photo-upload"
                             type="file"
-                            accept="image/*"
+                            accept="image/jpeg,image/png,image/webp"
                             style={{ display: 'none' }}
                             onChange={async (e) => {
                                 const file = e.target.files?.[0];
                                 if (!file) return;
+                                // File type validation
+                                const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                                if (!validTypes.includes(file.type)) {
+                                    toast.error('Only JPG, PNG, or WebP images are allowed.');
+                                    return;
+                                }
+                                // File size validation
                                 if (file.size > 5 * 1024 * 1024) {
                                     toast.error('Image too large. Max 5MB.');
                                     return;
                                 }
+                                // Dimension validation
+                                const dimOk = await new Promise(resolve => {
+                                    const img = new Image();
+                                    img.onload = () => {
+                                        if (img.width < 300 || img.height < 300) {
+                                            toast.error('Image must be at least 300×300 pixels.');
+                                            resolve(false);
+                                        } else { resolve(true); }
+                                    };
+                                    img.onerror = () => resolve(true);
+                                    img.src = URL.createObjectURL(file);
+                                });
+                                if (!dimOk) return;
                                 const tid = toast.loading('Uploading photo...');
                                 const url = await uploadImage(file);
                                 toast.dismiss(tid);
                                 if (url) {
                                     setF('image_url', url);
+                                    setImageWarning(true);
                                     toast.success('Photo uploaded! ✓');
                                 }
                             }}
@@ -443,21 +598,38 @@ export default function SellPage() {
                         )}
                     </div>
                     <div className="fs oa">
-                        <h3>📍 Location</h3>
+                        <h3>📍 Location Details</h3>
                         <div className="fg">
                             <div className="ff">
-                                <label>City / Village *</label>
+                                <label>Village</label>
+                                <input placeholder="e.g. Vadavalli" value={form.village} onChange={e => setF('village', e.target.value)} />
+                            </div>
+                            <div className="ff">
+                                <label>Taluk</label>
+                                <input placeholder="e.g. Coimbatore North" value={form.taluk} onChange={e => setF('taluk', e.target.value)} />
+                            </div>
+                        </div>
+                        <div className="fg">
+                            <div className="ff">
+                                <label>City *</label>
                                 <input placeholder="e.g. Coimbatore" value={form.location} onChange={e => setF('location', e.target.value)} />
                                 {fieldErrors.location && <div style={{ color: '#e63946', fontSize: 12, marginTop: 4 }}>⚠️ {fieldErrors.location}</div>}
                             </div>
                             <div className="ff">
-                                <label>State</label>
+                                <label>Landmark <span style={{ fontSize: 11, color: 'var(--g3)' }}>(Optional)</span></label>
+                                <input placeholder="e.g. Near bus stand" value={form.landmark} onChange={e => setF('landmark', e.target.value)} />
+                            </div>
+                        </div>
+                        <div className="fg">
+                            <div className="ff">
+                                <label>State *</label>
                                 <select value={form.state} onChange={e => setF('state', e.target.value)}>
                                     <option value="">Select State</option>
                                     {INDIAN_STATES.map(s => (
                                         <option key={s} value={s}>{s}</option>
                                     ))}
                                 </select>
+                                {fieldErrors.state && <div style={{ color: '#e63946', fontSize: 12, marginTop: 4 }}>⚠️ {fieldErrors.state}</div>}
                             </div>
                         </div>
                     </div>

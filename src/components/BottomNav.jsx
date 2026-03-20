@@ -1,17 +1,19 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import './BottomNav.css';
 
 const NAV_ITEMS = [
-    { icon: '🏠', label: 'Home', path: '/' },
-    { icon: '🔍', label: 'Search', path: '/search' },
-    { icon: '+', label: 'Sell', path: '/sell', isSell: true },
-    { icon: '🔔', label: 'Alerts', path: '/notifications' },
-    { icon: '👤', label: 'Profile', path: '/profile' },
+    { icon: '🏠', labelKey: 'bottomNav.home', path: '/' },
+    { icon: '🔍', labelKey: 'bottomNav.search', path: '/search' },
+    { icon: '+', labelKey: 'bottomNav.sell', path: '/sell', isSell: true },
+    { icon: '🔔', labelKey: 'bottomNav.alerts', path: '/notifications' },
+    { icon: '👤', labelKey: 'bottomNav.profile', path: '/profile' },
 ];
 
 export default function BottomNav() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { pathname } = useLocation();
     const { isGuest, guestPrefs } = useAuth();
@@ -38,7 +40,7 @@ export default function BottomNav() {
                             ) : (
                                 <span className="bnav-icon">{item.icon}</span>
                             )}
-                            <span className="bnav-label">{item.label}</span>
+                            <span className="bnav-label">{t(item.labelKey)}</span>
                         </button>
                     );
                 })}

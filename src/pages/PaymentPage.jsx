@@ -48,8 +48,8 @@ export default function PaymentPage() {
                 return data;
             }
         } catch {
-            // Demo fallback
-            return { ...payload, id: 'demo-' + Date.now() };
+            // Demo fallback (Must start with 'd' and length < 10 for demo listings to render)
+            return { ...payload, id: 'd' + Date.now().toString().slice(-6) };
         }
     }
 
@@ -206,6 +206,7 @@ export default function PaymentPage() {
     // ── MAIN payment UI ────────────────────────────────────
     return (
         <div className="pay-wrap">
+            <BackButton fallbackPath="/sell" />
             {/* Header */}
             <div className="pay-header">
                 <div style={{ fontSize: 28 }}>
@@ -269,8 +270,9 @@ export default function PaymentPage() {
             </div>
 
             {/* Payment methods */}
-            <div className="pay-methods-card">
-                <div className="pay-methods-title">Choose Payment Method</div>
+            <div className="pay-methods-card" style={{ border: '2px solid #1a7a3c', background: '#f8fafc' }}>
+                <div className="pay-methods-title" style={{ fontSize: 18, color: '#1a7a3c' }}>Secure Payment Options</div>
+                <p style={{ fontSize: 13, color: '#64748b', marginBottom: 16 }}>Select your preferred payment method below to complete the secure transaction.</p>
 
                 {['upi', 'card', 'netbanking'].map(method => (
                     <div

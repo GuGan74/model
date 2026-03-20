@@ -1,11 +1,11 @@
 // Centralized constants to avoid duplication across pages
 
 export const CATEGORIES = [
-    { id: 'all', emoji: '🎛️', label: 'All Cattle' },
+    { id: 'all', emoji: '🎯', label: 'All' },
     { id: 'cow', emoji: '🐄', label: 'Cow' },
     { id: 'buffalo', emoji: '🦬', label: 'Buffalo' },
     { id: 'goat', emoji: '🐐', label: 'Goat' },
-    { id: 'sheep', emoji: '🐑', label: 'Sheep' },
+    { id: 'horse', emoji: '🐎', label: 'Horse' },
     { id: 'poultry', emoji: '🐓', label: 'Poultry' },
     { id: 'pets', emoji: '🐾', label: 'Pets' },
     { id: 'dogs', emoji: '🐕', label: 'Dogs' },
@@ -17,7 +17,7 @@ export const LIVESTOCK_CATS = [
     { id: 'cow', label: '🐄', name: 'Cow' },
     { id: 'buffalo', label: '🦬', name: 'Buffalo' },
     { id: 'goat', label: '🐐', name: 'Goat' },
-    { id: 'sheep', label: '🐑', name: 'Sheep' },
+    { id: 'horse', label: '🐎', name: 'Horse' },
     { id: 'poultry', label: '🐓', name: 'Poultry' },
     { id: 'other', label: '🐾', name: 'Other' },
 ];
@@ -32,11 +32,11 @@ export const PET_CATS = [
 ];
 
 export const FILTER_PILLS = [
-    { id: 'all', label: 'All Cattle' },
+    { id: 'all', label: 'All' },
     { id: 'cow', label: '🐄 Cow' },
     { id: 'buffalo', label: '🦬 Buffalo' },
     { id: 'goat', label: '🐐 Goat' },
-    { id: 'sheep', label: '🐑 Sheep' },
+    { id: 'horse', label: '🐎 Horse' },
     { id: 'poultry', label: '🐓 Poultry' },
     { id: 'dog', label: '🐕 Dog' },
     { id: 'cat', label: '🐈 Cat' },

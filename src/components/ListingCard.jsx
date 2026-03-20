@@ -2,15 +2,17 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import './ListingCard.css';
 
 const BG_MAP = {
-    cow: '#fffde7', buffalo: '#e8edf5', goat: '#f0fff4', sheep: '#fff8e1',
+    cow: '#fffde7', buffalo: '#e8edf5', goat: '#f0fff4', horse: '#fff8e1',
     poultry: '#fff3e8', dog: '#f0ebff', cat: '#fff0f6', bird: '#e3f8ff',
 };
 
 const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedProp = false, onToggleFavorite }) {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const {
@@ -27,11 +29,11 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
     const bg = BG_MAP[category] || '#f7f8fa';
 
     const emoji = {
-        cow: '🐄', buffalo: '🦬', goat: '🐐', sheep: '🐑',
+        cow: '🐄', buffalo: '🦬', goat: '🐐', horse: '🐎',
         poultry: '🐓', dog: '🐕', cat: '🐈', bird: '🦜',
     }[category] || '🐾';
 
-    const isPet = ['dog', 'cat', 'bird'].includes(category);
+    const isPet = ['dog', 'cat', 'bird', 'fish', 'rabbit'].includes(category);
 
     async function handleLike(e) {
         e.stopPropagation();
@@ -50,14 +52,12 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
             const isDemo = String(id).startsWith('d') && String(id).length < 10;
             if (isLiked) {
                 if (!isDemo) await supabase.from('favorites').delete().eq('user_id', currentUser.id).eq('listing_id', id);
-                toast.success('Removed from favorites');
+                toast.success(t('listingCard.removedFromFavorites'));
             } else {
                 if (!isDemo) await supabase.from('favorites').insert({ user_id: currentUser.id, listing_id: id });
-                toast.success('Added to favorites! ❤️');
+                toast.success(t('listingCard.addedToFavorites'));
             }
         }
-
-        toast.success(isLiked ? 'Removed from favorites' : 'Added to favorites! ❤️');
     }
 
     return (
@@ -94,7 +94,7 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
                     <div className="lc-badge promoted">⚡ PROMOTED</div>
                 )}
 
-                <div className={`lc-heart ${isLiked ? 'liked' : ''}`} onClick={handleLike} aria-label="Add to favorites">
+                <div className={`lc-heart ${isLiked ? 'liked' : ''}`} onClick={handleLike} aria-label={t('listingCard.addToFavorites')}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill={isLiked ? "#EF4444" : "none"} stroke={isLiked ? "#EF4444" : "currentColor"} strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
@@ -137,14 +137,23 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
                 <div className="lc-stats-grid">
                     {!isPet ? (
                         <>
-                            <div className="stat-col">
-                                <div className="stat-lbl">MILK YIELD</div>
-                                <div className="stat-val">{milk_yield_liters ? `${milk_yield_liters}L/day` : 'N/A'}</div>
-                            </div>
+                            {['cow', 'buffalo', 'goat', 'sheep'].includes(category) && (
+                                <div className="stat-col">
+                                    <div className="stat-lbl">MILK YIELD</div>
+                                    <div className="stat-val">{milk_yield_liters ? `${milk_yield_liters}L/day` : 'N/A'}</div>
+                                </div>
+                            )}
                             <div className="stat-col">
                                 <div className="stat-lbl">AGE</div>
                                 <div className="stat-val">{age_years ? `${age_years} Years` : 'Unknown'}</div>
                             </div>
+                            {/* Balance row for horses, etc. */}
+                            {!['cow', 'buffalo', 'goat', 'sheep'].includes(category) && listing.gender && (
+                                <div className="stat-col">
+                                    <div className="stat-lbl">GENDER</div>
+                                    <div className="stat-val" style={{ textTransform: 'capitalize' }}>{listing.gender}</div>
+                                </div>
+                            )}
                         </>
                     ) : (
                         <>
@@ -182,7 +191,7 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
                         }
                         navigate(`/listing/${id}`);
                     }}>
-                        💬 Reach Seller
+                        {t('listingCard.reachSeller')}
                     </button>
                     <button className="lc-btn-call" onClick={async (e) => {
                         e.stopPropagation();
@@ -199,7 +208,7 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
                         }
                         navigate(`/listing/${id}`);
                     }}>
-                        📞 Call Seller
+                        {t('listingCard.callSeller')}
                     </button>
                 </div>
             </div>

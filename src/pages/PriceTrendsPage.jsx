@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import './PriceTrendsPage.css';
 
 const ANIMAL_EMOJIS = {
-    cow: '🐄', buffalo: '🦬', goat: '🐐', sheep: '🐑',
+    cow: '🐄', buffalo: '🦬', goat: '🐐', horse: '🐎',
     poultry: '🐓', dog: '🐕', cat: '🐈', bird: '🦜',
 };
 

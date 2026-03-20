@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import ListingCard from '../components/ListingCard';
+import BackButton from '../components/BackButton';
 import toast from 'react-hot-toast';
 import './MyListingsPage.css';
 
@@ -17,6 +18,7 @@ export default function MyListingsPage() {
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState('active');
+    const [error, setError] = useState(null);
 
     async function markSold(id) {
         if (!window.confirm('Mark this listing as sold?')) return;
@@ -44,9 +46,18 @@ export default function MyListingsPage() {
             setLoading(false);
             return;
         }
-        const { data } = await supabase.from('listings').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-        setListings(data || DEMO);
-        setLoading(false);
+        try {
+            const { data, error: fetchErr } = await supabase.from('listings').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+            if (fetchErr) throw fetchErr;
+            setListings(data || DEMO);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching listings:', err);
+            setError('Failed to load your listings. Please try again.');
+            setListings(DEMO);
+        } finally {
+            setLoading(false);
+        }
     }, [currentUser]);
 
     useEffect(() => {
@@ -57,10 +68,16 @@ export default function MyListingsPage() {
 
     return (
         <div className="myl-wrap">
+            <BackButton fallbackPath="/" />
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                 <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 22, fontWeight: 900 }}>📋 My Listings</h2>
                 <button className="btn-primary" onClick={() => navigate('/sell')}>+ Post New</button>
             </div>
+            {error && (
+                <div style={{ background: '#ffebee', color: '#c62828', padding: 12, borderRadius: 8, marginBottom: 16 }}>
+                    {error}
+                </div>
+            )}
 
             <div className="myl-tabs">
                 {[['active', 'Active', 'green'], ['pending', 'Pending', 'orange'], ['sold', 'Sold', '']].map(([id, label, color]) => {
