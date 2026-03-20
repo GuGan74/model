@@ -88,7 +88,7 @@ export default function OnboardingPage() {
                 boxShadow: '0 24px 64px rgba(0,0,0,0.35)',
                 textAlign: 'center',
             }}>
-                <img src={logoImg} alt="Kosalai Logo" style={{ height: 75, marginBottom: 12, objectFit: 'contain' }} />
+                <img src={logoImg} alt="Kosalai Logo" style={{ width: 200, height: 'auto', marginBottom: 16, objectFit: 'contain' }} />
                 <h1 style={{
                     fontFamily: 'Poppins,sans-serif', fontSize: 21,
                     fontWeight: 900, color: '#1a1a1a', margin: '0 0 6px',
