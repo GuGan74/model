@@ -145,7 +145,7 @@ export default function PaymentPage() {
                         ? 'Your listing is now promoted and will appear at the top.'
                         : boostTier
                             ? 'Listing fee paid! Proceeding to boost payment…'
-                            : 'Your listing is now live on PashuBazaar.'}
+                            : 'Your listing is now live on Kosalai.'}
                 </p>
                 <div style={{
                     margin: '20px auto', background: '#e8f5e9',
@@ -219,7 +219,7 @@ export default function PaymentPage() {
                 <p className="pay-sub">
                     {isBoostPayment
                         ? `Boosting your listing with ${boostTier?.name} plan`
-                        : 'Pay ₹50 to publish your listing on PashuBazaar'}
+                        : 'Pay ₹50 to publish your listing on Kosalai'}
                 </p>
             </div>
 

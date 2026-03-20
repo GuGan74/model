@@ -119,7 +119,7 @@ export default function AdminPage() {
         <div className="admin-page">
             <div className="adm-top">
                 <div>
-                    <div className="adm-brand">PashuBazaar Admin Panel</div>
+                    <div className="adm-brand">Kosalai Admin Panel</div>
                     <div className="adm-title">🛡️ Admin Dashboard</div>
                 </div>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>

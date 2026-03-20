@@ -2,10 +2,10 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 const DEFAULT_IMAGE = 'https://model-mauve.vercel.app/og-image.png';
-const SITE_NAME = 'PashuBazaar';
+const SITE_NAME = 'Kosalai';
 
 export default function SEOHead({ title, description, imageUrl, url }) {
-    const fullTitle = title || 'Buy & Sell Cattle in India | PashuBazaar';
+    const fullTitle = title || 'Buy & Sell Cattle in India | Kosalai';
     const fullDesc = description || "India's trusted marketplace for cows, buffaloes, goats, horses and pets. Verified listings from farmers across India.";
     const image = imageUrl || DEFAULT_IMAGE;
     const canonical = url || 'https://model-mauve.vercel.app/';

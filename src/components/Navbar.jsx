@@ -36,7 +36,7 @@ export default function Navbar() {
                 <div className="nav-inner">
                     <div className="nav-logo" onClick={() => navigate('/')}>
                         <img src={cowLogo} className="nav-logo-icon" alt="Logo" style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: '50%' }} />
-                        <div className="nav-brand">Pashu<span>Bazaar</span></div>
+                        <div className="nav-brand">Ko<span>salai</span></div>
                     </div>
 
                     {/* Desktop links */}
@@ -112,7 +112,7 @@ export default function Navbar() {
             <div className={`mob-drawer${drawerOpen ? ' open' : ''}`}>
                 <div className="mob-drawer-hd">
                     <img src={cowLogo} className="nav-logo-icon" alt="Logo" style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: '50%' }} />
-                    <div className="nav-brand" style={{ fontSize: 16 }}>Pashu<span>Bazaar</span></div>
+                    <div className="nav-brand" style={{ fontSize: 16 }}>Ko<span>salai</span></div>
                     <button className="mob-close-btn" onClick={() => setDrawerOpen(false)}>✕</button>
                 </div>
                 <div className="mob-drawer-links">

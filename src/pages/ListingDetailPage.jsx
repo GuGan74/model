@@ -128,7 +128,7 @@ export default function ListingDetailPage() {
 
     // WhatsApp link using seller phone if available
     const phone = sellerPhone ? sellerPhone.replace(/\D/g, '').replace(/^91/, '') : null;
-    const waMsg = encodeURIComponent(`Hi, I saw your listing for ${listing.title} on PashuBazaar. Is it still available?`);
+    const waMsg = encodeURIComponent(`Hi, I saw your listing for ${listing.title} on Kosalai. Is it still available?`);
     const waLink = phone
         ? `https://wa.me/91${phone}?text=${waMsg}`
         : `https://wa.me/?text=${waMsg}`;
@@ -152,7 +152,7 @@ export default function ListingDetailPage() {
     return (
         <div className="det-page">
             <SEOHead
-                title={`${listing.title} for sale in ${listing.location} | PashuBazaar`}
+                title={`${listing.title} for sale in ${listing.location} | Kosalai`}
                 description={`${listing.breed || ''}, ${listing.age_years ? listing.age_years + ' years old' : ''}. Price: ${listing.for_adoption ? 'Free' : '₹' + Number(listing.price).toLocaleString('en-IN')}. Located in ${listing.location}${listing.state ? ', ' + listing.state : ''}.`}
                 imageUrl={listing.image_url}
                 url={`https://model-mauve.vercel.app/listing/${listing.id}`}

@@ -165,7 +165,7 @@ export default function HomePage() {
     return (
         <div className="home-layout">
             <SEOHead
-                title="Buy & Sell Cattle in India | PashuBazaar"
+                title="Buy & Sell Cattle in India | Kosalai"
                 description="India's trusted marketplace for cows, buffaloes, goats, horses and pets."
             />
             <div className="home-container">

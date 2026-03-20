@@ -82,7 +82,7 @@ export default function SplashPage() {
     return (
         <div className="splash-wrapper">
             <SEOHead
-                title="PashuBazaar — Buy &amp; Sell Cattle with Full Trust"
+                title="Kosalai — Buy &amp; Sell Cattle with Full Trust"
                 description="India's most trusted cattle marketplace. Verified cows, buffaloes, goats and pets from farmers across India."
                 url="https://model-mauve.vercel.app/"
             />
@@ -91,7 +91,7 @@ export default function SplashPage() {
             <div className="splash-brand-panel">
                 <div className="brand-header">
                     <div className="tractor-logo">🚜</div>
-                    <div className="brand-name">PashuBazaar</div>
+                    <div className="brand-name">Kosalai</div>
                 </div>
 
                 <h1 className="brand-title">South India's<br />trusted cattle<br />marketplace</h1>
@@ -231,7 +231,7 @@ export default function SplashPage() {
                             </button>
 
                             <div className="login-legal">
-                                By continuing, you agree to PashuBazaar's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                                By continuing, you agree to Kosalai's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
                             </div>
                         </div>
                     )}

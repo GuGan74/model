@@ -79,7 +79,7 @@ function AppRoutes() {
             fontFamily: 'Poppins,sans-serif',
             fontSize: 28, fontWeight: 900
           }}>
-            PashuBazaar
+            Kosalai
           </div>
           <div style={{ marginTop: 20 }}>
             <div className="spinner" style={{ margin: '0 auto' }} />

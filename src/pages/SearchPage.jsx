@@ -72,7 +72,7 @@ export default function SearchPage() {
     return (
         <div className="search-page">
             <SEOHead
-                title={query ? `Search: ${query} | PashuBazaar` : 'Search Cattle | PashuBazaar'}
+                title={query ? `Search: ${query} | Kosalai` : 'Search Cattle | Kosalai'}
                 description="Search thousands of verified cattle and pet listings across India."
                 url="https://model-mauve.vercel.app/search"
             />

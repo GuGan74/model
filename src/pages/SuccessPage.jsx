@@ -12,7 +12,7 @@ export default function SuccessPage() {
         <div className="suc-wrap">
             <div className="suc-circle">🎉</div>
             <h1 className="suc-ttl">Listing Published!</h1>
-            <p className="suc-sub">Your cattle is now live on PashuBazaar and visible to all buyers across India. You'll receive WhatsApp / call inquiries directly.</p>
+            <p className="suc-sub">Your cattle is now live on Kosalai and visible to all buyers across India. You'll receive WhatsApp / call inquiries directly.</p>
 
             {state?.boosted && (
                 <div style={{

@@ -76,7 +76,7 @@ export default function OnboardingPage() {
                     fontFamily: 'Poppins,sans-serif',
                     fontSize: 24, fontWeight: 900, color: 'white',
                 }}>
-                    PashuBazaar
+                    Kosalai
                 </span>
             </div>
 
@@ -92,7 +92,7 @@ export default function OnboardingPage() {
                     fontFamily: 'Poppins,sans-serif', fontSize: 21,
                     fontWeight: 900, color: '#1a1a1a', margin: '0 0 6px',
                 }}>
-                    Welcome to PashuBazaar
+                    Welcome to Kosalai
                 </h1>
                 <p style={{ fontSize: 13, color: '#888', margin: '0 0 22px' }}>
                     South India's most trusted cattle marketplace
