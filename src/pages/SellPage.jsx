@@ -5,6 +5,14 @@ import { useAuth } from '../context/AuthContext';
 import { LIVESTOCK_CATS, PET_CATS } from '../constants/index';
 import toast from 'react-hot-toast';
 import './SellPage.css';
+import '../pages/BoostPage.css';
+
+const BOOST_TIERS = [
+    { name: 'Basic', price: 99, period: '/7 days', badge: '', features: ['2× more views', 'Listed in search results', 'WhatsApp button shown'], color: '#3b82f6', bg: '#eff6ff', recommended: false },
+    { name: 'Standard', price: 199, period: '/14 days', badge: 'POPULAR', features: ['5× more views', 'Featured on homepage', 'Priority in search', 'SMS alert to buyers'], color: '#10b981', bg: '#ecfdf5', recommended: false },
+    { name: 'Premium', price: 399, period: '/30 days', badge: 'BEST VALUE', features: ['10× more views', 'Top of search results', 'Promoted badge', 'SMS + WhatsApp alerts', 'Seller verified badge'], color: '#f59e0b', bg: '#fffbeb', recommended: true },
+    { name: 'Elite', price: 799, period: '/60 days', badge: '', features: ['20× more views', 'Homepage hero slot', 'All Premium benefits', 'Dedicated support'], color: '#8b5cf6', bg: '#f5f3ff', recommended: false },
+];
 
 // Fix #4: Category-specific breed lists
 const BREED_OPTIONS = {
@@ -81,6 +89,7 @@ export default function SellPage() {
         image_url: '',
         for_adoption: false,
         is_promoted: false,
+        boostPlanName: 'Premium',
     });
 
     function getWeightLimits(cat) {
@@ -135,6 +144,7 @@ export default function SellPage() {
                 image_url: l.image_url || '',
                 for_adoption: l.for_adoption || false,
                 is_promoted: l.is_promoted || false,
+                boostPlanName: 'Premium',
             });
         }
     }, [location.state]);
@@ -276,7 +286,7 @@ export default function SellPage() {
                     purpose: 'listing_fee',
                     listingPayload: payload,
                     listingFee: { name: 'Listing Fee', price: 50 },
-                    boostTier: form.is_promoted ? { name: 'Boost', price: 399 } : null,
+                    boostTier: form.is_promoted ? BOOST_TIERS.find(t => t.name === form.boostPlanName) : null,
                     isEditing: false,
                     editingId: null,
                 }
@@ -677,10 +687,52 @@ export default function SellPage() {
                                 id="boost-toggle"
                                 type="checkbox"
                                 checked={form.is_promoted}
-                                onChange={e => setF('is_promoted', e.target.checked)}
+                                onChange={e => {
+                                    setF('is_promoted', e.target.checked);
+                                    if (e.target.checked && !form.boostPlanName) setF('boostPlanName', 'Premium');
+                                }}
                                 style={{ width: '22px', height: '22px', accentColor: '#f1c40f' }}
                             />
                         </label>
+
+                        {form.is_promoted && (
+                            <div className="boost-grid animate-fadeIn" style={{ marginBottom: 20 }}>
+                                {BOOST_TIERS.map(t => {
+                                    const isSelected = form.boostPlanName === t.name;
+                                    return (
+                                        <div
+                                            key={t.name}
+                                            className={`boost-card ${t.recommended ? 'rec' : ''}`}
+                                            onClick={() => setF('boostPlanName', t.name)}
+                                            style={{
+                                                cursor: 'pointer',
+                                                border: isSelected ? `2.5px solid ${t.color}` : '2px solid transparent',
+                                                boxShadow: isSelected ? `0 4px 12px ${t.color}33` : 'var(--sh)',
+                                                transform: isSelected ? 'translateY(-3px)' : 'none'
+                                            }}
+                                        >
+                                            <div className="bc-top">
+                                                <div className="bc-nm" style={{ color: t.color }}>{t.name}</div>
+                                                {t.badge && <div className="bc-badge">{t.badge}</div>}
+                                            </div>
+                                            <div className="bc-price" style={{ color: t.color }}>₹{t.price}</div>
+                                            <div className="bc-period">{t.period}</div>
+                                            <ul className="bc-feats">
+                                                {t.features.map((f, i) => <li key={i}>{f}</li>)}
+                                            </ul>
+                                            <div style={{ marginTop: 15, textAlign: 'center' }}>
+                                                <input
+                                                    type="radio"
+                                                    checked={isSelected}
+                                                    readOnly
+                                                    style={{ width: 18, height: 18, accentColor: t.color }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        )}
                     </div>
                     <div className="fs ba">
                         <h3>✍️ Description</h3>
