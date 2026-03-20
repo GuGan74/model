@@ -84,14 +84,10 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
         >
             {/* Image Box */}
             <div className={`lc-img-box${!image_url ? ' show-emoji' : ''}`} style={{ background: bg }}>
-                {is_vaccinated ? (
-                    <div className="lc-badge green">VACCINATED</div>
+                {listing.is_verified ? (
+                    <div className="lc-badge green">✓ Verified</div>
                 ) : (
-                    <div className="lc-badge gray">PENDING</div>
-                )}
-
-                {listing.is_promoted && (
-                    <div className="lc-badge promoted">⚡ PROMOTED</div>
+                    <div className="lc-badge gray">⚠ Not Verified</div>
                 )}
 
                 <div className={`lc-heart ${isLiked ? 'liked' : ''}`} onClick={handleLike} aria-label={t('listingCard.addToFavorites')}>
@@ -171,41 +167,19 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
                         e.stopPropagation();
                         if (!isLoggedIn) {
                             sessionStorage.setItem('pb_redirect_after_login', `/listing/${id}`);
-                            toast('Sign in to contact sellers 🔐', { icon: '💬', duration: 2500 });
+                            toast('Sign in to view seller profile 🔐', { icon: '👆', duration: 2500 });
                             setTimeout(() => navigate('/login'), 800);
                             return;
                         }
-                        if (owner_id && currentUser && owner_id !== currentUser.id) {
-                            await supabase.from('notifications').insert({
-                                user_id: owner_id,
-                                actor_id: currentUser.id,
-                                type: 'inquiry',
-                                icon: '💬',
-                                title: 'New chat inquiry!',
-                                message: `${currentProfile?.full_name || 'A buyer'} wants to reach you about ${title}.`,
-                                metadata: { listing_id: id }
-                            });
-                        }
-                        navigate(`/listing/${id}`);
+                        navigate(`/seller/${owner_id || 'demo-seller'}`);
                     }}>
-                        {t('listingCard.reachSeller')}
+                        👤 View Seller
                     </button>
-                    <button className="lc-btn-call" onClick={async (e) => {
+                    <button className="lc-btn-call" onClick={(e) => {
                         e.stopPropagation();
-                        if (owner_id && currentUser && owner_id !== currentUser.id) {
-                            await supabase.from('notifications').insert({
-                                user_id: owner_id,
-                                actor_id: currentUser.id,
-                                type: 'inquiry',
-                                icon: '📞',
-                                title: 'New call inquiry!',
-                                message: `${currentProfile?.full_name || 'A buyer'} clicked call for ${title}.`,
-                                metadata: { listing_id: id }
-                            });
-                        }
                         navigate(`/listing/${id}`);
                     }}>
-                        {t('listingCard.callSeller')}
+                        📋 Details
                     </button>
                 </div>
             </div>

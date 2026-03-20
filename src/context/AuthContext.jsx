@@ -28,6 +28,16 @@ export function AuthProvider({ children }) {
         } catch { return null; }
     });
 
+    // Cattle/Pets toggle — persisted across sessions
+    const [listingType, setListingTypeState] = useState(() => {
+        try { return localStorage.getItem('ks_listing_type') || 'livestock'; }
+        catch { return 'livestock'; }
+    });
+    function setListingType(type) {
+        setListingTypeState(type);
+        try { localStorage.setItem('ks_listing_type', type); } catch { }
+    }
+
     function enterGuestMode(prefs = {}) {
         setIsGuest(true);
         setGuestPrefs(prefs);
@@ -237,6 +247,8 @@ export function AuthProvider({ children }) {
         demoMode,
         isGuest,
         guestPrefs,
+        listingType,
+        setListingType,
         enterGuestMode,
         sendOTP,
         verifyOTP,

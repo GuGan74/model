@@ -1,166 +1,149 @@
-import React, { useState, useEffect, useRef, startTransition } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { useListings } from '../hooks/useListings';
 import { useFavorites } from '../hooks/useFavorites';
-import { CATEGORIES } from '../constants/index';
 import { useTranslation } from 'react-i18next';
 import ListingCard from '../components/ListingCard';
 import SkeletonCard from '../components/SkeletonCard';
 import SEOHead from '../components/SEOHead';
 import './HomePage.css';
 
-const PET_CATEGORIES = ['dog', 'cat', 'bird', 'fish', 'rabbit', 'other-pet'];
-const PET_TAB_IDS = ['pets', 'dogs', 'dog', 'cats', 'cat', 'birds', 'bird',
-    'fish', 'rabbit', 'other-pet'];
+const LIVESTOCK_CATEGORIES = [
+    { id: 'all', emoji: '🎯', label: 'All' },
+    { id: 'cow', emoji: '🐄', label: 'Cows' },
+    { id: 'buffalo', emoji: '🦬', label: 'Buffalos' },
+    { id: 'goat', emoji: '🐐', label: 'Goats' },
+    { id: 'horse', emoji: '🐎', label: 'Horses' },
+    { id: 'poultry', emoji: '🐓', label: 'Poultry' },
+    { id: 'sheep', emoji: '🐑', label: 'Sheep' },
+];
 
-// Reads guestPrefs from context OR falls back to localStorage directly.
-// Prevents 1-frame flicker where context hasn't hydrated yet.
-function getActivePrefs(guestPrefs) {
-    if (guestPrefs) return guestPrefs;
-    try {
-        const raw = localStorage.getItem('pb_guest_prefs');
-        return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
-}
+const PET_CATEGORIES = [
+    { id: 'all', emoji: '🎯', label: 'All' },
+    { id: 'dog', emoji: '🐕', label: 'Dogs' },
+    { id: 'cat', emoji: '🐈', label: 'Cats' },
+    { id: 'bird', emoji: '🐦', label: 'Birds' },
+    { id: 'fish', emoji: '🐟', label: 'Fish' },
+    { id: 'rabbit', emoji: '🐰', label: 'Rabbits' },
+    { id: 'other-pet', emoji: '🐾', label: 'Other' },
+];
+
+const PET_IDS = ['dog', 'cat', 'bird', 'fish', 'rabbit', 'other-pet'];
+
+const INDIAN_STATES = [
+    'Tamil Nadu', 'Karnataka', 'Kerala', 'Andhra Pradesh', 'Telangana',
+    'Maharashtra', 'Gujarat', 'Rajasthan', 'Punjab', 'Haryana',
+    'Uttar Pradesh', 'Bihar', 'West Bengal', 'Odisha', 'Madhya Pradesh',
+    'Assam', 'Jharkhand', 'Uttarakhand', 'Himachal Pradesh', 'Chhattisgarh',
+    'Goa', 'Tripura', 'Meghalaya', 'Manipur', 'Arunachal Pradesh',
+    'Delhi', 'Jammu & Kashmir', 'Puducherry',
+];
+
+const DEMO_LISTINGS = [
+    { id: 'd1', title: 'HF Cow — High Milk Yield', category: 'cow', breed: 'HF Holstein', age_years: 4, price: 65000, location: 'Coimbatore', state: 'Tamil Nadu', milk_yield_liters: 18, is_vaccinated: true, is_verified: true, is_pregnant: true, is_promoted: false, for_adoption: false, image_url: null, status: 'active', gender: 'female', created_at: new Date().toISOString() },
+    { id: 'd2', title: 'Murrah Buffalo — Milk Breed', category: 'buffalo', breed: 'Murrah', age_years: 5, price: 85000, location: 'Amreli', state: 'Gujarat', milk_yield_liters: 14, is_vaccinated: true, is_verified: true, is_pregnant: false, is_promoted: false, for_adoption: false, image_url: null, status: 'active', gender: 'female', created_at: new Date().toISOString() },
+    { id: 'd3', title: 'Boer Goat — Meat Breed', category: 'goat', breed: 'Boer', age_years: 2, price: 12000, location: 'Pune', state: 'Maharashtra', milk_yield_liters: null, is_vaccinated: false, is_verified: false, is_pregnant: false, is_promoted: false, for_adoption: false, image_url: null, status: 'active', gender: 'male', created_at: new Date().toISOString() },
+    { id: 'd4', title: 'Gir Cow — A2 Milk', category: 'cow', breed: 'Gir', age_years: 3, price: 48000, location: 'Junagadh', state: 'Gujarat', milk_yield_liters: 12, is_vaccinated: true, is_verified: true, is_pregnant: true, is_promoted: false, for_adoption: false, image_url: null, status: 'active', gender: 'female', created_at: new Date().toISOString() },
+    { id: 'd5', title: 'Labrador Retriever Puppy', category: 'dog', breed: 'Labrador', age_years: 0.3, price: 15000, location: 'Chennai', state: 'Tamil Nadu', is_vaccinated: true, is_verified: true, is_pregnant: false, is_promoted: false, for_adoption: false, image_url: null, status: 'active', gender: 'male', created_at: new Date().toISOString() },
+    { id: 'd6', title: 'Persian Cat — Ready for Adoption', category: 'cat', breed: 'Persian', age_years: 1, price: 8000, location: 'Bengaluru', state: 'Karnataka', is_vaccinated: true, is_verified: false, is_pregnant: false, is_promoted: false, for_adoption: false, image_url: null, status: 'active', gender: 'female', created_at: new Date().toISOString() },
+];
 
 export default function HomePage() {
     const { t } = useTranslation();
-    const { currentUser, isGuest, guestPrefs } = useAuth();
-    const { listings, loading, hasMore, refetch, loadMore } = useListings();
+    const { currentUser, listingType } = useAuth();
     const navigate = useNavigate();
+
+    const [listings, setListings] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('all');
-    const [stats, setStats] = useState({ farmers: '1,200', listings: '450' });
-    const [loadingMore, setLoadingMore] = useState(false);
+    const [selectedState, setSelectedState] = useState('all');
+    const [sortBy, setSortBy] = useState('recent');
     const [searchQuery, setSearchQuery] = useState('');
-    const rowRefs = useRef({});
 
     const listingIds = listings.map(l => l.id);
     const { likedIds, toggleFavorite } = useFavorites(currentUser?.id, listingIds);
 
-    const fetchStats = React.useCallback(async () => {
+    const categories = listingType === 'livestock' ? LIVESTOCK_CATEGORIES : PET_CATEGORIES;
+
+    const fetchListings = useCallback(async () => {
+        setLoading(true);
         try {
-            const [listingRes, farmerRes] = await Promise.all([
-                supabase.from('listings').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-                supabase.from('profiles').select('id', { count: 'exact', head: true }),
-            ]);
-            if (listingRes.count !== null)
-                setStats(s => ({ ...s, listings: listingRes.count.toLocaleString() }));
-            if (farmerRes.count !== null)
-                setStats(s => ({ ...s, farmers: farmerRes.count.toLocaleString() }));
+            let query = supabase
+                .from('listings')
+                .select('*')
+                .eq('status', 'active');
+
+            if (listingType === 'livestock') {
+                query = query.not('category', 'in', `(${PET_IDS.join(',')})`);
+            } else {
+                query = query.in('category', PET_IDS);
+            }
+
+            if (selectedState !== 'all') {
+                query = query.eq('state', selectedState);
+            }
+
+            if (sortBy === 'recent') {
+                query = query.order('created_at', { ascending: false });
+            } else if (sortBy === 'price_low') {
+                query = query.order('price', { ascending: true });
+            } else if (sortBy === 'price_high') {
+                query = query.order('price', { ascending: false });
+            }
+
+            const { data, error } = await query.limit(60);
+            if (error) throw error;
+
+            const fetched = data || [];
+            // Supplement with demo data if empty
+            if (fetched.length === 0) {
+                const demoFiltered = listingType === 'livestock'
+                    ? DEMO_LISTINGS.filter(l => !PET_IDS.includes(l.category))
+                    : DEMO_LISTINGS.filter(l => PET_IDS.includes(l.category));
+                setListings(demoFiltered);
+            } else {
+                setListings(fetched);
+            }
         } catch (err) {
-            console.error('Error fetching stats:', err);
+            console.error('Fetch error:', err);
+            const demoFiltered = listingType === 'livestock'
+                ? DEMO_LISTINGS.filter(l => !PET_IDS.includes(l.category))
+                : DEMO_LISTINGS.filter(l => PET_IDS.includes(l.category));
+            setListings(demoFiltered);
+        } finally {
+            setLoading(false);
         }
-    }, []);
+    }, [listingType, selectedState, sortBy]);
 
     useEffect(() => {
-        (async () => { refetch(); await fetchStats(); })();
-    }, [refetch, fetchStats]);
+        setActiveTab('all'); // Reset category on type switch
+        fetchListings();
+    }, [fetchListings]);
 
-    // Auto-set the active tab based on category preference.
-    // No isGuest check — works for guests AND logged-in users.
-    useEffect(() => {
-        const prefs = getActivePrefs(guestPrefs);
-        startTransition(() => {
-            if (prefs?.category === 'livestock') setActiveTab('all');
-            if (prefs?.category === 'pets') setActiveTab('pets');
-        });
-    }, [guestPrefs?.category]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    const isBuyer = isGuest && guestPrefs?.role === 'buyer';
-
-    async function handleLoadMore() {
-        setLoadingMore(true);
-        await loadMore();
-        setLoadingMore(false);
-    }
-
-    // Single source of truth — sync read so frame-1 is always correct
-    const activePrefs = getActivePrefs(guestPrefs);
-    const isLivestock = activePrefs?.category === 'livestock';
-    const isPets = activePrefs?.category === 'pets';
-
-    // Master filtered list — used everywhere, never use raw listings[]
     const filteredListings = React.useMemo(() => {
-        const prefs = getActivePrefs(guestPrefs);
         let result = [...listings];
 
-        // Step 1 — category hard-filter
-        if (prefs?.category === 'livestock') {
-            result = result.filter(l => !PET_CATEGORIES.includes(l.category));
-        } else if (prefs?.category === 'pets') {
-            result = result.filter(l => PET_CATEGORIES.includes(l.category));
-        }
-
-        // Step 2 — active tab filter
         if (activeTab !== 'all') {
-            if (activeTab === 'pets')
-                result = result.filter(l => PET_CATEGORIES.includes(l.category));
-            else if (activeTab === 'dogs')
-                result = result.filter(l => l.category === 'dog');
-            else if (activeTab === 'cats')
-                result = result.filter(l => l.category === 'cat');
-            else if (activeTab === 'birds')
-                result = result.filter(l => l.category === 'bird');
-            else
-                result = result.filter(l => l.category === activeTab);
+            result = result.filter(l => l.category === activeTab);
         }
 
-        // Step 3 — search filter
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase();
             result = result.filter(l =>
                 (l.title || '').toLowerCase().includes(q) ||
                 (l.breed || '').toLowerCase().includes(q) ||
-                (l.location || '').toLowerCase().includes(q) ||
-                (l.category || '').toLowerCase().includes(q)
+                (l.location || '').toLowerCase().includes(q)
             );
         }
 
         return result;
-    }, [listings, activeTab, searchQuery, guestPrefs]);
-
-    // Pre-computed sublists for the "all" tab sections
-    const newlyAdded = filteredListings.slice(0, 10);
-    const petListings = filteredListings.filter(l => PET_CATEGORIES.includes(l.category));
-    const cattleListings = filteredListings.filter(l => !PET_CATEGORIES.includes(l.category));
+    }, [listings, activeTab, searchQuery]);
 
     function handleSearchKeyDown(e) {
         if (e.key === 'Enter' && searchQuery.trim())
             navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
-
-    function scrollRow(key, dir) {
-        const row = rowRefs.current[key];
-        if (row) row.scrollBy({ left: dir * 300, behavior: 'smooth' });
-    }
-
-    function renderSkeletons(count = 4) {
-        return Array.from({ length: count }).map((_, i) => (
-            <div key={i} className="cs-card-wrapper"><SkeletonCard /></div>
-        ));
-    }
-
-    function renderCard(listing) {
-        return (
-            <div key={listing.id} className="cs-card-wrapper">
-                <ListingCard
-                    listing={listing}
-                    isLiked={likedIds.has(listing.id)}
-                    onToggleFavorite={toggleFavorite}
-                />
-            </div>
-        );
-    }
-
-    // Category strip — hide wrong-type tabs based on preference
-    const visibleCategories = CATEGORIES.filter(c => {
-        if (c.id === 'pets') return false; // Hide redundant "Pets" icon from top strip
-        if (isLivestock) return !PET_TAB_IDS.includes(c.id);
-        if (isPets) return PET_TAB_IDS.includes(c.id) || c.id === 'all';
-        return true;
-    });
 
     return (
         <div className="home-layout">
@@ -170,280 +153,89 @@ export default function HomePage() {
             />
             <div className="home-container">
 
-                {/* HERO BANNER */}
-                <div className="new-hero-banner">
-                    <div className="nh-content">
-                        <h1 className="nh-title">
-                            {t('home.heroTitle')}<br />
-                            <span className="nh-yellow">With Full Trust</span>
-                        </h1>
-                        <p className="nh-sub">
-                            Connecting farmers across India with verified cattle listings.
-                        </p>
-                        <div className="nh-actions">
-                            {!isBuyer && (
-                                <button
-                                    className="nh-btn-primary"
-                                    onClick={() => navigate('/sell')}
-                                >
-                                    {t('home.getStarted')}
-                                </button>
-                            )}
-                            <button
-                                className="nh-btn-outline"
-                                onClick={() => {
-                                    document.querySelector('.category-strip')
-                                        ?.scrollIntoView({ behavior: 'smooth' });
-                                }}
-                            >
-                                {t('home.howItWorks')}
-                            </button>
-                        </div>
+                {/* SEARCH + STATE FILTER ROW */}
+                <div className="hp-top-row">
+                    <div className="hp-search-box">
+                        <span style={{ fontSize: 18, flexShrink: 0 }}>🔍</span>
+                        <input
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                            onKeyDown={handleSearchKeyDown}
+                            placeholder={listingType === 'livestock'
+                                ? 'Search cow, buffalo, Gir, Murrah…'
+                                : 'Search dog, cat, Labrador, Persian…'}
+                            className="hp-search-input"
+                        />
+                        {searchQuery && (
+                            <button onClick={() => setSearchQuery('')} className="hp-search-clear">✕</button>
+                        )}
                     </div>
+                    <select
+                        value={selectedState}
+                        onChange={e => setSelectedState(e.target.value)}
+                        className="hp-state-select"
+                    >
+                        <option value="all">All States</option>
+                        {INDIAN_STATES.map(s => (
+                            <option key={s} value={s}>{s}</option>
+                        ))}
+                    </select>
                 </div>
 
-                {/* STATS ROW */}
-                <div className="stats-row">
-                    <div className="stat-card">
-                        <div className="sc-icon gray">👥</div>
-                        <div className="sc-info">
-                            <div className="sc-val">{stats.farmers}</div>
-                            <div className="sc-lbl">{t('home.registeredFarmers')}</div>
-                        </div>
-                    </div>
-                    <div className="stat-card">
-                        <div className="sc-icon yellow">🗂</div>
-                        <div className="sc-info">
-                            <div className="sc-val">{stats.listings}</div>
-                            <div className="sc-lbl">{t('home.activeListings')}</div>
-                        </div>
-                    </div>
-                    <div className="stat-card">
-                        <div className="sc-icon green">🛡</div>
-                        <div className="sc-info">
-                            <div className="sc-val">100%</div>
-                            <div className="sc-lbl">{t('home.aiVerified')}</div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* SEARCH BAR */}
-                <div style={{
-                    display: 'flex', alignItems: 'center', gap: 10,
-                    background: 'white', border: '1.5px solid #e5e7eb',
-                    borderRadius: 14, padding: '10px 16px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)', marginBottom: 8
-                }}>
-                    <span style={{ fontSize: 18 }}>🔍</span>
-                    <input
-                        value={searchQuery}
-                        onChange={e => setSearchQuery(e.target.value)}
-                        onKeyDown={handleSearchKeyDown}
-                        placeholder="Search cow, buffalo, Gir, Murrah, Labrador…"
-                        style={{
-                            flex: 1, border: 'none', outline: 'none',
-                            fontFamily: 'Nunito, sans-serif', fontSize: 14,
-                            color: '#1a3c28', background: 'transparent'
-                        }}
-                    />
-                    {searchQuery && (
+                {/* CATEGORY TABS */}
+                <div className="hp-category-tabs">
+                    {categories.map(cat => (
                         <button
-                            onClick={() => setSearchQuery('')}
-                            style={{
-                                background: 'none', border: 'none',
-                                cursor: 'pointer', color: '#9ca3af',
-                                fontSize: 16, padding: 4
-                            }}
-                        >✕</button>
-                    )}
-                    {searchQuery && (
-                        <button
-                            onClick={() => navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`)}
-                            style={{
-                                background: '#1a7a3c', color: 'white',
-                                border: 'none', borderRadius: 10,
-                                padding: '6px 14px', cursor: 'pointer',
-                                fontWeight: 700, fontSize: 13
-                            }}
-                        >{t('home.search')}</button>
-                    )}
-                </div>
-
-                {/* CATEGORY STRIP — filtered by preference */}
-                <div className="category-strip">
-                    {visibleCategories.map(c => (
-                        <div
-                            key={c.id}
-                            className={`cat-icon-card ${activeTab === c.id ? 'active' : ''}`}
-                            onClick={() => setActiveTab(c.id)}
+                            key={cat.id}
+                            className={`hp-cat-tab${activeTab === cat.id ? ' active' : ''}`}
+                            onClick={() => setActiveTab(cat.id)}
                         >
-                            <div className="cat-icon-circle">{c.emoji}</div>
-                            <div className="cat-icon-lbl">{c.label}</div>
-                        </div>
+                            <span>{cat.emoji}</span>
+                            <span>{cat.label}</span>
+                        </button>
                     ))}
                 </div>
 
-                <div className="home-main-body">
-                    <div className="listings-container">
-                        {activeTab === 'all' ? (
-                            <>
-                                {/* NEWLY ADDED — uses filteredListings not raw listings */}
-                                <div className="category-section">
-                                    <div className="cs-header">
-                                        <div className="cs-title-group">
-                                            <div className="cs-icon-tag">⏳</div>
-                                            <h2 className="cs-title">
-                                                {isPets
-                                                    ? 'NEWLY ADDED PETS'
-                                                    : isLivestock
-                                                        ? 'NEWLY ADDED CATTLE'
-                                                        : 'NEWLY ADDED'}
-                                            </h2>
-                                        </div>
-                                        <div className="cs-arrows">
-                                            <button className="arrow-btn"
-                                                onClick={() => scrollRow('new', -1)}>❮</button>
-                                            <button className="arrow-btn"
-                                                onClick={() => scrollRow('new', 1)}>❯</button>
-                                        </div>
-                                    </div>
-                                    <div className="cs-row"
-                                        ref={el => (rowRefs.current['new'] = el)}>
-                                        {loading
-                                            ? renderSkeletons(4)
-                                            : newlyAdded.map(renderCard)}
-                                    </div>
-                                </div>
-
-                                {/* CATTLE SECTIONS — hidden in pets mode */}
-                                {!loading && !isPets && CATEGORIES
-                                    .filter(c =>
-                                        c.id !== 'all' &&
-                                        c.id !== 'pets' &&
-                                        !PET_TAB_IDS.includes(c.id)
-                                    )
-                                    .map(cat => {
-                                        const catListings = cattleListings
-                                            .filter(l => l.category === cat.id);
-                                        if (catListings.length === 0) return null;
-                                        return (
-                                            <div key={cat.id} className="category-section">
-                                                <div className="cs-header">
-                                                    <div className="cs-title-group">
-                                                        <div className="cs-icon-tag">
-                                                            {cat.emoji}
-                                                        </div>
-                                                        <h2 className="cs-title"
-                                                            style={{ textTransform: 'uppercase' }}>
-                                                            {cat.label}S
-                                                        </h2>
-                                                    </div>
-                                                    <button className="cs-view-all"
-                                                        onClick={() => setActiveTab(cat.id)}>
-                                                        <span className="eye-icon">👁</span> VIEW ALL
-                                                    </button>
-                                                    <div className="cs-arrows">
-                                                        <button className="arrow-btn"
-                                                            onClick={() => scrollRow(cat.id, -1)}>❮</button>
-                                                        <button className="arrow-btn"
-                                                            onClick={() => scrollRow(cat.id, 1)}>❯</button>
-                                                    </div>
-                                                </div>
-                                                <div className="cs-row"
-                                                    ref={el => (rowRefs.current[cat.id] = el)}>
-                                                    {catListings.slice(0, 8).map(renderCard)}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-
-                                {/* PETS SECTION — hidden in livestock mode */}
-                                {!loading && !isLivestock && petListings.length > 0 && (
-                                    <div className="category-section">
-                                        <div className="cs-header">
-                                            <div className="cs-title-group">
-                                                <div className="cs-icon-tag">🐾</div>
-                                                <h2 className="cs-title">PETS &amp; OTHERS</h2>
-                                            </div>
-                                            <button className="cs-view-all"
-                                                onClick={() => setActiveTab('pets')}>
-                                                <span className="eye-icon">👁</span> VIEW ALL
-                                            </button>
-                                            <div className="cs-arrows">
-                                                <button className="arrow-btn"
-                                                    onClick={() => scrollRow('pets', -1)}>❮</button>
-                                                <button className="arrow-btn"
-                                                    onClick={() => scrollRow('pets', 1)}>❯</button>
-                                            </div>
-                                        </div>
-                                        <div className="cs-row"
-                                            ref={el => (rowRefs.current['pets'] = el)}>
-                                            {petListings.map(renderCard)}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* LOAD MORE */}
-                                {!loading && hasMore && (
-                                    <div style={{ textAlign: 'center', padding: '20px 0 32px' }}>
-                                        <button
-                                            onClick={handleLoadMore}
-                                            disabled={loadingMore}
-                                            style={{
-                                                padding: '12px 32px',
-                                                background: '#1a7a3c', color: 'white',
-                                                border: 'none', borderRadius: 12,
-                                                fontWeight: 800, fontSize: 14,
-                                                cursor: 'pointer',
-                                                fontFamily: 'Nunito, sans-serif',
-                                                opacity: loadingMore ? 0.7 : 1
-                                            }}
-                                        >
-                                            {loadingMore ? 'Loading…' : '🔽 Load More'}
-                                        </button>
-                                    </div>
-                                )}
-                            </>
-                        ) : (
-                            /* SPECIFIC CATEGORY TAB VIEW */
-                            <div className="category-section">
-                                <div className="cs-header">
-                                    <div className="cs-title-group">
-                                        <div className="cs-icon-tag">
-                                            {CATEGORIES.find(c => c.id === activeTab)?.emoji}
-                                        </div>
-                                        <h2 className="cs-title"
-                                            style={{ textTransform: 'uppercase' }}>
-                                            {CATEGORIES.find(c => c.id === activeTab)?.label}{activeTab !== 'pets' && activeTab !== 'all' && 'S'}
-                                        </h2>
-                                    </div>
-                                    <button className="cs-view-all"
-                                        onClick={() => setActiveTab('all')}>
-                                        ❮ BACK TO HOME
-                                    </button>
-                                </div>
-                                {loading ? (
-                                    <div className="cards-grid">{renderSkeletons(6)}</div>
-                                ) : filteredListings.length === 0 ? (
-                                    <div className="ls-empty">
-                                        No listings match this category.
-                                    </div>
-                                ) : (
-                                    <div className="cards-grid">
-                                        {filteredListings.map(listing => (
-                                            <ListingCard
-                                                key={listing.id}
-                                                listing={listing}
-                                                isLiked={likedIds.has(listing.id)}
-                                                onToggleFavorite={toggleFavorite}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                {/* SORT / FILTER CONTROL BAR */}
+                <div className="hp-controls-bar">
+                    <div className="hp-sort-group">
+                        <span style={{ fontSize: 13, color: '#6B7280', fontWeight: 600 }}>Sort:</span>
+                        <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="hp-sort-select">
+                            <option value="recent">Recently Added</option>
+                            <option value="price_low">Price: Low → High</option>
+                            <option value="price_high">Price: High → Low</option>
+                        </select>
                     </div>
+                    <button className="hp-filter-btn" onClick={() => navigate('/search')}>
+                        🎛️ Filters
+                    </button>
                 </div>
+
+                {/* LISTINGS 2×2 GRID */}
+                {loading ? (
+                    <div className="hp-grid">
+                        {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+                    </div>
+                ) : filteredListings.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '60px 20px', color: '#9CA3AF' }}>
+                        <div style={{ fontSize: 60, marginBottom: 16 }}>
+                            {listingType === 'livestock' ? '🐄' : '🐾'}
+                        </div>
+                        <h3 style={{ color: '#374151' }}>No listings found</h3>
+                        <p style={{ fontSize: 14 }}>Try a different category or state filter</p>
+                    </div>
+                ) : (
+                    <div className="hp-grid">
+                        {filteredListings.map(listing => (
+                            <ListingCard
+                                key={listing.id}
+                                listing={listing}
+                                isLiked={likedIds.has(listing.id)}
+                                onToggleFavorite={toggleFavorite}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

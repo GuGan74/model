@@ -14,27 +14,10 @@ export default function SuccessPage() {
             <h1 className="suc-ttl">Listing Published!</h1>
             <p className="suc-sub">Your cattle is now live on Kosalai and visible to all buyers across India. You'll receive WhatsApp / call inquiries directly.</p>
 
-            {state?.boosted && (
-                <div style={{
-                    background: 'linear-gradient(135deg,#f59e0b,#d97706)',
-                    color: 'white', borderRadius: 12,
-                    padding: '12px 20px', marginBottom: 16,
-                    fontWeight: 800, fontSize: 15, textAlign: 'center',
-                }}>
-                    ⚡ Boost Active — Your listing is promoted!
-                </div>
-            )}
-
             <div className="suc-id">
                 <div className="lb">LISTING ID</div>
                 <div className="id">{id}</div>
                 <div className="meta">Published just now · Active for 30 days</div>
-            </div>
-
-            <div className="boost-upsell">
-                <div className="bu-ttl">⚡ Boost Your Listing</div>
-                <div className="bu-sub">Get 5× more views • Featured on homepage • Priority in search results</div>
-                <button className="btn-boost" onClick={() => navigate('/boost')}>🚀 Boost for ₹99 →</button>
             </div>
 
             <div className="suc-btns">

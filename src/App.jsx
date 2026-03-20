@@ -22,8 +22,8 @@ import NotFoundPage from './pages/NotFoundPage';
 
 const AdminPage = React.lazy(() => import('./pages/AdminPage'));
 const PriceTrendsPage = React.lazy(() => import('./pages/PriceTrendsPage'));
-const BoostPage = React.lazy(() => import('./pages/BoostPage'));
 
+import SellerProfilePage from './pages/SellerProfilePage';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
 import './index.css';
@@ -165,12 +165,8 @@ function AppRoutes() {
                   <SuccessPage />
                 </LoginGuard>
               } />
-            <Route path="/boost"
-              element={
-                <LoginGuard>
-                  <BoostPage />
-                </LoginGuard>
-              } />
+            <Route path="/seller/:userId"
+              element={<SellerProfilePage />} />
             <Route path="/admin"
               element={
                 <LoginGuard>
