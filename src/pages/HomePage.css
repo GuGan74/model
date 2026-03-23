@@ -973,6 +973,12 @@
     gap: 8px;
 }
 
+.hp-sort-label {
+    font-size: 13px;
+    color: #6B7280;
+    font-weight: 600;
+}
+
 .hp-sort-select {
     padding: 6px 10px;
     border: 1.5px solid #e5e7eb;
@@ -1024,6 +1030,29 @@
     .hp-search-box { padding: 8px 10px; flex-wrap: wrap; }
     .hp-state-select-inline { font-size: 12px; }
     .hp-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+    /* Improved Filter/Sort Bar for Mobile */
+    .hp-controls-bar {
+        gap: 12px;
+        padding: 12px;
+        align-items: flex-start;
+    }
+    .hp-sort-group {
+        flex: 1;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        min-width: 0;
+    }
+    .hp-sort-label {
+        font-size: 11px;
+    }
+    .hp-sort-select {
+        width: 100%;
+        font-size: 13px;
+        padding: 8px 6px;
+        text-overflow: ellipsis;
+    }
 }
 
 /* Seller Profile Page */

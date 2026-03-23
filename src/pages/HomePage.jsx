@@ -222,7 +222,7 @@ export default function HomePage() {
                 {/* SORT / FILTER CONTROL BAR — filter LEFT, sort RIGHT */}
                 <div className="hp-controls-bar">
                     <div className="hp-sort-group">
-                        <span style={{ fontSize: 13, color: '#6B7280', fontWeight: 600 }}>Filter:</span>
+                        <span className="hp-sort-label">Filter:</span>
                         <select value={filterBy} onChange={e => setFilterBy(e.target.value)} className="hp-sort-select">
                             <option value="all">All Listings</option>
                             <option value="verified">Verified Only</option>
@@ -243,7 +243,7 @@ export default function HomePage() {
                         </select>
                     </div>
                     <div className="hp-sort-group">
-                        <span style={{ fontSize: 13, color: '#6B7280', fontWeight: 600 }}>Sort:</span>
+                        <span className="hp-sort-label">Sort:</span>
                         <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="hp-sort-select">
                             <option value="recent">Recently Added</option>
                             <option value="price_low">Price: Low → High</option>
