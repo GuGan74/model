@@ -59,6 +59,7 @@ export default function HomePage() {
     const [activeTab, setActiveTab] = useState('all');
     const [selectedState, setSelectedState] = useState('all');
     const [sortBy, setSortBy] = useState('recent');
+    const [filterBy, setFilterBy] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
 
     const listingIds = listings.map(l => l.id);
@@ -120,6 +121,7 @@ export default function HomePage() {
 
     useEffect(() => {
         setActiveTab('all'); // Reset category on type switch
+        setFilterBy('all');  // Reset filter when type switches to prevent carryover
         fetchListings();
     }, [fetchListings]);
 
@@ -128,6 +130,24 @@ export default function HomePage() {
 
         if (activeTab !== 'all') {
             result = result.filter(l => l.category === activeTab);
+        }
+
+        if (filterBy === 'verified') {
+            result = result.filter(l => l.is_verified);
+        } else if (filterBy === 'with_images') {
+            result = result.filter(l => l.image_url);
+        } else if (filterBy === 'high_yield') {
+            result = result.filter(l => l.milk_yield_liters > 10);
+        } else if (filterBy === 'pregnant') {
+            result = result.filter(l => l.is_pregnant);
+        } else if (filterBy === 'vaccinated') {
+            result = result.filter(l => l.is_vaccinated);
+        } else if (filterBy === 'young') {
+            result = result.filter(l => l.age_years && l.age_years <= 1);
+        } else if (filterBy === 'male') {
+            result = result.filter(l => l.gender && l.gender.toLowerCase() === 'male');
+        } else if (filterBy === 'female') {
+            result = result.filter(l => l.gender && l.gender.toLowerCase() === 'female');
         }
 
         if (searchQuery.trim()) {
@@ -140,7 +160,7 @@ export default function HomePage() {
         }
 
         return result;
-    }, [listings, activeTab, searchQuery]);
+    }, [listings, activeTab, filterBy, searchQuery]);
 
     function handleSearchKeyDown(e) {
         if (e.key === 'Enter' && searchQuery.trim())
@@ -158,6 +178,17 @@ export default function HomePage() {
                 {/* SEARCH + STATE FILTER ROW */}
                 <div className="hp-top-row">
                     <div className="hp-search-box">
+                        <select
+                            value={selectedState}
+                            onChange={e => setSelectedState(e.target.value)}
+                            className="hp-state-select-inline"
+                        >
+                            <option value="all">All States</option>
+                            {INDIAN_STATES.map(s => (
+                                <option key={s} value={s}>{s}</option>
+                            ))}
+                        </select>
+                        <div className="hp-search-divider"></div>
                         <span style={{ fontSize: 18, flexShrink: 0 }}>🔍</span>
                         <input
                             value={searchQuery}
@@ -172,16 +203,6 @@ export default function HomePage() {
                             <button onClick={() => setSearchQuery('')} className="hp-search-clear">✕</button>
                         )}
                     </div>
-                    <select
-                        value={selectedState}
-                        onChange={e => setSelectedState(e.target.value)}
-                        className="hp-state-select"
-                    >
-                        <option value="all">All States</option>
-                        {INDIAN_STATES.map(s => (
-                            <option key={s} value={s}>{s}</option>
-                        ))}
-                    </select>
                 </div>
 
                 {/* CATEGORY TABS */}
@@ -200,9 +221,27 @@ export default function HomePage() {
 
                 {/* SORT / FILTER CONTROL BAR — filter LEFT, sort RIGHT */}
                 <div className="hp-controls-bar">
-                    <button className="hp-filter-btn" onClick={() => navigate('/search')}>
-                        🎛️ Filters
-                    </button>
+                    <div className="hp-sort-group">
+                        <span style={{ fontSize: 13, color: '#6B7280', fontWeight: 600 }}>Filter:</span>
+                        <select value={filterBy} onChange={e => setFilterBy(e.target.value)} className="hp-sort-select">
+                            <option value="all">All Listings</option>
+                            <option value="verified">Verified Only</option>
+                            <option value="with_images">With Photos</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            {listingType === 'livestock' ? (
+                                <>
+                                    <option value="high_yield">High Milk Yield (&gt;10L)</option>
+                                    <option value="pregnant">Pregnant Only</option>
+                                </>
+                            ) : (
+                                <>
+                                    <option value="vaccinated">Vaccinated Only</option>
+                                    <option value="young">Young Pets (≤1 Year)</option>
+                                </>
+                            )}
+                        </select>
+                    </div>
                     <div className="hp-sort-group">
                         <span style={{ fontSize: 13, color: '#6B7280', fontWeight: 600 }}>Sort:</span>
                         <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="hp-sort-select">

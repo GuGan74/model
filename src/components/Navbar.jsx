@@ -11,13 +11,22 @@ export default function Navbar() {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
-    const { currentProfile, signOut, isLoggedIn } = useAuth();
+    const { currentProfile, signOut, isLoggedIn, listingType, setListingType } = useAuth();
     const [drawerOpen, setDrawerOpen] = useState(false);
 
     const initials = (currentProfile?.full_name || 'U').slice(0, 2).toUpperCase();
 
+    function handleToggleType() {
+        const next = listingType === 'livestock' ? 'pets' : 'livestock';
+        setListingType(next);
+        navigate('/');
+    }
+
+    const toggleIcon = listingType === 'livestock' ? '🐾' : '🐄';
+    const toggleLabel = listingType === 'livestock' ? 'Buy Pets' : 'Buy Cattle';
+
     const navLinks = [
-        { label: t('navbar.buyCattle'), path: '/' },
+        { label: listingType === 'livestock' ? t('navbar.buyCattle') : 'Buy Pets', path: '/' },
         { label: t('navbar.alerts'), path: '/notifications' },
         { label: t('navbar.profile'), path: '/profile' },
     ];
@@ -51,6 +60,30 @@ export default function Navbar() {
                     </div>
 
                     <div className="nav-right">
+                        <button
+                            className="hide-mobile"
+                            onClick={handleToggleType}
+                            style={{
+                                background: '#e8f5e9',
+                                color: '#1a7a3c',
+                                border: '1px solid #1a7a3c',
+                                borderRadius: 20,
+                                padding: '4px 12px',
+                                fontWeight: 700,
+                                fontSize: 13,
+                                cursor: 'pointer',
+                                fontFamily: 'Nunito, sans-serif',
+                                marginRight: 8,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 6,
+                                whiteSpace: 'nowrap'
+                            }}
+                            title={`Switch to ${toggleLabel}`}
+                        >
+                            <span>{toggleIcon}</span>
+                            <span>{toggleLabel}</span>
+                        </button>
                         <button
                             className="lang-sel hide-mobile"
                             onClick={() => {

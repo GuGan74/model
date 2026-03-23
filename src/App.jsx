@@ -24,6 +24,7 @@ const AdminPage = React.lazy(() => import('./pages/AdminPage'));
 import SellerProfilePage from './pages/SellerProfilePage';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
+import loadingGif from './assets/379.gif';
 import './index.css';
 import './App.css';
 
@@ -34,7 +35,7 @@ function LazyFallback() {
       display: 'flex', alignItems: 'center',
       justifyContent: 'center', minHeight: '40vh'
     }}>
-      <div className="spinner dark" style={{ margin: '0 auto' }} />
+      <img src={loadingGif} alt="Loading..." style={{ width: 60, height: 60, objectFit: 'contain' }} />
     </div>
   );
 }
@@ -77,7 +78,7 @@ function AppRoutes() {
             Kosalai
           </div>
           <div style={{ marginTop: 20 }}>
-            <div className="spinner" style={{ margin: '0 auto' }} />
+            <img src={loadingGif} alt="Loading..." style={{ width: 80, height: 80, objectFit: 'contain' }} />
           </div>
         </div>
       </div>

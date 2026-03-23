@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import OTPInput from '../components/OTPInput';
 import SEOHead from '../components/SEOHead';
 import logoImg from '../assets/kosalai-logo-removebg-preview.png';
+import loadingGif from '../assets/379.gif';
 import toast from 'react-hot-toast';
 import './SplashPage.css';
 
@@ -227,7 +228,7 @@ export default function SplashPage() {
                             </div>
 
                             <button className="btn-send-otp" onClick={handleSendOTP} disabled={loading}>
-                                {loading ? <span className="spinner" style={{ borderColor: 'rgba(0,0,0,0.2)', borderTopColor: '#000', width: 20, height: 20 }} /> : 'Send OTP →'}
+                                {loading ? <img src={loadingGif} alt="Loading..." style={{ width: 24, height: 24, objectFit: 'contain' }} /> : 'Send OTP →'}
                             </button>
 
                             <div className="login-legal">
@@ -272,7 +273,7 @@ export default function SplashPage() {
 
                             {loading && (
                                 <div style={{ marginBottom: 20 }}>
-                                    <span className="spinner" style={{ borderTopColor: '#194628' }} />
+                                    <img src={loadingGif} alt="Loading..." style={{ width: 40, height: 40, objectFit: 'contain' }} />
                                 </div>
                             )}
 
