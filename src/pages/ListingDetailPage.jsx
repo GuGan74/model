@@ -202,11 +202,6 @@ export default function ListingDetailPage() {
                             </div>
                         )}
                         <div className="gal-badges">
-                            {listing.is_verified && (
-                                <span className="gal-badge g" style={{ background: '#e0f2f1', color: '#00695c', border: '1px solid #004d40', fontWeight: 900 }}>
-                                    ✓ AI Verified (Image matches Category)
-                                </span>
-                            )}
                             {listing.is_promoted && <span className="gal-badge o">⚡ Promoted</span>}
                             {listing.for_adoption && <span className="gal-badge p">💜 Free Adoption</span>}
                         </div>

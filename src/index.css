@@ -421,3 +421,24 @@ textarea {
     display: none !important;
   }
 }
+
+/* ─── HIDE BOOST FEATURES ──────────────────── */
+/* Remove this block to re-enable boost features */
+.boost-section,
+.boost-button,
+.boost-badge,
+.boost-zone,
+.boost-grid,
+[class*="boost-"] {
+  display: none !important;
+}
+/* Keep BoostPage itself accessible via direct URL */
+.boost-page-root {
+  display: block !important;
+}
+
+/* ─── POST AGE BADGE ANIMATIONS ────────────── */
+@keyframes pulseFresh {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}

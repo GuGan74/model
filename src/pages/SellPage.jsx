@@ -34,7 +34,10 @@ function getBreedOptions(category) {
 // Fix #5 Helpers
 function isLivestock(category) { return ['cow', 'buffalo', 'goat', 'sheep', 'horse'].includes(category); }
 function isPet(category) { return ['dog', 'cat', 'bird', 'fish', 'rabbit'].includes(category); }
-function showsMilkYield(category) { return ['cow', 'buffalo', 'goat', 'sheep'].includes(category); }
+function showsMilkYield(category, gender) {
+    // Only show milk yield for female livestock that can produce milk
+    return ['cow', 'buffalo', 'goat', 'sheep'].includes(category) && gender === 'female';
+}
 function showsPregnancyStatus(category) { return ['cow', 'buffalo', 'goat', 'horse'].includes(category); }
 
 const INDIAN_STATES = [
@@ -153,6 +156,13 @@ export default function SellPage() {
     }, [location.state]);
 
     function setF(key, val) { setForm(f => ({ ...f, [key]: val })); }
+
+    // Clear milk yield field if gender is changed to male
+    useEffect(() => {
+        if (form.gender === 'male' && form.milk_yield_liters) {
+            setF('milk_yield_liters', '');
+        }
+    }, [form.gender]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function uploadImage(file) {
         const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
@@ -311,10 +321,7 @@ export default function SellPage() {
 
             navigate('/payment', {
                 state: {
-                    purpose: 'listing_fee',
                     listingPayload: payload,
-                    listingFee: { name: 'Listing Fee', price: 50 },
-                    boostTier: form.is_promoted ? BOOST_TIERS.find(t => t.name === form.boostPlanName) : null,
                     isEditing: true, // Tell PaymentPage to UPDATE the pending record
                     editingId: newListingId,
                 }
@@ -452,7 +459,7 @@ export default function SellPage() {
                                 </small>
                                 {fieldErrors.weight && <div style={{ color: '#e63946', fontSize: 12, marginTop: 2 }}>⚠️ {fieldErrors.weight}</div>}
                             </div>
-                            {showsMilkYield(form.category) && (
+                            {showsMilkYield(form.category, form.gender) && (
                                 <div className="ff">
                                     <label>Milk Yield (L/day)</label>
                                     <input type="number" placeholder="0" value={form.milk_yield_liters} onChange={e => setF('milk_yield_liters', e.target.value)} min={0} />
@@ -693,75 +700,78 @@ export default function SellPage() {
                             </div>
                         </div>
                     </div>
-                    <div className="fs ba">
-                        <h3>⚡ Boost & Promote</h3>
-                        <p style={{ fontSize: 13, color: 'var(--g3)', marginBottom: 14, textAlign: 'left' }}>Get up to 10× more views by boosting your listing to the top of search results.</p>
-                        <label className="boost-zone" id="boost-toggle-label" htmlFor="boost-toggle" style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '15px',
-                            background: '#fff9e6',
-                            padding: '15px',
-                            border: '2px dashed #f1c40f',
-                            borderRadius: '12px',
-                            cursor: 'pointer',
-                            marginBottom: '20px'
-                        }}>
-                            <div className="bz-content" style={{ flex: 1, textAlign: 'left' }}>
-                                <div className="bz-title" style={{ fontWeight: 700, fontSize: 16, color: '#967117' }}>⚡ Boost Your Listing</div>
-                                <div className="bz-sub" style={{ fontSize: 13, color: '#b8860b' }}>Promoted label will display on the home page</div>
-                            </div>
-                            <input
-                                id="boost-toggle"
-                                type="checkbox"
-                                checked={form.is_promoted}
-                                onChange={e => {
-                                    setF('is_promoted', e.target.checked);
-                                    if (e.target.checked && !form.boostPlanName) setF('boostPlanName', 'Premium');
-                                }}
-                                style={{ width: '22px', height: '22px', accentColor: '#f1c40f' }}
-                            />
-                        </label>
 
-                        {form.is_promoted && (
-                            <div className="boost-grid animate-fadeIn" style={{ marginBottom: 20 }}>
-                                {BOOST_TIERS.map(t => {
-                                    const isSelected = form.boostPlanName === t.name;
-                                    return (
-                                        <div
-                                            key={t.name}
-                                            className={`boost-card ${t.recommended ? 'rec' : ''}`}
-                                            onClick={() => setF('boostPlanName', t.name)}
-                                            style={{
-                                                cursor: 'pointer',
-                                                border: isSelected ? `2.5px solid ${t.color}` : '2px solid transparent',
-                                                boxShadow: isSelected ? `0 4px 12px ${t.color}33` : 'var(--sh)',
-                                                transform: isSelected ? 'translateY(-3px)' : 'none'
-                                            }}
-                                        >
-                                            <div className="bc-top">
-                                                <div className="bc-nm" style={{ color: t.color }}>{t.name}</div>
-                                                {t.badge && <div className="bc-badge">{t.badge}</div>}
+                    {/* BOOST SECTION - HIDDEN (not deleted, can re-enable by removing {false &&}) */}
+                    {false && (
+                        <div className="fs ba">
+                            <h3>⚡ Boost &amp; Promote</h3>
+                            <p style={{ fontSize: 13, color: 'var(--g3)', marginBottom: 14, textAlign: 'left' }}>Get up to 10× more views by boosting your listing to the top of search results.</p>
+                            <label className="boost-zone" id="boost-toggle-label" htmlFor="boost-toggle" style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '15px',
+                                background: '#fff9e6',
+                                padding: '15px',
+                                border: '2px dashed #f1c40f',
+                                borderRadius: '12px',
+                                cursor: 'pointer',
+                                marginBottom: '20px'
+                            }}>
+                                <div className="bz-content" style={{ flex: 1, textAlign: 'left' }}>
+                                    <div className="bz-title" style={{ fontWeight: 700, fontSize: 16, color: '#967117' }}>⚡ Boost Your Listing</div>
+                                    <div className="bz-sub" style={{ fontSize: 13, color: '#b8860b' }}>Promoted label will display on the home page</div>
+                                </div>
+                                <input
+                                    id="boost-toggle"
+                                    type="checkbox"
+                                    checked={form.is_promoted}
+                                    onChange={e => {
+                                        setF('is_promoted', e.target.checked);
+                                        if (e.target.checked && !form.boostPlanName) setF('boostPlanName', 'Premium');
+                                    }}
+                                    style={{ width: '22px', height: '22px', accentColor: '#f1c40f' }}
+                                />
+                            </label>
+                            {form.is_promoted && (
+                                <div className="boost-grid animate-fadeIn" style={{ marginBottom: 20 }}>
+                                    {BOOST_TIERS.map(t => {
+                                        const isSelected = form.boostPlanName === t.name;
+                                        return (
+                                            <div
+                                                key={t.name}
+                                                className={`boost-card ${t.recommended ? 'rec' : ''}`}
+                                                onClick={() => setF('boostPlanName', t.name)}
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    border: isSelected ? `2.5px solid ${t.color}` : '2px solid transparent',
+                                                    boxShadow: isSelected ? `0 4px 12px ${t.color}33` : 'var(--sh)',
+                                                    transform: isSelected ? 'translateY(-3px)' : 'none'
+                                                }}
+                                            >
+                                                <div className="bc-top">
+                                                    <div className="bc-nm" style={{ color: t.color }}>{t.name}</div>
+                                                    {t.badge && <div className="bc-badge">{t.badge}</div>}
+                                                </div>
+                                                <div className="bc-price" style={{ color: t.color }}>₹{t.price}</div>
+                                                <div className="bc-period">{t.period}</div>
+                                                <ul className="bc-feats">
+                                                    {t.features.map((f, i) => <li key={i}>{f}</li>)}
+                                                </ul>
+                                                <div style={{ marginTop: 15, textAlign: 'center' }}>
+                                                    <input
+                                                        type="radio"
+                                                        checked={isSelected}
+                                                        readOnly
+                                                        style={{ width: 18, height: 18, accentColor: t.color }}
+                                                    />
+                                                </div>
                                             </div>
-                                            <div className="bc-price" style={{ color: t.color }}>₹{t.price}</div>
-                                            <div className="bc-period">{t.period}</div>
-                                            <ul className="bc-feats">
-                                                {t.features.map((f, i) => <li key={i}>{f}</li>)}
-                                            </ul>
-                                            <div style={{ marginTop: 15, textAlign: 'center' }}>
-                                                <input
-                                                    type="radio"
-                                                    checked={isSelected}
-                                                    readOnly
-                                                    style={{ width: 18, height: 18, accentColor: t.color }}
-                                                />
-                                            </div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        )}
-                    </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
                     <div className="fs ba">
                         <h3>✍️ Description</h3>
                         <div className="ff">

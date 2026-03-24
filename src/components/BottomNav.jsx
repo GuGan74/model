@@ -35,13 +35,15 @@ export default function BottomNav() {
                     <span className="bnav-label">{t('bottomNav.home')}</span>
                 </button>
 
+                {/* Cattle / Pets Toggle */}
                 <button
-                    className={`bnav-btn${pathname === '/search' ? ' active' : ''}`}
-                    onClick={() => navigate('/search')}
-                    aria-label="Search"
+                    className="bnav-btn bnav-toggle"
+                    onClick={handleToggleType}
+                    aria-label={toggleLabel}
+                    title={`Switch to ${toggleLabel}`}
                 >
-                    <span className="bnav-icon">🔍</span>
-                    <span className="bnav-label">{t('bottomNav.search')}</span>
+                    <span className="bnav-icon">{toggleIcon}</span>
+                    <span className="bnav-label" style={{ fontSize: 9 }}>{toggleLabel}</span>
                 </button>
 
                 {!isBuyer && (
@@ -54,17 +56,6 @@ export default function BottomNav() {
                         <span className="bnav-label">{t('bottomNav.sell')}</span>
                     </button>
                 )}
-
-                {/* Cattle / Pets Toggle */}
-                <button
-                    className="bnav-btn bnav-toggle"
-                    onClick={handleToggleType}
-                    aria-label={toggleLabel}
-                    title={`Switch to ${toggleLabel}`}
-                >
-                    <span className="bnav-icon">{toggleIcon}</span>
-                    <span className="bnav-label" style={{ fontSize: 9 }}>{toggleLabel}</span>
-                </button>
 
                 <button
                     className={`bnav-btn${pathname === '/notifications' ? ' active' : ''}`}

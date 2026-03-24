@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import { getPostAgeInfo } from '../utils/helpers';
 import './ListingCard.css';
 
 const BG_MAP = {
@@ -20,6 +21,8 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
         milk_yield_liters, age_years, is_vaccinated, for_adoption, image_url,
         user_id: owner_id
     } = listing;
+
+    const ageInfo = getPostAgeInfo(listing.created_at);
 
     const { currentUser, currentProfile, isLoggedIn } = useAuth();
     // Use prop-driven liked state (from parent batch query), with local override capability
@@ -84,16 +87,17 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
         >
             {/* Image Box */}
             <div className={`lc-img-box${!image_url ? ' show-emoji' : ''}`} style={{ background: bg }}>
-                {listing.is_verified ? (
-                    <div className="lc-badge green">✓ Verified</div>
-                ) : (
-                    <div className="lc-badge gray">⚠ Not Verified</div>
-                )}
 
                 <div className={`lc-heart ${isLiked ? 'liked' : ''}`} onClick={handleLike} aria-label={t('listingCard.addToFavorites')}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill={isLiked ? "#EF4444" : "none"} stroke={isLiked ? "#EF4444" : "currentColor"} strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
+                </div>
+
+                {/* Post Age Badge */}
+                <div className={`lc-age-badge ${ageInfo.className}`}>
+                    <span className="lc-age-icon">{ageInfo.icon}</span>
+                    <span className="lc-age-label">{ageInfo.label}</span>
                 </div>
 
                 {image_url ? (
