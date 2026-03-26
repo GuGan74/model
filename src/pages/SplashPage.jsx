@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import OTPInput from '../components/OTPInput';
 import SEOHead from '../components/SEOHead';
+import LanguageSelector from '../components/LanguageSelector';
 import logoImg from '../assets/kosalai-logo-removebg-preview.png';
 import loadingGif from '../assets/379.gif';
 import toast from 'react-hot-toast';
@@ -90,6 +91,10 @@ export default function SplashPage() {
 
     return (
         <div className="splash-wrapper">
+            {/* Language Selector — fixed top-right */}
+            <div style={{ position: 'fixed', top: 14, right: 16, zIndex: 9999 }}>
+                <LanguageSelector />
+            </div>
             <SEOHead
                 title="Kosalai — Buy &amp; Sell Cattle with Full Trust"
                 description="India's most trusted cattle marketplace. Verified cows, buffaloes, goats and pets from farmers across India."
