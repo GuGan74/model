@@ -34,32 +34,35 @@ export default function OnboardingPage() {
         <button
             onClick={onClick}
             style={{
-                display: 'flex', flexDirection: 'column',
-                alignItems: 'center', gap: 6,
-                padding: '16px 12px', borderRadius: 16,
+                display: 'grid',
+                gridTemplateRows: '50px 32px 30px', // Strict row heights
+                alignItems: 'center',
+                padding: '12px', borderRadius: 16,
                 border: `2.5px solid ${border}`, background: bg,
                 cursor: 'pointer', transition: 'transform 0.18s',
                 width: '100%',
-                height: '160px', // Fixed height for consistency
-                justifyContent: 'center'
+                height: '160px',
+                overflow: 'hidden'
             }}
             onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
             onMouseLeave={e => e.currentTarget.style.transform = 'none'}
         >
-            <span style={{ fontSize: 32, marginBottom: 4 }}>{icon}</span>
+            <span style={{ fontSize: 32 }}>{icon}</span>
             <span style={{
                 fontSize: 14, fontWeight: 900,
                 color: accent, fontFamily: 'Poppins,sans-serif',
                 textAlign: 'center',
-                display: 'block', width: '100%',
-                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                lineHeight: 1.1,
+                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                overflow: 'hidden'
             }}>
                 {label}
             </span>
             <span style={{
                 fontSize: 10, color: '#888',
-                textAlign: 'center', lineHeight: 1.3,
-                maxHeight: '2.6em', overflow: 'hidden',
+                textAlign: 'center', lineHeight: 1.2,
+                marginTop: 4,
+                overflow: 'hidden',
                 display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
                 width: '100%'
             }}>
