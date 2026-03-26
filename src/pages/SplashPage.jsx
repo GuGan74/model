@@ -31,7 +31,14 @@ export default function SplashPage() {
 
     async function handleGoogleLogin() {
         const { error } = await signInWithGoogle();
-        if (error) toast.error('Google login failed: ' + error.message);
+        if (error) {
+            toast.error('Google login failed: ' + error.message);
+        } else {
+            toast.success('Welcome! 🎉');
+            const redirectTo = sessionStorage.getItem('pb_redirect_after_login') || '/';
+            sessionStorage.removeItem('pb_redirect_after_login');
+            navigate(redirectTo, { replace: true });
+        }
     }
 
     async function handleSendOTP() {
