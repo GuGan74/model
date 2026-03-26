@@ -456,5 +456,23 @@
         "browsePets": "🐾 Browse Pets",
         "continueBrowsing": "Continue Browsing",
         "tagline": "Trusted by farmers across India"
+    },
+    "onboardingPage": {
+        "welcome": "Welcome to Kosalai",
+        "subtitle": "South India's most trusted cattle marketplace",
+        "cattle": "Cattle",
+        "buyCattle": "Buy Cattle",
+        "buyCattleSub": "Cows · Buffaloes · Goats · Sheep",
+        "sellCattle": "Sell Cattle",
+        "sellCattleSub": "Post cattle listings",
+        "or": "or",
+        "pets": "Pets",
+        "buyPets": "Buy Pets",
+        "buyPetsSub": "Dogs · Cats · Birds & more",
+        "sellPets": "Sell Pets",
+        "sellPetsSub": "Post pet listings",
+        "noAccountNeeded": "No account needed to browse · Free to join",
+        "alreadyHaveAccount": "Already have an account?",
+        "signIn": "Sign in"
     }
 }

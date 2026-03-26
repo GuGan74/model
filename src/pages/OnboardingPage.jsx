@@ -1,11 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../components/LanguageSelector';
 import logoImg from '../assets/kosalai-logo-removebg-preview.png';
 
 export default function OnboardingPage() {
     const navigate = useNavigate();
     const { enterGuestMode } = useAuth();
+    const { t } = useTranslation();
 
     function go(role, category) {
         try {
@@ -67,6 +70,10 @@ export default function OnboardingPage() {
             background:
                 'linear-gradient(160deg,#0f5228 0%,#1a7a3c 55%,#0d3d1e 100%)',
         }}>
+            {/* Language Selector — fixed top-right */}
+            <div style={{ position: 'fixed', top: 14, right: 16, zIndex: 9999 }}>
+                <LanguageSelector />
+            </div>
             {/* Logo */}
             <div style={{
                 display: 'flex', alignItems: 'center',
@@ -93,10 +100,10 @@ export default function OnboardingPage() {
                     fontFamily: 'Poppins,sans-serif', fontSize: 21,
                     fontWeight: 900, color: '#1a1a1a', margin: '0 0 6px',
                 }}>
-                    Welcome to Kosalai
+                    {t('onboardingPage.welcome')}
                 </h1>
                 <p style={{ fontSize: 13, color: '#888', margin: '0 0 22px' }}>
-                    South India's most trusted cattle marketplace
+                    {t('onboardingPage.subtitle')}
                 </p>
 
                 {/* Cattle */}
@@ -104,7 +111,7 @@ export default function OnboardingPage() {
                     fontSize: 12, fontWeight: 800, color: '#555',
                     textAlign: 'left', marginBottom: 10,
                 }}>
-                    🐄 Cattle
+                    🐄 {t('onboardingPage.cattle')}
                 </div>
                 <div style={{
                     display: 'grid', gridTemplateColumns: '1fr 1fr',
@@ -113,12 +120,12 @@ export default function OnboardingPage() {
                     {card(
                         () => go('buyer', 'livestock'),
                         '#e8f5e9', '#1a7a3c', '#1a7a3c',
-                        '🐄', 'Buy Cattle', 'Cows · Buffaloes · Goats · Sheep'
+                        '🐄', t('onboardingPage.buyCattle'), t('onboardingPage.buyCattleSub')
                     )}
                     {card(
                         () => go('seller', 'livestock'),
                         '#fff3e8', '#e65c00', '#e65c00',
-                        '🏷️', 'Sell Cattle', 'Post cattle listings'
+                        '🏷️', t('onboardingPage.sellCattle'), t('onboardingPage.sellCattleSub')
                     )}
                 </div>
 
@@ -129,7 +136,7 @@ export default function OnboardingPage() {
                     color: '#ccc', fontSize: 12,
                 }}>
                     <div style={{ flex: 1, height: 1, background: '#eee' }} />
-                    <span>or</span>
+                    <span>{t('onboardingPage.or')}</span>
                     <div style={{ flex: 1, height: 1, background: '#eee' }} />
                 </div>
 
@@ -138,7 +145,7 @@ export default function OnboardingPage() {
                     fontSize: 12, fontWeight: 800, color: '#555',
                     textAlign: 'left', marginBottom: 10,
                 }}>
-                    🐕 Pets
+                    🐕 {t('onboardingPage.pets')}
                 </div>
                 <div style={{
                     display: 'grid', gridTemplateColumns: '1fr 1fr',
@@ -147,17 +154,17 @@ export default function OnboardingPage() {
                     {card(
                         () => go('buyer', 'pets'),
                         '#e3f2fd', '#1565c0', '#1565c0',
-                        '🐕', 'Buy Pets', 'Dogs · Cats · Birds & more'
+                        '🐕', t('onboardingPage.buyPets'), t('onboardingPage.buyPetsSub')
                     )}
                     {card(
                         () => go('seller', 'pets'),
                         '#f0ebff', '#6c3fc5', '#6c3fc5',
-                        '🏷️', 'Sell Pets', 'Post pet listings'
+                        '🏷️', t('onboardingPage.sellPets'), t('onboardingPage.sellPetsSub')
                     )}
                 </div>
 
                 <p style={{ fontSize: 11, color: '#bbb', marginTop: 12 }}>
-                    🔒 No account needed to browse · Free to join
+                    🔒 {t('onboardingPage.noAccountNeeded')}
                 </p>
             </div>
 
@@ -166,7 +173,7 @@ export default function OnboardingPage() {
                 marginTop: 18, fontSize: 13,
                 color: 'rgba(255,255,255,0.75)',
             }}>
-                Already have an account?{' '}
+                {t('onboardingPage.alreadyHaveAccount')}{' '}
                 <button
                     onClick={() => navigate('/login')}
                     style={{
@@ -176,7 +183,7 @@ export default function OnboardingPage() {
                         textDecoration: 'underline',
                     }}
                 >
-                    Sign in
+                    {t('onboardingPage.signIn')}
                 </button>
             </div>
         </div>
