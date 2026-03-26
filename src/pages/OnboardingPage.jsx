@@ -36,26 +36,32 @@ export default function OnboardingPage() {
             style={{
                 display: 'flex', flexDirection: 'column',
                 alignItems: 'center', gap: 6,
-                padding: '20px 12px 16px', borderRadius: 16,
+                padding: '16px 12px', borderRadius: 16,
                 border: `2.5px solid ${border}`, background: bg,
                 cursor: 'pointer', transition: 'transform 0.18s',
                 width: '100%',
+                height: '160px', // Fixed height for consistency
+                justifyContent: 'center'
             }}
-            onMouseEnter={e =>
-                e.currentTarget.style.transform = 'translateY(-3px)'}
-            onMouseLeave={e =>
-                e.currentTarget.style.transform = 'none'}
+            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'none'}
         >
-            <span style={{ fontSize: 38 }}>{icon}</span>
+            <span style={{ fontSize: 32, marginBottom: 4 }}>{icon}</span>
             <span style={{
-                fontSize: 15, fontWeight: 900,
+                fontSize: 14, fontWeight: 900,
                 color: accent, fontFamily: 'Poppins,sans-serif',
+                textAlign: 'center',
+                display: 'block', width: '100%',
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
             }}>
                 {label}
             </span>
             <span style={{
                 fontSize: 10, color: '#888',
-                textAlign: 'center', lineHeight: 1.4,
+                textAlign: 'center', lineHeight: 1.3,
+                maxHeight: '2.6em', overflow: 'hidden',
+                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                width: '100%'
             }}>
                 {sub}
             </span>
