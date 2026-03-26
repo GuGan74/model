@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useTranslation } from 'react-i18next';
 import ListingCard from '../components/ListingCard';
 import BackButton from '../components/BackButton';
 import SEOHead from '../components/SEOHead';
@@ -25,6 +26,7 @@ const DEMO_DATA = [
 
 export default function SearchPage() {
     const [searchParams] = useSearchParams();
+    const { t } = useTranslation();
     const [query, setQuery] = useState(searchParams.get('q') || '');
     const [results, setResults] = useState([]);
     const [activePills, setActivePills] = useState([]);
@@ -83,7 +85,7 @@ export default function SearchPage() {
                     <input
                         value={query}
                         onChange={e => setQuery(e.target.value)}
-                        placeholder="Search cow, buffalo, goat, Labrador…"
+                        placeholder={t('searchPage.searchPlaceholder')}
                         autoFocus
                     />
                     {query && <button onClick={() => setQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--g3)', fontSize: 16 }}>✕</button>}
@@ -106,15 +108,15 @@ export default function SearchPage() {
 
             <div className="search-results">
                 <div style={{ fontSize: 13, color: 'var(--g3)', fontWeight: 600, marginBottom: 12 }}>
-                    {loading ? 'Searching…' : `${results.length} result${results.length !== 1 ? 's' : ''} found`}
+                    {loading ? t('searchPage.searching') : results.length === 1 ? t('searchPage.resultsFound', { count: results.length }) : t('searchPage.resultsFoundPlural', { count: results.length })}
                 </div>
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: 40 }}><div className="spinner dark" style={{ margin: '0 auto' }} /></div>
                 ) : results.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: 60, color: 'var(--g3)' }}>
                         <div style={{ fontSize: 60 }}>🔍</div>
-                        <h3 style={{ marginTop: 12, color: 'var(--g1)' }}>No results found</h3>
-                        <p>Try a different keyword or clear filters</p>
+                        <h3 style={{ marginTop: 12, color: 'var(--g1)' }}>{t('searchPage.noResults')}</h3>
+                        <p>{t('searchPage.tryDifferent')}</p>
                     </div>
                 ) : (
                     <div className="search-cards-grid">

@@ -9,27 +9,8 @@ import SkeletonCard from '../components/SkeletonCard';
 import SEOHead from '../components/SEOHead';
 import './HomePage.css';
 
-const LIVESTOCK_CATEGORIES = [
-    { id: 'all', emoji: '🎯', label: 'All' },
-    { id: 'cow', emoji: '🐄', label: 'Cows' },
-    { id: 'buffalo', emoji: '🦬', label: 'Buffalos' },
-    { id: 'goat', emoji: '🐐', label: 'Goats' },
-    { id: 'horse', emoji: '🐎', label: 'Horses' },
-    { id: 'poultry', emoji: '🐓', label: 'Poultry' },
-    { id: 'sheep', emoji: '🐑', label: 'Sheep' },
-];
-
-const PET_CATEGORIES = [
-    { id: 'all', emoji: '🎯', label: 'All' },
-    { id: 'dog', emoji: '🐕', label: 'Dogs' },
-    { id: 'cat', emoji: '🐈', label: 'Cats' },
-    { id: 'bird', emoji: '🐦', label: 'Birds' },
-    { id: 'fish', emoji: '🐟', label: 'Fish' },
-    { id: 'rabbit', emoji: '🐰', label: 'Rabbits' },
-    { id: 'other-pet', emoji: '🐾', label: 'Other' },
-];
-
 const PET_IDS = ['dog', 'cat', 'bird', 'fish', 'rabbit', 'other-pet'];
+const LIVESTOCK_IDS = ['cow', 'buffalo', 'goat', 'sheep', 'horse', 'poultry'];
 
 const INDIAN_STATES = [
     'Tamil Nadu', 'Karnataka', 'Kerala', 'Andhra Pradesh', 'Telangana',
@@ -65,91 +46,77 @@ export default function HomePage() {
     const listingIds = listings.map(l => l.id);
     const { likedIds, toggleFavorite } = useFavorites(currentUser?.id, listingIds);
 
-    const categories = listingType === 'livestock' ? LIVESTOCK_CATEGORIES : PET_CATEGORIES;
+    // Build category tabs dynamically with translations
+    const LIVESTOCK_CATEGORIES = [
+        { id: 'all', emoji: '🎯', label: t('homePage.all') },
+        { id: 'cow', emoji: '🐄', label: t('homePage.cows') },
+        { id: 'buffalo', emoji: '🦬', label: t('homePage.buffalos') },
+        { id: 'goat', emoji: '🐐', label: t('homePage.goats') },
+        { id: 'horse', emoji: '🐎', label: t('homePage.horses') },
+        { id: 'poultry', emoji: '🐓', label: t('homePage.poultry') },
+        { id: 'sheep', emoji: '🐑', label: t('homePage.sheep') },
+    ];
 
-    const LIVESTOCK_IDS = ['cow', 'buffalo', 'goat', 'sheep', 'horse', 'poultry'];
+    const PET_CATEGORIES = [
+        { id: 'all', emoji: '🎯', label: t('homePage.all') },
+        { id: 'dog', emoji: '🐕', label: t('homePage.dogs') },
+        { id: 'cat', emoji: '🐈', label: t('homePage.cats') },
+        { id: 'bird', emoji: '🐦', label: t('homePage.birds') },
+        { id: 'fish', emoji: '🐟', label: t('homePage.fish') },
+        { id: 'rabbit', emoji: '🐰', label: t('homePage.rabbits') },
+        { id: 'other-pet', emoji: '🐾', label: t('homePage.other') },
+    ];
+
+    const categories = listingType === 'livestock' ? LIVESTOCK_CATEGORIES : PET_CATEGORIES;
 
     const fetchListings = useCallback(async () => {
         setLoading(true);
         try {
-            let query = supabase
-                .from('listings')
-                .select('*')
-                .eq('status', 'active');
-
+            let query = supabase.from('listings').select('*').eq('status', 'active');
             if (listingType === 'livestock') {
                 query = query.in('category', LIVESTOCK_IDS);
             } else {
                 query = query.in('category', PET_IDS);
             }
-
-            if (selectedState !== 'all') {
-                query = query.eq('state', selectedState);
-            }
-
-            if (sortBy === 'recent') {
-                query = query.order('created_at', { ascending: false });
-            } else if (sortBy === 'price_low') {
-                query = query.order('price', { ascending: true });
-            } else if (sortBy === 'price_high') {
-                query = query.order('price', { ascending: false });
-            }
-
+            if (selectedState !== 'all') query = query.eq('state', selectedState);
+            if (sortBy === 'recent') query = query.order('created_at', { ascending: false });
+            else if (sortBy === 'price_low') query = query.order('price', { ascending: true });
+            else if (sortBy === 'price_high') query = query.order('price', { ascending: false });
             const { data, error } = await query.limit(60);
             if (error) throw error;
-
             const fetched = data || [];
-            // Supplement with demo data if empty
             if (fetched.length === 0) {
-                const demoFiltered = listingType === 'livestock'
+                setListings(listingType === 'livestock'
                     ? DEMO_LISTINGS.filter(l => !PET_IDS.includes(l.category))
-                    : DEMO_LISTINGS.filter(l => PET_IDS.includes(l.category));
-                setListings(demoFiltered);
+                    : DEMO_LISTINGS.filter(l => PET_IDS.includes(l.category)));
             } else {
                 setListings(fetched);
             }
         } catch (err) {
             console.error('Fetch error:', err);
-            const demoFiltered = listingType === 'livestock'
+            setListings(listingType === 'livestock'
                 ? DEMO_LISTINGS.filter(l => !PET_IDS.includes(l.category))
-                : DEMO_LISTINGS.filter(l => PET_IDS.includes(l.category));
-            setListings(demoFiltered);
-        } finally {
-            setLoading(false);
-        }
+                : DEMO_LISTINGS.filter(l => PET_IDS.includes(l.category)));
+        } finally { setLoading(false); }
     }, [listingType, selectedState, sortBy]);
 
     useEffect(() => {
-        setActiveTab('all'); // Reset category on type switch
-        setFilterBy('all');  // Reset filter when type switches to prevent carryover
+        setActiveTab('all');
+        setFilterBy('all');
         fetchListings();
     }, [fetchListings]);
 
     const filteredListings = React.useMemo(() => {
         let result = [...listings];
-
-        if (activeTab !== 'all') {
-            result = result.filter(l => l.category === activeTab);
-        }
-
-        if (filterBy === 'verified') {
-            result = result.filter(l => l.is_verified);
-        } else if (filterBy === 'with_images') {
-            result = result.filter(l => l.image_url);
-        } else if (filterBy === 'high_yield') {
-            result = result.filter(l => l.milk_yield_liters > 10);
-        } else if (filterBy === 'pregnant') {
-            result = result.filter(l => l.is_pregnant);
-        } else if (filterBy === 'vaccinated') {
-            result = result.filter(l => l.is_vaccinated);
-        } else if (filterBy === 'young') {
-            result = result.filter(l => l.age_years && l.age_years <= 1);
-        } else if (filterBy === 'male') {
-            result = result.filter(l => l.gender && l.gender.toLowerCase() === 'male');
-        } else if (filterBy === 'female') {
-            result = result.filter(l => l.gender && l.gender.toLowerCase() === 'female');
-        }
-
+        if (activeTab !== 'all') result = result.filter(l => l.category === activeTab);
+        if (filterBy === 'verified') result = result.filter(l => l.is_verified);
+        else if (filterBy === 'with_images') result = result.filter(l => l.image_url);
+        else if (filterBy === 'high_yield') result = result.filter(l => l.milk_yield_liters > 10);
+        else if (filterBy === 'pregnant') result = result.filter(l => l.is_pregnant);
+        else if (filterBy === 'vaccinated') result = result.filter(l => l.is_vaccinated);
+        else if (filterBy === 'young') result = result.filter(l => l.age_years && l.age_years <= 1);
+        else if (filterBy === 'male') result = result.filter(l => l.gender && l.gender.toLowerCase() === 'male');
+        else if (filterBy === 'female') result = result.filter(l => l.gender && l.gender.toLowerCase() === 'female');
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase();
             result = result.filter(l =>
@@ -158,7 +125,6 @@ export default function HomePage() {
                 (l.location || '').toLowerCase().includes(q)
             );
         }
-
         return result;
     }, [listings, activeTab, filterBy, searchQuery]);
 
@@ -174,7 +140,6 @@ export default function HomePage() {
                 description="India's trusted marketplace for cows, buffaloes, goats, horses and pets."
             />
             <div className="home-container">
-
                 {/* SEARCH + STATE FILTER ROW */}
                 <div className="hp-top-row">
                     <div className="hp-search-box">
@@ -183,7 +148,7 @@ export default function HomePage() {
                             onChange={e => setSelectedState(e.target.value)}
                             className="hp-state-select-inline"
                         >
-                            <option value="all">All States</option>
+                            <option value="all">{t('homePage.allStates')}</option>
                             {INDIAN_STATES.map(s => (
                                 <option key={s} value={s}>{s}</option>
                             ))}
@@ -195,8 +160,8 @@ export default function HomePage() {
                             onChange={e => setSearchQuery(e.target.value)}
                             onKeyDown={handleSearchKeyDown}
                             placeholder={listingType === 'livestock'
-                                ? 'Search cow, buffalo, Gir, Murrah…'
-                                : 'Search dog, cat, Labrador, Persian…'}
+                                ? t('homePage.searchCowPlaceholder')
+                                : t('homePage.searchPetPlaceholder')}
                             className="hp-search-input"
                         />
                         {searchQuery && (
@@ -219,40 +184,40 @@ export default function HomePage() {
                     ))}
                 </div>
 
-                {/* SORT / FILTER CONTROL BAR — filter LEFT, sort RIGHT */}
+                {/* SORT / FILTER CONTROL BAR */}
                 <div className="hp-controls-bar">
                     <div className="hp-sort-group">
-                        <span className="hp-sort-label">Filter:</span>
+                        <span className="hp-sort-label">{t('homePage.filterLabel')}</span>
                         <select value={filterBy} onChange={e => setFilterBy(e.target.value)} className="hp-sort-select">
-                            <option value="all">All Listings</option>
-                            <option value="verified">Verified Only</option>
-                            <option value="with_images">With Photos</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
+                            <option value="all">{t('homePage.allListings')}</option>
+                            <option value="verified">{t('homePage.verifiedOnly')}</option>
+                            <option value="with_images">{t('homePage.withPhotos')}</option>
+                            <option value="male">{t('homePage.male')}</option>
+                            <option value="female">{t('homePage.female')}</option>
                             {listingType === 'livestock' ? (
                                 <>
-                                    <option value="high_yield">High Milk Yield (&gt;10L)</option>
-                                    <option value="pregnant">Pregnant Only</option>
+                                    <option value="high_yield">{t('homePage.highMilkYield')}</option>
+                                    <option value="pregnant">{t('homePage.pregnantOnly')}</option>
                                 </>
                             ) : (
                                 <>
-                                    <option value="vaccinated">Vaccinated Only</option>
-                                    <option value="young">Young Pets (≤1 Year)</option>
+                                    <option value="vaccinated">{t('homePage.vaccinatedOnly')}</option>
+                                    <option value="young">{t('homePage.youngPets')}</option>
                                 </>
                             )}
                         </select>
                     </div>
                     <div className="hp-sort-group">
-                        <span className="hp-sort-label">Sort:</span>
+                        <span className="hp-sort-label">{t('homePage.sortLabel')}</span>
                         <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="hp-sort-select">
-                            <option value="recent">Recently Added</option>
-                            <option value="price_low">Price: Low → High</option>
-                            <option value="price_high">Price: High → Low</option>
+                            <option value="recent">{t('homePage.recentlyAdded')}</option>
+                            <option value="price_low">{t('homePage.priceLow')}</option>
+                            <option value="price_high">{t('homePage.priceHigh')}</option>
                         </select>
                     </div>
                 </div>
 
-                {/* LISTINGS 2×2 GRID */}
+                {/* LISTINGS GRID */}
                 {loading ? (
                     <div className="hp-grid">
                         {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
@@ -262,8 +227,8 @@ export default function HomePage() {
                         <div style={{ fontSize: 60, marginBottom: 16 }}>
                             {listingType === 'livestock' ? '🐄' : '🐾'}
                         </div>
-                        <h3 style={{ color: '#374151' }}>No listings found</h3>
-                        <p style={{ fontSize: 14 }}>Try a different category or state filter</p>
+                        <h3 style={{ color: '#374151' }}>{t('homePage.noListingsFound')}</h3>
+                        <p style={{ fontSize: 14 }}>{t('homePage.tryDifferent')}</p>
                     </div>
                 ) : (
                     <div className="hp-grid">

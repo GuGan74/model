@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { useTranslation } from 'react-i18next';
 import ListingCard from '../components/ListingCard';
 import BackButton from '../components/BackButton';
 import toast from 'react-hot-toast';
@@ -10,6 +11,7 @@ import './ProfilePage.css';
 export default function ProfilePage() {
     const navigate = useNavigate();
     const { currentProfile, signOut, currentUser, loadProfile } = useAuth();
+    const { t } = useTranslation();
     const p = currentProfile || {};
     const initials = (p.full_name || 'U').slice(0, 2).toUpperCase();
     const yr = new Date(p.created_at || Date.now()).getFullYear();
@@ -96,10 +98,10 @@ export default function ProfilePage() {
     }
 
     const menuItems = [
-        { icon: '📋', label: 'My Listings', sub: 'View & manage your listings', action: () => navigate('/my-listings') },
-        { icon: '🔔', label: 'Notifications', sub: 'Buyer inquiries & alerts', action: () => navigate('/notifications') },
-        { icon: '❓', label: 'Help & FAQ', sub: 'Support & guides', action: () => toast('Help coming soon!') },
-        { icon: '🔐', label: 'Privacy Policy', sub: 'Terms & conditions', action: () => toast('Privacy policy') },
+        { icon: '📋', label: t('profilePage.myListings'), sub: t('profilePage.viewManage'), action: () => navigate('/my-listings') },
+        { icon: '🔔', label: t('profilePage.notifications'), sub: t('profilePage.buyerInquiries'), action: () => navigate('/notifications') },
+        { icon: '❓', label: t('profilePage.helpFaq'), sub: t('profilePage.supportGuides'), action: () => toast('Help coming soon!') },
+        { icon: '🔐', label: t('profilePage.privacyPolicy'), sub: t('profilePage.termsConditions'), action: () => toast('Privacy policy') },
     ];
 
     return (
@@ -109,8 +111,8 @@ export default function ProfilePage() {
             <div className="prof-card">
                 <div className="prof-hd-bg">
                     <div className="p-av">{initials}</div>
-                    <div className="p-nm">{p.full_name || 'My Account'}</div>
-                    <div className="p-meta">{p.location ? `📍 ${p.location} · ` : ''}Member since {yr}</div>
+                    <div className="p-nm">{p.full_name || t('profilePage.myAccount')}</div>
+                    <div className="p-meta">{p.location ? `📍 ${p.location} · ` : ''}{t('profilePage.memberSince', { year: yr })}</div>
                     <div className="p-badges">
                         <span className="p-bdg">✓ OTP Verified</span>
                     </div>
@@ -168,9 +170,9 @@ export default function ProfilePage() {
                 ) : (
                     <>
                         <div className="p-stats">
-                            <div className="pst"><div className="n">{stats.listings}</div><div className="l">Listings</div></div>
-                            <div className="pst"><div className="n">{stats.inquiries}</div><div className="l">Inquiries</div></div>
-                            <div className="pst"><div className="n">{stats.sold}</div><div className="l">Sold</div></div>
+                            <div className="pst"><div className="n">{stats.listings}</div><div className="l">{t('profilePage.listings')}</div></div>
+                            <div className="pst"><div className="n">{stats.inquiries}</div><div className="l">{t('profilePage.inquiries')}</div></div>
+                            <div className="pst"><div className="n">{stats.sold}</div><div className="l">{t('profilePage.sold')}</div></div>
                         </div>
                         <div className="prof-body">
                             {menuItems.map((m, i) => (
@@ -189,8 +191,8 @@ export default function ProfilePage() {
                                 <div className="pmi-l">
                                     <div className="pmi-ic-box" style={{ color: 'var(--red)', background: 'var(--red-light)' }}>🚪</div>
                                     <div>
-                                        <div className="pmi-lbl" style={{ color: 'var(--red)' }}>Sign Out</div>
-                                        <div style={{ fontSize: 11, color: 'var(--red)', opacity: 0.7 }}>Securely leave your account</div>
+                                        <div className="pmi-lbl" style={{ color: 'var(--red)' }}>{t('profilePage.signOut')}</div>
+                                        <div style={{ fontSize: 11, color: 'var(--red)', opacity: 0.7 }}>{t('profilePage.securelyLeave')}</div>
                                     </div>
                                 </div>
                             </div>
@@ -202,20 +204,20 @@ export default function ProfilePage() {
             {/* Right — Quick Actions */}
             <div className="prof-right">
                 <div className="section-card" style={{ marginBottom: 16 }}>
-                    <h4>Quick Actions</h4>
+                    <h4>{t('profilePage.quickActions')}</h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                         <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => navigate('/sell')}>
-                            + Post New Listing
+                            {t('profilePage.postNewListing')}
                         </button>
                         <button className="btn-secondary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => navigate('/my-listings')}>
-                            📋 My Listings
+                            📋 {t('profilePage.myListings')}
                         </button>
                     </div>
                 </div>
 
                 <div className="section-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                        <h4 style={{ marginBottom: 0 }}>Account Details</h4>
+                        <h4 style={{ marginBottom: 0 }}>{t('profilePage.accountDetails')}</h4>
                         <button
                             style={{ background: 'none', border: 'none', color: 'var(--green)', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}
                             onClick={() => {
@@ -231,22 +233,16 @@ export default function ProfilePage() {
                             ✏️ Edit
                         </button>
                     </div>
-                    <div className="prof-detail-row">
-                        <span>📱 Phone</span>
-                        <span>{p.phone || '—'}</span>
-                    </div>
-                    <div className="prof-detail-row">
-                        <span>📧 Email</span>
-                        <span>{p.email || '—'}</span>
-                    </div>
+                    <div className="prof-detail-row"><span>{t('profilePage.phoneIcon')}</span><span>{p.phone || '—'}</span></div>
+                    <div className="prof-detail-row"><span>{t('profilePage.email')}</span><span>{p.email || '—'}</span></div>
                 </div>
 
                 <div className="section-card" style={{ marginTop: 16 }}>
-                    <h4>❤️ Liked Cattle</h4>
+                    <h4>❤️ {t('profilePage.likedCattle')}</h4>
                     {loadingLiked ? (
                         <div style={{ padding: 20, textAlign: 'center' }}><div className="spinner dark" /></div>
                     ) : likedListings.length === 0 ? (
-                        <p style={{ fontSize: 13, color: 'var(--g3)', textAlign: 'center', padding: '20px 0' }}>You haven't liked any cattle yet.</p>
+                        <p style={{ fontSize: 13, color: 'var(--g3)', textAlign: 'center', padding: '20px 0' }}>{t('profilePage.noLikedYet')}</p>
                     ) : (
                         <div className="liked-animals-grid">
                             {likedListings.map(l => (

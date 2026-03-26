@@ -139,28 +139,28 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
                         <>
                             {['cow', 'buffalo', 'goat', 'sheep'].includes(category) && (
                                 <div className="stat-col">
-                                    <div className="stat-lbl">MILK YIELD</div>
+                                    <div className="stat-lbl">{t('listingCard.milkYield')}</div>
                                     <div className="stat-val">{milk_yield_liters ? `${milk_yield_liters}L/day` : 'N/A'}</div>
                                 </div>
                             )}
                             <div className="stat-col">
-                                <div className="stat-lbl">AGE</div>
-                                <div className="stat-val">{age_years ? `${age_years} Years` : 'Unknown'}</div>
+                                <div className="stat-lbl">{t('listingCard.age')}</div>
+                                <div className="stat-val">{age_years ? `${age_years} ${t('listingCard.years')}` : t('listingCard.unknown')}</div>
                             </div>
                             <div className="stat-col">
-                                <div className="stat-lbl">GENDER</div>
-                                <div className="stat-val" style={{ textTransform: 'capitalize' }}>{listing.gender || 'Unknown'}</div>
+                                <div className="stat-lbl">{t('listingCard.gender')}</div>
+                                <div className="stat-val" style={{ textTransform: 'capitalize' }}>{listing.gender || t('listingCard.unknown')}</div>
                             </div>
                         </>
                     ) : (
                         <>
                             <div className="stat-col">
-                                <div className="stat-lbl">AGE</div>
-                                <div className="stat-val">{age_years ? `${age_years} Years` : 'Unknown'}</div>
+                                <div className="stat-lbl">{t('listingCard.age')}</div>
+                                <div className="stat-val">{age_years ? `${age_years} ${t('listingCard.years')}` : t('listingCard.unknown')}</div>
                             </div>
                             <div className="stat-col">
-                                <div className="stat-lbl">GENDER</div>
-                                <div className="stat-val" style={{ textTransform: 'capitalize' }}>{listing.gender || 'Unknown'}</div>
+                                <div className="stat-lbl">{t('listingCard.gender')}</div>
+                                <div className="stat-val" style={{ textTransform: 'capitalize' }}>{listing.gender || t('listingCard.unknown')}</div>
                             </div>
                         </>
                     )}
@@ -177,13 +177,13 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
                         }
                         navigate(`/seller/${owner_id || 'demo-seller'}`);
                     }}>
-                        👤 View Seller
+                        {t('listingCard.viewSeller')}
                     </button>
                     <button className="lc-btn-call" onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/listing/${id}`);
                     }}>
-                        📋 Details
+                        {t('listingCard.details')}
                     </button>
                 </div>
             </div>

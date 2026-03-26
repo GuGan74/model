@@ -7,12 +7,14 @@ import SEOHead from '../components/SEOHead';
 import BackButton from '../components/BackButton';
 import loadingGif from '../assets/379.gif';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import './ListingDetailPage.css';
 
 export default function ListingDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { currentUser, currentProfile } = useAuth();
+    const { t } = useTranslation();
     const [listing, setListing] = useState(null);
     const [sellerPhone, setSellerPhone] = useState(null);
     const [sellerName, setSellerName] = useState(null);
@@ -168,7 +170,7 @@ export default function ListingDetailPage() {
                 <div className="det-left">
                     <BackButton fallbackPath="/" />
                     <div className="breadcrumb">
-                        <span onClick={() => navigate('/')} style={{ color: 'var(--green)', cursor: 'pointer' }}>Home</span>
+                        <span onClick={() => navigate('/')} style={{ color: 'var(--green)', cursor: 'pointer' }}>{t('listingDetail.home')}</span>
                         <span>›</span>
                         <span style={{ textTransform: 'capitalize' }}>{listing.category}</span>
                         <span>›</span>
@@ -216,19 +218,19 @@ export default function ListingDetailPage() {
 
                     <h1 className="det-title">{listing.title}</h1>
                     <div className="det-meta">
-                        Listed by {sellerName || 'Verified Seller'}
-                        · Member since {new Date(sellerJoinDate || Date.now()).getFullYear()}
+                        {t('listingDetail.listedBy')} {sellerName || t('listingDetail.verifiedSeller')}
+                        · {t('listingDetail.memberSince', { year: new Date(sellerJoinDate || Date.now()).getFullYear() })}
                     </div>
                     <div className="det-loc">📍 {listing.location}{listing.state ? `, ${listing.state}` : ''}</div>
 
                     <div className="stats-grid">
-                        {listing.age_years != null && <div className="sg"><div className="lb">Age</div><div className="vl">{listing.age_years} Years</div></div>}
-                        {['cow', 'buffalo', 'goat', 'sheep'].includes(listing.category) && listing.milk_yield_liters && <div className="sg"><div className="lb">Milk Yield</div><div className="vl">{listing.milk_yield_liters}L / day</div></div>}
-                        {listing.weight_kg && <div className="sg"><div className="lb">Weight</div><div className="vl">{listing.weight_kg} kg</div></div>}
-                        {listing.gender && <div className="sg"><div className="lb">Gender</div><div className="vl" style={{ textTransform: 'capitalize' }}>{listing.gender}</div></div>}
-                        <div className="sg"><div className="lb">Category</div><div className="vl" style={{ textTransform: 'capitalize' }}>{listing.category}</div></div>
-                        {listing.breed && <div className="sg"><div className="lb">Breed</div><div className="vl">{listing.breed}</div></div>}
-                        <div className="sg"><div className="lb">Location</div><div className="vl">{listing.location}</div></div>
+                        {listing.age_years != null && <div className="sg"><div className="lb">{t('listingDetail.age')}</div><div className="vl">{listing.age_years} {t('listingDetail.years')}</div></div>}
+                        {['cow', 'buffalo', 'goat', 'sheep'].includes(listing.category) && listing.milk_yield_liters && <div className="sg"><div className="lb">{t('listingDetail.milkYield')}</div><div className="vl">{listing.milk_yield_liters}{t('listingDetail.perDay')}</div></div>}
+                        {listing.weight_kg && <div className="sg"><div className="lb">{t('listingDetail.weight')}</div><div className="vl">{listing.weight_kg} {t('listingDetail.kg')}</div></div>}
+                        {listing.gender && <div className="sg"><div className="lb">{t('listingDetail.gender')}</div><div className="vl" style={{ textTransform: 'capitalize' }}>{listing.gender}</div></div>}
+                        <div className="sg"><div className="lb">{t('listingDetail.category')}</div><div className="vl" style={{ textTransform: 'capitalize' }}>{listing.category}</div></div>
+                        {listing.breed && <div className="sg"><div className="lb">{t('listingDetail.breed')}</div><div className="vl">{listing.breed}</div></div>}
+                        <div className="sg"><div className="lb">{t('listingDetail.location')}</div><div className="vl">{listing.location}</div></div>
                     </div>
 
                     {listing.description && (
@@ -244,9 +246,9 @@ export default function ListingDetailPage() {
                     <div className="s-top">
                         <div className={`s-av${isPet ? ' p' : ''}`}>SL</div>
                         <div>
-                            <div className="s-name">Verified Seller</div>
-                            <div className="s-sub">Member since 2024</div>
-                            <div className={`s-vfy${isPet ? ' p' : ''}`}>✓ OTP Verified</div>
+                            <div className="s-name">{t('listingDetail.verifiedSeller')}</div>
+                            <div className="s-sub">{t('listingDetail.memberSince', { year: new Date(sellerJoinDate || Date.now()).getFullYear() })}</div>
+                            <div className={`s-vfy${isPet ? ' p' : ''}`}>{t('listingDetail.otpVerified')}</div>
                         </div>
                     </div>
                     <div className="price-w">
@@ -255,7 +257,7 @@ export default function ListingDetailPage() {
                         ) : (
                             <div className={`price-big${isPet ? ' p' : ''}`}>₹{Number(listing.price).toLocaleString('en-IN')}</div>
                         )}
-                        <div className="price-note">Negotiable · Direct from owner</div>
+                        <div className="price-note">{t('listingDetail.negotiable')}</div>
                     </div>
                     <div className="w-btns">
                         <button
@@ -276,7 +278,7 @@ export default function ListingDetailPage() {
                                 }
                             }}
                         >
-                            📞 Reach Seller
+                            {t('listingDetail.reachSeller')}
                         </button>
                         <button
                             className={`btn-fav-large ${isLiked ? 'active' : ''}`}
@@ -291,7 +293,7 @@ export default function ListingDetailPage() {
                                 transition: '0.2s'
                             }}
                         >
-                            {isLiked ? '❤️ SAVED TO PROFILE' : '🤍 ADD TO FAVORITES'}
+                            {isLiked ? t('listingDetail.savedToProfile') : t('listingDetail.addToFavorites')}
                         </button>
                     </div>
                     <button
@@ -299,11 +301,9 @@ export default function ListingDetailPage() {
                         disabled={reporting}
                         style={{ width: '100%', marginTop: '12px', padding: '12px', background: 'transparent', border: '1px solid #ff4d4f', color: '#ff4d4f', borderRadius: '10px', cursor: 'pointer', fontWeight: 700, fontFamily: 'Nunito, sans-serif' }}
                     >
-                        {reporting ? 'Submitting...' : '🚩 REPORT THIS POST'}
+                        {reporting ? t('listingDetail.submitting') : t('listingDetail.reportPost')}
                     </button>
-                    <div className="w-safety">
-                        🛡️ Always meet in person · Never pay upfront · Report suspicious activity
-                    </div>
+                    <div className="w-safety">{t('listingDetail.safetyTip')}</div>
                 </div>
             </div>
         </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import BackButton from '../components/BackButton';
 import toast from 'react-hot-toast';
 import './PaymentPage.css';
@@ -12,6 +13,7 @@ export default function PaymentPage() {
     const navigate = useNavigate();
     const location = useLocation();
     const { currentUser } = useAuth(); // eslint-disable-line no-unused-vars
+    const { t } = useTranslation();
 
     const {
         listingPayload,
@@ -80,10 +82,10 @@ export default function PaymentPage() {
             <div className="pay-wrap" style={{ textAlign: 'center', padding: '60px 20px' }}>
                 <div style={{ fontSize: 60, marginBottom: 16 }}>✅</div>
                 <h2 style={{ fontFamily: 'Poppins,sans-serif', marginBottom: 8 }}>
-                    Payment Successful!
+                    {t('paymentPage.paymentSuccess')}
                 </h2>
                 <p style={{ color: '#666', fontSize: 14 }}>
-                    Your listing is now live on Kosalai.
+                    {t('paymentPage.listingLive')}
                 </p>
                 <div style={{
                     margin: '20px auto', background: '#e8f5e9',
@@ -91,7 +93,7 @@ export default function PaymentPage() {
                     maxWidth: 300
                 }}>
                     <div style={{ fontSize: 12, color: '#666' }}>
-                        Transaction ID: {txnId}
+                        {t('paymentPage.transactionId')} {txnId}
                     </div>
                     <div style={{
                         fontSize: 20, fontWeight: 800,
@@ -100,11 +102,8 @@ export default function PaymentPage() {
                         ₹{LISTING_FEE} Paid
                     </div>
                 </div>
-                <button
-                    className="btn-primary"
-                    onClick={() => navigate('/my-listings')}
-                >
-                    View My Listings →
+                <button className="btn-primary" onClick={() => navigate('/my-listings')}>
+                    {t('paymentPage.viewMyListings')}
                 </button>
             </div>
         );
@@ -115,7 +114,7 @@ export default function PaymentPage() {
         return (
             <div className="pay-wrap" style={{ textAlign: 'center', padding: '60px 20px' }}>
                 <div style={{ fontSize: 60, marginBottom: 16 }}>❌</div>
-                <h2>Payment Failed</h2>
+                <h2>{t('paymentPage.paymentFailed')}</h2>
                 <p style={{ color: '#888', marginTop: 8 }}>
                     Your bank declined the transaction. Please try again.
                 </p>
@@ -123,14 +122,8 @@ export default function PaymentPage() {
                     marginTop: 30, display: 'flex', gap: 12,
                     justifyContent: 'center'
                 }}>
-                    <button className="btn-primary"
-                        onClick={() => setPayStep('idle')}>
-                        Try Again
-                    </button>
-                    <button className="btn-secondary"
-                        onClick={() => navigate('/sell')}>
-                        Back to Listing
-                    </button>
+                    <button className="btn-primary" onClick={() => setPayStep('idle')}>{t('paymentPage.tryAgain')}</button>
+                    <button className="btn-secondary" onClick={() => navigate('/sell')}>{t('paymentPage.backToListing')}</button>
                 </div>
             </div>
         );
@@ -144,37 +137,25 @@ export default function PaymentPage() {
             {/* Header */}
             <div className="pay-header">
                 <div style={{ fontSize: 28 }}>🚀</div>
-                <h2 className="pay-title">Complete Your Listing</h2>
-                <p className="pay-sub">Pay once to publish your listing on Kosalai</p>
+                <h2 className="pay-title">{t('paymentPage.completeYourListing')}</h2>
+                <p className="pay-sub">{t('paymentPage.payOnce')}</p>
             </div>
 
             {/* Simple Pricing Card */}
             <div className="pay-pricing-card">
-                <div className="pay-pricing-label">Listing Fee</div>
+                <div className="pay-pricing-label">{t('paymentPage.listingFee')}</div>
 
                 <div className="pay-amount-display">
                     <span className="pay-currency">₹</span>
                     <span className="pay-big-num">{LISTING_FEE}</span>
-                    <span className="pay-per">/ listing</span>
+                    <span className="pay-per">{t('paymentPage.perListing')}</span>
                 </div>
 
                 <div className="pay-features">
-                    <div className="pay-feature">
-                        <span className="pay-feature-icon">✓</span>
-                        <span>Post your listing</span>
-                    </div>
-                    <div className="pay-feature">
-                        <span className="pay-feature-icon">✓</span>
-                        <span>Visible to all buyers</span>
-                    </div>
-                    <div className="pay-feature">
-                        <span className="pay-feature-icon">✓</span>
-                        <span>Active for 30 days</span>
-                    </div>
-                    <div className="pay-feature">
-                        <span className="pay-feature-icon">✓</span>
-                        <span>Edit anytime for free</span>
-                    </div>
+                    <div className="pay-feature"><span className="pay-feature-icon">✓</span><span>{t('paymentPage.postYourListing')}</span></div>
+                    <div className="pay-feature"><span className="pay-feature-icon">✓</span><span>{t('paymentPage.visibleToAll')}</span></div>
+                    <div className="pay-feature"><span className="pay-feature-icon">✓</span><span>{t('paymentPage.activeFor30')}</span></div>
+                    <div className="pay-feature"><span className="pay-feature-icon">✓</span><span>{t('paymentPage.editAnytime')}</span></div>
                 </div>
 
                 <button
@@ -182,9 +163,9 @@ export default function PaymentPage() {
                     onClick={handlePay}
                     disabled={payStep === 'processing' || payStep === 'verifying'}
                 >
-                    {payStep === 'processing' ? '⏳ Processing…'
-                        : payStep === 'verifying' ? '🔍 Verifying…'
-                            : `Pay ₹${LISTING_FEE} & Post Listing`}
+                    {payStep === 'processing' ? t('paymentPage.processing')
+                        : payStep === 'verifying' ? t('paymentPage.verifying')
+                            : t('paymentPage.payAndPost', { amount: LISTING_FEE })}
                 </button>
             </div>
 
@@ -193,7 +174,7 @@ export default function PaymentPage() {
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
-                256-bit SSL Secure · Razorpay Gateway
+                {t('paymentPage.securePayment')}
             </div>
 
             <button

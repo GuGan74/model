@@ -2,6 +2,7 @@ import React, { useState, useEffect, startTransition } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { LIVESTOCK_CATS, PET_CATS } from '../constants/index';
 import toast from 'react-hot-toast';
 import './SellPage.css';
@@ -53,12 +54,15 @@ const INDIAN_STATES = [
     'Daman & Diu', 'Lakshadweep'
 ];
 
-const STEPS = ['Cattle Type', 'Details', 'Photos', 'Pricing'];
+const STEPS = [
+    'Cattle Type', 'Details', 'Photos', 'Pricing'
+];
 
 export default function SellPage() {
     const navigate = useNavigate();
     const location = useLocation();
     const { currentUser, guestPrefs, listingType: globalListingType } = useAuth();
+    const { t } = useTranslation();
     const [step, setStep] = useState(1);
     const [submitting, setSubmitting] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -338,9 +342,9 @@ export default function SellPage() {
                 <button className="btn-back" onClick={() => step > 1 ? setStep(s => s - 1) : navigate(isEditing ? '/my-listings' : '/')}>←</button>
                 <div>
                     <div className="sell-ttl">
-                        {isEditing ? '✏️ Edit Listing' : (listingType === 'livestock' ? '🐄 Sell Cattle' : '🐾 Sell Pet')}
+                        {isEditing ? t('sellPage.editListing') : (listingType === 'livestock' ? t('sellPage.sellCattle') : t('sellPage.sellPet'))}
                     </div>
-                    <div className="sell-sub">Step {step} of {STEPS.length}: {STEPS[step - 1]}</div>
+                    <div className="sell-sub">{t('sellPage.stepOf', { step, total: STEPS.length })}: {STEPS[step - 1]}</div>
                 </div>
             </div>
 
@@ -361,7 +365,7 @@ export default function SellPage() {
 
             {step === 1 && (
                 <div className="sell-section animate-fadeIn">
-                    <h3>📂 What are you selling?</h3>
+                    <h3>{t('sellPage.whatSelling')}</h3>
                     <div className="toggle-row" style={{ marginBottom: 30, marginTop: 15 }}>
                         {(guestPrefs?.category !== 'pets') && (
                             <button
@@ -382,7 +386,7 @@ export default function SellPage() {
                     </div>
                     <div>
                         <h4 style={{ marginBottom: 16, color: '#666' }}>
-                            {listingType === 'livestock' ? 'Select Cattle Type:' : 'Select Pet Type:'}
+                            {listingType === 'livestock' ? t('sellPage.selectCattleType') : t('sellPage.selectPetType')}
                         </h4>
                         <div className="category-grid">
                             {(listingType === 'livestock' ? LIVESTOCK_CATS : PET_CATS).map(c => (
@@ -404,10 +408,10 @@ export default function SellPage() {
             {step === 2 && (
                 <div className="animate-fadeIn">
                     <div className="fs ga">
-                        <h3>📝 {listingType === 'pet' ? 'Pet Details' : 'Cattle Details'}</h3>
+                        <h3>{listingType === 'pet' ? t('sellPage.petDetails') : t('sellPage.cattleDetails')}</h3>
                         <div className="fg">
                             <div className="ff">
-                                <label>Listing Title *</label>
+                                <label>{t('sellPage.listingTitle')} *</label>
                                 <input placeholder={listingType === 'pet' ? "e.g. Golden Retriever Puppy" : "e.g. HF Cow — High Milk Yield"} value={form.title} onChange={e => setF('title', e.target.value)} maxLength={100} />
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
                                     {fieldErrors.title ? <span style={{ color: '#e63946', fontSize: 12 }}>⚠️ {fieldErrors.title}</span> : <span />}
@@ -415,9 +419,9 @@ export default function SellPage() {
                                 </div>
                             </div>
                             <div className="ff">
-                                <label>Breed *</label>
+                                <label>{t('sellPage.breed')}</label>
                                 <select value={form.breed} onChange={(e) => setF('breed', e.target.value)} style={{ padding: '12px 14px', borderRadius: 8, border: '1.5px solid #ccc', outline: 'none' }}>
-                                    <option value="">Select Breed</option>
+                                    <option value="">{t('sellPage.selectBreed')}</option>
                                     {getBreedOptions(form.category).map(b => (
                                         <option key={b} value={b}>{b}</option>
                                     ))}
@@ -434,11 +438,11 @@ export default function SellPage() {
                             <div className="radio-group" style={{ display: 'flex', gap: 16 }}>
                                 <label className="radio-option">
                                     <input type="radio" name="gender" value="male" checked={form.gender === 'male'} onChange={(e) => setF('gender', e.target.value)} style={{ width: 18, height: 18 }} />
-                                    <span>🚹 Male</span>
+                                    <span>{t('sellPage.male')}</span>
                                 </label>
                                 <label className="radio-option">
                                     <input type="radio" name="gender" value="female" checked={form.gender === 'female'} onChange={(e) => setF('gender', e.target.value)} style={{ width: 18, height: 18 }} />
-                                    <span>🚺 Female</span>
+                                    <span>{t('sellPage.female')}</span>
                                 </label>
                             </div>
                             {fieldErrors.gender && <span style={{ color: '#e63946', fontSize: 12, marginTop: 4, display: 'block' }}>⚠️ {fieldErrors.gender}</span>}

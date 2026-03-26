@@ -1,0 +1,122 @@
+.lang-sel-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.lang-sel-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: white;
+    border: 2px solid var(--g5, #e5e7eb);
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: Nunito, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--g1, #1f2937);
+    transition: border-color 0.2s, background 0.2s;
+    white-space: nowrap;
+}
+
+.lang-sel-btn:hover {
+    border-color: var(--green, #1a7a3c);
+    background: #f0fdf4;
+}
+
+.lang-code {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--green, #1a7a3c);
+    background: #e8f5e9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1.2;
+}
+
+.lang-native {
+    font-size: 13px;
+}
+
+.lang-chevron {
+    font-size: 11px;
+    color: #9ca3af;
+    transition: transform 0.2s;
+    display: inline-block;
+}
+
+.lang-chevron.open {
+    transform: rotate(180deg);
+}
+
+.lang-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    z-index: 2000;
+    min-width: 180px;
+    overflow: hidden;
+    animation: langSlideDown 0.18s ease-out;
+}
+
+@keyframes langSlideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.lang-opt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #f3f4f6;
+    cursor: pointer;
+    font-family: Nunito, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    text-align: left;
+    transition: background 0.15s;
+}
+
+.lang-opt:last-child {
+    border-bottom: none;
+}
+
+.lang-opt:hover {
+    background: #f9fafb;
+}
+
+.lang-opt.active {
+    background: #f0fdf4;
+    color: var(--green, #1a7a3c);
+}
+
+.lang-tick {
+    margin-left: auto;
+    color: var(--green, #1a7a3c);
+    font-weight: 800;
+    font-size: 15px;
+}
+
+@media (max-width: 480px) {
+    .lang-dropdown {
+        right: 0;
+        left: auto;
+        min-width: 170px;
+    }
+    .lang-sel-btn .lang-native {
+        display: none;
+    }
+    .lang-sel-btn {
+        padding: 6px 8px;
+    }
+}

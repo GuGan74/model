@@ -4,11 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import cowLogo from '../assets/kosalai-logo-removebg-preview.png';
+import LanguageSelector from './LanguageSelector';
 import './Navbar.css';
 
 
 export default function Navbar() {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const { currentProfile, signOut, isLoggedIn, listingType, setListingType } = useAuth();
@@ -84,16 +85,7 @@ export default function Navbar() {
                             <span>{toggleIcon}</span>
                             <span>{toggleLabel}</span>
                         </button>
-                        <button
-                            className="lang-sel hide-mobile"
-                            onClick={() => {
-                                const nextLang = i18n.language === 'en' ? 'hi' : (i18n.language === 'hi' ? 'ta' : 'en');
-                                i18n.changeLanguage(nextLang);
-                            }}
-                            style={{ background: 'white', color: 'var(--g1)', border: '2px solid var(--g5)', borderRadius: 20, padding: '4px 12px', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'Nunito, sans-serif' }}
-                        >
-                            {i18n.language === 'hi' ? 'हिंदी' : (i18n.language === 'ta' ? 'தமிழ்' : 'English')}
-                        </button>
+                        <LanguageSelector />
                         {/* Show avatar for logged-in, Sign In button for guests */}
                         {isLoggedIn ? (
                             <div className="nav-avatar" onClick={() => navigate('/profile')} title={t('navbar.myProfile')}>
