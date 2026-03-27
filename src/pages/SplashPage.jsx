@@ -91,15 +91,16 @@ export default function SplashPage() {
 
     return (
         <div className="splash-wrapper">
-            {/* Language Selector — fixed top-right */}
-            <div style={{ position: 'fixed', top: 14, right: 16, zIndex: 9999 }}>
-                <LanguageSelector />
-            </div>
             <SEOHead
                 title="Kosalai — Buy &amp; Sell Cattle with Full Trust"
                 description="India's most trusted cattle marketplace. Verified cows, buffaloes, goats and pets from farmers across India."
                 url="https://model-mauve.vercel.app/"
             />
+
+            {/* Manual Language Selector for First-time users */}
+            <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 10000 }}>
+                <LanguageSelector />
+            </div>
 
             {/* LEFT / BRANDING PANEL */}
             <div className="splash-brand-panel">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import ListingCard from '../components/ListingCard';
@@ -15,6 +16,7 @@ const DEMO = [
 export default function MyListingsPage() {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState('active');
@@ -70,8 +72,8 @@ export default function MyListingsPage() {
         <div className="myl-wrap">
             <BackButton fallbackPath="/" />
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 22, fontWeight: 900 }}>📋 My Listings</h2>
-                <button className="btn-primary" onClick={() => navigate('/sell')}>+ Post New</button>
+                <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 22, fontWeight: 900 }}>📋 {t('myListingsPage.title')}</h2>
+                <button className="btn-primary" onClick={() => navigate('/sell')}>+ {t('myListingsPage.noListings')}</button>
             </div>
             {error && (
                 <div style={{ background: '#ffebee', color: '#c62828', padding: 12, borderRadius: 8, marginBottom: 16 }}>
@@ -80,7 +82,7 @@ export default function MyListingsPage() {
             )}
 
             <div className="myl-tabs">
-                {[['active', 'Active', 'green'], ['pending', 'Pending', 'orange'], ['sold', 'Sold', '']].map(([id, label, color]) => {
+                {[['active', t('myListingsPage.active'), 'green'], ['pending', t('myListingsPage.pending'), 'orange'], ['sold', t('myListingsPage.sold'), '']].map(([id, label, color]) => {
                     const count = listings.filter(l => l.status === id).length;
                     return (
                         <button key={id} className={`myl-tab${tab === id ? ' act' : ''}${color === 'orange' ? ' or' : ''}`} onClick={() => setTab(id)}>
@@ -96,8 +98,8 @@ export default function MyListingsPage() {
             ) : filtered.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: 60, color: 'var(--g3)' }}>
                     <div style={{ fontSize: 60 }}>📋</div>
-                    <h3 style={{ marginTop: 12, color: 'var(--g1)' }}>No {tab} listings</h3>
-                    {tab === 'active' && <button className="btn-primary" style={{ marginTop: 16 }} onClick={() => navigate('/sell')}>Post Your First Listing</button>}
+                    <h3 style={{ marginTop: 12, color: 'var(--g1)' }}>{t('myListingsPage.noListings')}</h3>
+                    {tab === 'active' && <button className="btn-primary" style={{ marginTop: 16 }} onClick={() => navigate('/sell')}>{t('myListingsPage.postFirst')}</button>}
                 </div>
             ) : (
                 <div className="myl-grid">
@@ -107,9 +109,9 @@ export default function MyListingsPage() {
                             <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
                                 {l.status === 'active' && (
                                     <>
-                                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 20 }} onClick={() => navigate('/sell', { state: { editListing: l } })}>✏️ Edit</button>
-                                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 20, color: 'var(--green)', borderColor: 'var(--green)' }} onClick={() => markSold(l.id)}>✅ Mark Sold</button>
-                                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 20, color: 'var(--red)', borderColor: 'var(--red)' }} onClick={() => deleteListing(l.id)}>🗑️ Delete</button>
+                                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 20 }} onClick={() => navigate('/sell', { state: { editListing: l } })}>✏️ {t('myListingsPage.edit')}</button>
+                                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 20, color: 'var(--green)', borderColor: 'var(--green)' }} onClick={() => markSold(l.id)}>✅ {t('myListingsPage.markSold')}</button>
+                                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 20, color: 'var(--red)', borderColor: 'var(--red)' }} onClick={() => deleteListing(l.id)}>🗑️ {t('myListingsPage.delete')}</button>
                                     </>
                                 )}
                                 {l.status === 'pending' && (

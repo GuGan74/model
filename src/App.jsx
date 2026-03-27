@@ -24,6 +24,7 @@ const AdminPage = React.lazy(() => import('./pages/AdminPage'));
 import SellerProfilePage from './pages/SellerProfilePage';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
+import LanguageSelector from './components/LanguageSelector';
 import loadingGif from './assets/379.gif';
 import './index.css';
 import './App.css';
@@ -65,10 +66,18 @@ function AppRoutes() {
   if (loading) {
     return (
       <div style={{
-        display: 'flex', alignItems: 'center',
-        justifyContent: 'center', minHeight: '100vh',
-        background: 'linear-gradient(135deg,#0f5228,#1a7a3c)',
+        minHeight: '100vh', display: 'flex',
+        flexDirection: 'column', alignItems: 'center',
+        justifyContent: 'center', padding: '20px 16px',
+        background:
+          'linear-gradient(160deg,#0f5228 0%,#1a7a3c 55%,#0d3d1e 100%)',
       }}>
+        {/* Language Selector */}
+        <div style={{ position: 'absolute', top: 20, right: 20 }}>
+          <LanguageSelector />
+        </div>
+
+        {/* Logo */}
         <div style={{ textAlign: 'center', color: 'white' }}>
           <div style={{ fontSize: 64, marginBottom: 16 }}>🐄</div>
           <div style={{

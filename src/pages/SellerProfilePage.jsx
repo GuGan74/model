@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import BackButton from '../components/BackButton';
 import ListingCard from '../components/ListingCard';
@@ -21,6 +22,7 @@ const DEMO_SELLER_LISTINGS = [
 export default function SellerProfilePage() {
     const { userId } = useParams();
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [seller, setSeller] = useState(null);
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -89,20 +91,20 @@ export default function SellerProfilePage() {
                     {seller.full_name || 'Verified Seller'}
                 </h1>
                 <p style={{ opacity: 0.8, fontSize: 13, margin: 0 }}>
-                    Member since {memberYear} · {listings.length} active listing{listings.length !== 1 ? 's' : ''}
+                    {t('sellerProfile.sellerProfile')} · {t('listing.years', { count: memberYear })} · {t('sellerProfile.listingsCount', { count: listings.length })}
                 </p>
             </div>
 
             {/* Contact Info */}
             <div className="seller-contact-card">
                 <h3 style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 800, marginBottom: 8, color: '#1a3c28' }}>
-                    📋 Contact Information
+                    📋 {t('sellerProfile.contactInfo')}
                 </h3>
 
                 {seller.phone && (
                     <div className="seller-contact-item">
                         <span>📱</span>
-                        <span style={{ color: '#6B7280', fontWeight: 600 }}>Phone:</span>
+                        <span style={{ color: '#6B7280', fontWeight: 600 }}>{t('sellerProfile.phoneNumber')}:</span>
                         <a href={`tel:${seller.phone}`} style={{ color: '#1a7a3c', fontWeight: 700, textDecoration: 'none' }}>
                             +91 {seller.phone}
                         </a>
@@ -112,7 +114,7 @@ export default function SellerProfilePage() {
                 {seller.email && (
                     <div className="seller-contact-item">
                         <span>📧</span>
-                        <span style={{ color: '#6B7280', fontWeight: 600 }}>Email:</span>
+                        <span style={{ color: '#6B7280', fontWeight: 600 }}>{t('sellerProfile.emailAddress')}:</span>
                         <a href={`mailto:${seller.email}`} style={{ color: '#1a7a3c', fontWeight: 700, textDecoration: 'none' }}>
                             {seller.email}
                         </a>
@@ -122,7 +124,7 @@ export default function SellerProfilePage() {
                 {seller.location && (
                     <div className="seller-contact-item">
                         <span>📍</span>
-                        <span style={{ color: '#6B7280', fontWeight: 600 }}>Location:</span>
+                        <span style={{ color: '#6B7280', fontWeight: 600 }}>{t('listing.location')}:</span>
                         <span style={{ fontWeight: 600, color: '#374151' }}>{seller.location}</span>
                     </div>
                 )}
@@ -133,13 +135,13 @@ export default function SellerProfilePage() {
             {/* Seller Listings */}
             <div>
                 <h2 style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 800, marginBottom: 16, color: '#1a3c28', fontSize: 18 }}>
-                    🐄 Active Listings ({listings.length})
+                    🐄 {t('sellerProfile.listingsCount', { count: listings.length })}
                 </h2>
 
                 {listings.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: 40, color: '#9CA3AF' }}>
                         <div style={{ fontSize: 48 }}>📭</div>
-                        <p>No active listings from this seller</p>
+                        <p>{t('sellerProfile.noListings')}</p>
                     </div>
                 ) : (
                     <div className="seller-listings-grid">

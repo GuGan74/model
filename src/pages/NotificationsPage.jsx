@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import BackButton from '../components/BackButton';
@@ -24,6 +25,7 @@ const TYPE_MAP = {
 
 export default function NotificationsPage() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const { currentUser } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -90,17 +92,18 @@ export default function NotificationsPage() {
         <div className="notif-wrap">
             <BackButton fallbackPath="/" />
             <div className="notif-hd">
-                <h2>🔔 Notifications {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}</h2>
-                <button className="notif-mark" onClick={markAllRead}>Mark all read</button>
+                <h2>{t('notificationsPage.title')} {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}</h2>
+                <button className="notif-mark" onClick={markAllRead}>{t('notificationsPage.markAllRead')}</button>
             </div>
-            {unreadCount > 0 && <div className="unrd-banner">{unreadCount} unread notifications</div>}
+            {unreadCount > 0 && <div className="unrd-banner">{unreadCount} {t('notificationsPage.markAllRead')}</div>}
 
             {loading ? (
                 <div style={{ textAlign: 'center', padding: 40 }}><div className="spinner dark" /></div>
             ) : notifications.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: 60, color: 'var(--g3)' }}>
                     <div style={{ fontSize: 50 }}>🔔</div>
-                    <p>No notifications yet</p>
+                    <p>{t('notificationsPage.empty')}</p>
+                    <p style={{ fontSize: 13, marginTop: 4, color: 'var(--g3)' }}>{t('notificationsPage.emptySubtitle')}</p>
                 </div>
             ) : (
                 notifications.map((n, i) => (
