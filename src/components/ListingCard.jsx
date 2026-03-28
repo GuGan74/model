@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { getPostAgeInfo } from '../utils/helpers';
+import TranslatedText from './TranslatedText';
 import './ListingCard.css';
 
 const BG_MAP = {
@@ -120,7 +121,7 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
             {/* Content Box */}
             <div className="lc-content">
                 <div className="lc-header-row">
-                    <div className="lc-title">{title}</div>
+                    <div className="lc-title"><TranslatedText>{title}</TranslatedText></div>
                     <div className="lc-price">
                         {for_adoption ? 'Free' : `₹${Number(price).toLocaleString('en-IN')}`}
                     </div>
@@ -131,7 +132,7 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                         <circle cx="12" cy="10" r="3"></circle>
                     </svg>
-                    {loc}{state ? `, ${state}` : ''}
+                    <TranslatedText>{loc}</TranslatedText>{state ? `, ` : ''}{state && <TranslatedText>{state}</TranslatedText>}
                 </div>
 
                 <div className="lc-stats-grid">
@@ -149,7 +150,7 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
                             </div>
                             <div className="stat-col">
                                 <div className="stat-lbl">{t('listingCard.gender')}</div>
-                                <div className="stat-val" style={{ textTransform: 'capitalize' }}>{listing.gender || t('listingCard.unknown')}</div>
+                                <div className="stat-val" style={{ textTransform: 'capitalize' }}>{listing.gender ? t('listing.' + listing.gender.toLowerCase(), { defaultValue: listing.gender }) : t('listingCard.unknown')}</div>
                             </div>
                         </>
                     ) : (
@@ -160,7 +161,7 @@ const ListingCard = React.memo(function ListingCard({ listing, isLiked: isLikedP
                             </div>
                             <div className="stat-col">
                                 <div className="stat-lbl">{t('listingCard.gender')}</div>
-                                <div className="stat-val" style={{ textTransform: 'capitalize' }}>{listing.gender || t('listingCard.unknown')}</div>
+                                <div className="stat-val" style={{ textTransform: 'capitalize' }}>{listing.gender ? t('listing.' + listing.gender.toLowerCase(), { defaultValue: listing.gender }) : t('listingCard.unknown')}</div>
                             </div>
                         </>
                     )}

@@ -8,6 +8,7 @@ import BackButton from '../components/BackButton';
 import loadingGif from '../assets/379.gif';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import TranslatedText from '../components/TranslatedText';
 import './ListingDetailPage.css';
 
 export default function ListingDetailPage() {
@@ -172,9 +173,9 @@ export default function ListingDetailPage() {
                     <div className="breadcrumb">
                         <span onClick={() => navigate('/')} style={{ color: 'var(--green)', cursor: 'pointer' }}>{t('listingDetail.home')}</span>
                         <span>›</span>
-                        <span style={{ textTransform: 'capitalize' }}>{listing.category}</span>
+                        <span style={{ textTransform: 'capitalize' }}><TranslatedText>{listing.category}</TranslatedText></span>
                         <span>›</span>
-                        <span>{listing.title}</span>
+                        <span><TranslatedText>{listing.title}</TranslatedText></span>
                     </div>
 
                     <div className="det-img-wrap">
@@ -212,31 +213,31 @@ export default function ListingDetailPage() {
                     <div className="det-badges">
                         {listing.is_vaccinated && <span className="badge g">💉 Vaccinated</span>}
                         {listing.is_pregnant && <span className="badge g">🤰 Pregnant</span>}
-                        {listing.breed && <span className="badge b">{listing.breed}</span>}
+                        {listing.breed && <span className="badge b"><TranslatedText>{listing.breed}</TranslatedText></span>}
                         {listing.age_years != null && <span className="badge b">{listing.age_years} Years Old</span>}
                     </div>
 
-                    <h1 className="det-title">{listing.title}</h1>
+                    <h1 className="det-title"><TranslatedText>{listing.title}</TranslatedText></h1>
                     <div className="det-meta">
                         {t('listingDetail.listedBy')} {sellerName || t('listingDetail.verifiedSeller')}
                         · {t('listingDetail.memberSince', { year: new Date(sellerJoinDate || Date.now()).getFullYear() })}
                     </div>
-                    <div className="det-loc">📍 {listing.location}{listing.state ? `, ${listing.state}` : ''}</div>
+                    <div className="det-loc">📍 <TranslatedText>{listing.location}</TranslatedText>{listing.state ? `, ` : ''}{listing.state && <TranslatedText>{listing.state}</TranslatedText>}</div>
 
                     <div className="stats-grid">
                         {listing.age_years != null && <div className="sg"><div className="lb">{t('listingDetail.age')}</div><div className="vl">{listing.age_years} {t('listingDetail.years')}</div></div>}
                         {['cow', 'buffalo', 'goat', 'sheep'].includes(listing.category) && listing.milk_yield_liters && <div className="sg"><div className="lb">{t('listingDetail.milkYield')}</div><div className="vl">{listing.milk_yield_liters}{t('listingDetail.perDay')}</div></div>}
                         {listing.weight_kg && <div className="sg"><div className="lb">{t('listingDetail.weight')}</div><div className="vl">{listing.weight_kg} {t('listingDetail.kg')}</div></div>}
-                        {listing.gender && <div className="sg"><div className="lb">{t('listingDetail.gender')}</div><div className="vl" style={{ textTransform: 'capitalize' }}>{listing.gender}</div></div>}
-                        <div className="sg"><div className="lb">{t('listingDetail.category')}</div><div className="vl" style={{ textTransform: 'capitalize' }}>{listing.category}</div></div>
-                        {listing.breed && <div className="sg"><div className="lb">{t('listingDetail.breed')}</div><div className="vl">{listing.breed}</div></div>}
-                        <div className="sg"><div className="lb">{t('listingDetail.location')}</div><div className="vl">{listing.location}</div></div>
+                        {listing.gender && <div className="sg"><div className="lb">{t('listingDetail.gender')}</div><div className="vl" style={{ textTransform: 'capitalize' }}>{t('listing.' + listing.gender.toLowerCase(), { defaultValue: listing.gender })}</div></div>}
+                        <div className="sg"><div className="lb">{t('listingDetail.category')}</div><div className="vl" style={{ textTransform: 'capitalize' }}><TranslatedText>{listing.category}</TranslatedText></div></div>
+                        {listing.breed && <div className="sg"><div className="lb">{t('listingDetail.breed')}</div><div className="vl"><TranslatedText>{listing.breed}</TranslatedText></div></div>}
+                        <div className="sg"><div className="lb">{t('listingDetail.location')}</div><div className="vl"><TranslatedText>{listing.location}</TranslatedText></div></div>
                     </div>
 
                     {listing.description && (
                         <div className="det-desc">
                             <h4>📝 Description</h4>
-                            <p>{listing.description}</p>
+                            <p><TranslatedText>{listing.description}</TranslatedText></p>
                         </div>
                     )}
                 </div>

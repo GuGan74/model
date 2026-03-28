@@ -8,13 +8,13 @@ import SEOHead from '../components/SEOHead';
 import './SearchPage.css';
 
 const FILTER_PILLS = [
-    { label: '🐄 Cow', cat: 'cow' },
-    { label: '🦬 Buffalo', cat: 'buffalo' },
-    { label: '🐐 Goat', cat: 'goat' },
-    { label: '🐕 Dogs', cat: 'dog' },
-    { label: '🐈 Cats', cat: 'cat' },
-    { label: '💉 Vaccinated', prop: 'vaccinated' },
-    { label: '✅ Verified', prop: 'verified' },
+    { label: '🐄', key: 'cow', cat: 'cow' },
+    { label: '🦬', key: 'buffalo', cat: 'buffalo' },
+    { label: '🐐', key: 'goat', cat: 'goat' },
+    { label: '🐕', key: 'dog', cat: 'dog' },
+    { label: '🐈', key: 'cat', cat: 'cat' },
+    { label: '💉', key: 'vaccinated', prop: 'vaccinated' },
+    { label: '✅', key: 'verified', prop: 'verified' },
 ];
 
 const DEMO_DATA = [
@@ -74,8 +74,8 @@ export default function SearchPage() {
     return (
         <div className="search-page">
             <SEOHead
-                title={query ? `Search: ${query} | Kosalai` : 'Search Cattle | Kosalai'}
-                description="Search thousands of verified cattle and pet listings across India."
+                title={query ? t('searchPage.seoTitleQuery', { query }) : t('searchPage.seoTitle')}
+                description={t('searchPage.seoDescription')}
                 url="https://model-mauve.vercel.app/search"
             />
             <div className="search-bar-top">
@@ -100,7 +100,7 @@ export default function SearchPage() {
                             className={`fpill${activePills.find(a => JSON.stringify(a) === JSON.stringify(p)) ? ' act' : ''}`}
                             onClick={() => togglePill(p)}
                         >
-                            {p.label}
+                            {p.label} {t(`searchPage.${p.key}`)}
                         </button>
                     ))}
                 </div>

@@ -54,9 +54,7 @@ const INDIAN_STATES = [
     'Daman & Diu', 'Lakshadweep'
 ];
 
-const STEPS = [
-    'Cattle Type', 'Details', 'Photos', 'Pricing'
-];
+const STEPS = ['cattleType', 'details', 'photos', 'pricing'];
 
 export default function SellPage() {
     const navigate = useNavigate();
@@ -344,7 +342,7 @@ export default function SellPage() {
                     <div className="sell-ttl">
                         {isEditing ? t('sellPage.editListing') : (listingType === 'livestock' ? t('sellPage.sellCattle') : t('sellPage.sellPet'))}
                     </div>
-                    <div className="sell-sub">{t('sellPage.stepOf', { step, total: STEPS.length })}: {STEPS[step - 1]}</div>
+                    <div className="sell-sub">{t('sellPage.stepOf', { step, total: STEPS.length })}: {t(`sellPage.${STEPS[step - 1].toLowerCase().replace(' ', '')}`)}</div>
                 </div>
             </div>
 
@@ -356,7 +354,7 @@ export default function SellPage() {
                             <div className={`step-c${i + 1 < step ? ' done' : i + 1 === step ? ' act' : ''}`}>
                                 {i + 1 < step ? '✓' : i + 1}
                             </div>
-                            <span className={`step-lbl${i + 1 <= step ? ' act' : ''}`}>{s}</span>
+                            <span className={`step-lbl${i + 1 <= step ? ' act' : ''}`}>{t(`sellPage.${s}`)}</span>
                         </div>
                         {i < STEPS.length - 1 && <div className={`step-line${i + 1 < step ? ' done' : ''}`} />}
                     </React.Fragment>
@@ -372,7 +370,7 @@ export default function SellPage() {
                                 className={`tbtn toggle-btn${listingType === 'livestock' ? ' active' : ''}`}
                                 onClick={() => { setListingType('livestock'); setF('category', ''); }}
                             >
-                                🐄 Cattle
+                                🐄 {t('homePage.cattle')}
                             </button>
                         )}
                         {(guestPrefs?.category !== 'livestock') && (
@@ -380,7 +378,7 @@ export default function SellPage() {
                                 className={`tbtn toggle-btn${listingType === 'pet' ? ' active' : ''}`}
                                 onClick={() => { setListingType('pet'); setF('category', ''); }}
                             >
-                                🐾 Pets
+                                🐾 {t('homePage.pets')}
                             </button>
                         )}
                     </div>
@@ -396,7 +394,7 @@ export default function SellPage() {
                                     onClick={() => setF('category', c.id)}
                                 >
                                     <div className="cat-icon">{c.label}</div>
-                                    <div className="cat-name">{c.name}</div>
+                                    <div className="cat-name">{t(`homePage.${c.id === 'other-pet' ? 'other' : c.id + 's'}`)}</div>
                                 </div>
                             ))}
                         </div>
@@ -412,7 +410,7 @@ export default function SellPage() {
                         <div className="fg">
                             <div className="ff">
                                 <label>{t('sellPage.listingTitle')} *</label>
-                                <input placeholder={listingType === 'pet' ? "e.g. Golden Retriever Puppy" : "e.g. HF Cow — High Milk Yield"} value={form.title} onChange={e => setF('title', e.target.value)} maxLength={100} />
+                                <input placeholder={listingType === 'pet' ? t('sellPage.titlePetPlaceholder', { defaultValue: "e.g. Golden Retriever Puppy" }) : t('sellPage.titleCattlePlaceholder', { defaultValue: "e.g. HF Cow — High Milk Yield" })} value={form.title} onChange={e => setF('title', e.target.value)} maxLength={100} />
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
                                     {fieldErrors.title ? <span style={{ color: '#e63946', fontSize: 12 }}>⚠️ {fieldErrors.title}</span> : <span />}
                                     <span style={{ fontSize: 11, color: form.title.length < 5 ? '#e63946' : 'var(--g3)' }}>{form.title.length}/100 (min 5)</span>
@@ -428,13 +426,13 @@ export default function SellPage() {
                                 </select>
                                 {fieldErrors.breed && <div style={{ color: '#e63946', fontSize: 12, marginTop: 4 }}>⚠️ {fieldErrors.breed}</div>}
                                 {form.breed === 'Other' && (
-                                    <input type="text" placeholder="Please specify breed" value={form.customBreed} onChange={e => setF('customBreed', e.target.value)} style={{ marginTop: 8 }} />
+                                    <input type="text" placeholder={t('sellPage.specifyBreed')} value={form.customBreed} onChange={e => setF('customBreed', e.target.value)} style={{ marginTop: 8 }} />
                                 )}
                             </div>
                         </div>
 
                         <div className="ff" style={{ marginTop: 15, marginBottom: 15 }}>
-                            <label>Gender *</label>
+                            <label>{t('sellPage.gender')} *</label>
                             <div className="radio-group" style={{ display: 'flex', gap: 16 }}>
                                 <label className="radio-option">
                                     <input type="radio" name="gender" value="male" checked={form.gender === 'male'} onChange={(e) => setF('gender', e.target.value)} style={{ width: 18, height: 18 }} />
@@ -450,68 +448,68 @@ export default function SellPage() {
 
                         <div className="fg3">
                             <div className="ff">
-                                <label>Age (Years)</label>
+                                <label>{t('sellPage.ageYears')}</label>
                                 <input type="number" placeholder="0" value={form.age_years} onChange={e => { const v = Math.min(25, Math.max(0, Number(e.target.value))); setF('age_years', v || ''); }} min={0} max={25} />
-                                <small style={{ fontSize: 11, color: 'var(--g3)' }}>Max 25 years</small>
+                                <small style={{ fontSize: 11, color: 'var(--g3)' }}>{t('sellPage.maxYears')}</small>
                                 {fieldErrors.age && <div style={{ color: '#e63946', fontSize: 12, marginTop: 2 }}>⚠️ {fieldErrors.age}</div>}
                             </div>
                             <div className="ff">
-                                <label>Weight (kg)</label>
+                                <label>{t('sellPage.weightKg')}</label>
                                 <input type="number" placeholder="0" value={form.weight_kg} onChange={e => { const lim = getWeightLimits(form.category); const v = Math.min(lim.max, Math.max(0, Number(e.target.value))); setF('weight_kg', v || ''); }} min={0} max={getWeightLimits(form.category).max} />
                                 <small style={{ fontSize: 11, color: 'var(--g3)' }}>
-                                    {isLivestock(form.category) ? `Range: ${getWeightLimits(form.category).min}–${getWeightLimits(form.category).max} kg` : 'Enter approx weight'}
+                                    {isLivestock(form.category) ? `${t('sellPage.range')}: ${getWeightLimits(form.category).min}–${getWeightLimits(form.category).max} kg` : t('sellPage.enterApprox')}
                                 </small>
                                 {fieldErrors.weight && <div style={{ color: '#e63946', fontSize: 12, marginTop: 2 }}>⚠️ {fieldErrors.weight}</div>}
                             </div>
                             {showsMilkYield(form.category, form.gender) && (
                                 <div className="ff">
-                                    <label>Milk Yield (L/day)</label>
+                                    <label>{t('sellPage.milkYieldLabel')}</label>
                                     <input type="number" placeholder="0" value={form.milk_yield_liters} onChange={e => setF('milk_yield_liters', e.target.value)} min={0} />
-                                    <small style={{ fontSize: 11, color: 'var(--g3)' }}>Daily production</small>
+                                    <small style={{ fontSize: 11, color: 'var(--g3)' }}>{t('sellPage.dailyProduction')}</small>
                                 </div>
                             )}
                         </div>
                     </div>
                     <div className="fs oa" style={{ background: '#fff9f0', border: '1px solid #ffe8cc' }}>
-                        <h3 style={{ color: '#ea580c' }}>🩺 Health & Status</h3>
+                        <h3 style={{ color: '#ea580c' }}>{t('sellPage.healthStatus')}</h3>
 
                         <div className="fg" style={{ marginTop: 14 }}>
                             <div className="ff" style={{ flex: 1 }}>
-                                <label style={{ color: '#9a3412', fontWeight: 600, fontSize: 13, marginBottom: 8 }}>Is it Vaccinated? *</label>
+                                <label style={{ color: '#9a3412', fontWeight: 600, fontSize: 13, marginBottom: 8 }}>{t('sellPage.isVaccinated')} *</label>
                                 <select
                                     value={form.is_vaccinated ? 'yes' : 'no'}
                                     onChange={e => setF('is_vaccinated', e.target.value === 'yes')}
                                     style={{ padding: '12px 14px', borderRadius: 8, border: '1.5px solid #fbd38d', outline: 'none', background: 'white', fontSize: 14 }}
                                 >
-                                    <option value="no">Not Vaccinated</option>
-                                    <option value="yes">Yes, Vaccinated</option>
+                                    <option value="no">{t('sellPage.notVaccinated')}</option>
+                                    <option value="yes">{t('sellPage.yesVaccinated')}</option>
                                 </select>
                             </div>
 
                             {showsPregnancyStatus(form.category) && form.gender === 'female' && (
                                 <div className="ff" style={{ flex: 1 }}>
-                                    <label style={{ color: '#9a3412', fontWeight: 600, fontSize: 13, marginBottom: 8 }}>Is it Pregnant? *</label>
+                                    <label style={{ color: '#9a3412', fontWeight: 600, fontSize: 13, marginBottom: 8 }}>{t('sellPage.isPregnant')} *</label>
                                     <select
                                         value={form.is_pregnant ? 'yes' : 'no'}
                                         onChange={e => setF('is_pregnant', e.target.value === 'yes')}
                                         style={{ padding: '12px 14px', borderRadius: 8, border: '1.5px solid #fbd38d', outline: 'none', background: 'white', fontSize: 14 }}
                                     >
-                                        <option value="no">Not Pregnant</option>
-                                        <option value="yes">Yes, Currently Pregnant</option>
+                                        <option value="no">{t('sellPage.notPregnant')}</option>
+                                        <option value="yes">{t('sellPage.yesPregnant')}</option>
                                     </select>
                                 </div>
                             )}
 
                             {isPet(form.category) && (
                                 <div className="ff" style={{ flex: 1 }}>
-                                    <label style={{ color: '#9a3412', fontWeight: 600, fontSize: 13, marginBottom: 8 }}>Is it Trained? *</label>
+                                    <label style={{ color: '#9a3412', fontWeight: 600, fontSize: 13, marginBottom: 8 }}>{t('sellPage.isTrained')} *</label>
                                     <select
                                         value={form.is_trained ? 'yes' : 'no'}
                                         onChange={e => setF('is_trained', e.target.value === 'yes')}
                                         style={{ padding: '12px 14px', borderRadius: 8, border: '1.5px solid #fbd38d', outline: 'none', background: 'white', fontSize: 14 }}
                                     >
-                                        <option value="no">Not Trained</option>
-                                        <option value="yes">Yes, Well Trained</option>
+                                        <option value="no">{t('sellPage.notTrained')}</option>
+                                        <option value="yes">{t('sellPage.yesTrained')}</option>
                                     </select>
                                 </div>
                             )}
@@ -524,17 +522,16 @@ export default function SellPage() {
             {step === 3 && (
                 <div className="animate-fadeIn">
                     <div className="fs ba">
-                        <h3>📸 Add Photos</h3>
+                        <h3>{t('sellPage.addPhotos')}</h3>
                         <p style={{ fontSize: 13, color: 'var(--g3)', marginBottom: 16 }}>
-                            High quality photos get 3× more buyer inquiries.
+                            {t('sellPage.photoSubtitle')}
                         </p>
 
                         {/* Show upload zone OR large preview */}
                         {!form.image_url ? (
                             <label className="upload-zone-big" htmlFor="photo-upload">
                                 <div className="uzb-icon">📷</div>
-                                <div className="uzb-title">Tap to Upload Photo</div>
-                                <div className="uzb-sub">JPG or PNG · Max 5MB</div>
+                                <div className="uzb-sub">{t('sellPage.photoFormat')}</div>
                             </label>
                         ) : (
                             <div className="photo-preview-wrap">
@@ -545,7 +542,7 @@ export default function SellPage() {
                                 />
                                 <div className="photo-preview-bar">
                                     <span style={{ color: 'var(--green)', fontWeight: 700, fontSize: 13 }}>
-                                        ✅ Photo uploaded successfully
+                                        {t('sellPage.photoSuccess')}
                                     </span>
                                     <label
                                         htmlFor="photo-upload"
@@ -557,7 +554,7 @@ export default function SellPage() {
                                             textDecoration: 'underline',
                                         }}
                                     >
-                                        🔄 Change Photo
+                                        {t('sellPage.changePhoto')}
                                     </label>
                                 </div>
                             </div>
@@ -618,7 +615,7 @@ export default function SellPage() {
                         {!form.image_url && (
                             <div style={{ textAlign: 'center', marginTop: 12 }}>
                                 <span style={{ fontSize: 12, color: 'var(--g3)' }}>
-                                    No photo? No problem —{' '}
+                                    {t('sellPage.noPhotoOptional')}
                                 </span>
                                 <button
                                     style={{
@@ -628,16 +625,16 @@ export default function SellPage() {
                                     }}
                                     onClick={() => setF('image_url', ' ')}
                                 >
-                                    skip for now
+                                    {t('sellPage.skipForNow')}
                                 </button>
                             </div>
                         )}
                     </div>
                     <div className="fs ya" style={{ textAlign: 'center' }}>
-                        <h3>🤖 ML Verification (Optional)</h3>
-                        <p style={{ fontSize: 13, color: 'var(--g3)', marginBottom: 14 }}>Use AI to verify your cattle and get a trust badge — increases buyer confidence by 78%.</p>
-                        <button className="btn-primary" style={{ width: '100%' }} onClick={() => toast('ML Verification: Demo mode — auto-passed! ✓', { icon: '🤖' })}>
-                            📷 Start ML Verification
+                        <h3>{t('sellPage.mlVerificationTitle', { defaultValue: '🤖 ML Verification (Optional)' })}</h3>
+                        <p style={{ fontSize: 13, color: 'var(--g3)', marginBottom: 14 }}>{t('sellPage.mlVerificationDesc', { defaultValue: "Use AI to verify your cattle and get a trust badge — increases buyer confidence by 78%." })}</p>
+                        <button className="btn-primary" style={{ width: '100%' }} onClick={() => toast(t('sellPage.mlVerificationToast', { defaultValue: 'ML Verification: Demo mode — auto-passed! ✓' }), { icon: '🤖' })}>
+                            📷 {t('sellPage.startMlVerification', { defaultValue: 'Start ML Verification' })}
                         </button>
                     </div>
                 </div>
@@ -647,19 +644,19 @@ export default function SellPage() {
             {step === 4 && (
                 <div className="animate-fadeIn">
                     <div className="fs ga">
-                        <h3>💰 Pricing</h3>
+                        <h3>{t('sellPage.pricingTitle')}</h3>
                         <div style={{ marginBottom: 14 }}>
                             <label className="fopt" style={{ display: 'flex', gap: 10, cursor: 'pointer' }}>
                                 <input type="checkbox" checked={form.for_adoption} onChange={e => setF('for_adoption', e.target.checked)} style={{ width: 17, height: 17, accentColor: 'var(--purple)' }} />
-                                <span style={{ fontWeight: 700, color: 'var(--purple)' }}>💜 List for Free Adoption</span>
+                                <span style={{ fontWeight: 700, color: 'var(--purple)' }}>{t('sellPage.listForFreeAdoption', { defaultValue: '💜 List for Free Adoption' })}</span>
                             </label>
                         </div>
                         {!form.for_adoption && (
                             <div className="ff">
-                                <label>Asking Price (₹) *</label>
+                                <label>{t('sellPage.askingPrice')}</label>
                                 <input
                                     type="number"
-                                    placeholder="e.g. 65000"
+                                    placeholder={t('sellPage.pricePlaceholder', { defaultValue: "e.g. 65000" })}
                                     value={form.price}
                                     onChange={e => setF('price', e.target.value)}
                                     className="starred"
@@ -669,33 +666,33 @@ export default function SellPage() {
                         )}
                     </div>
                     <div className="fs oa">
-                        <h3>📍 Location Details</h3>
+                        <h3>{t('sellPage.locationDetails')}</h3>
                         <div className="fg">
                             <div className="ff">
-                                <label>Village</label>
-                                <input placeholder="e.g. Vadavalli" value={form.village} onChange={e => setF('village', e.target.value)} />
+                                <label>{t('sellPage.village')}</label>
+                                <input placeholder={t('sellPage.villagePlaceholder', { defaultValue: "e.g. Vadavalli" })} value={form.village} onChange={e => setF('village', e.target.value)} />
                             </div>
                             <div className="ff">
-                                <label>Taluk</label>
-                                <input placeholder="e.g. Coimbatore North" value={form.taluk} onChange={e => setF('taluk', e.target.value)} />
+                                <label>{t('sellPage.taluk')}</label>
+                                <input placeholder={t('sellPage.talukPlaceholder', { defaultValue: "e.g. Coimbatore North" })} value={form.taluk} onChange={e => setF('taluk', e.target.value)} />
                             </div>
                         </div>
                         <div className="fg">
                             <div className="ff">
-                                <label>City *</label>
-                                <input placeholder="e.g. Coimbatore" value={form.location} onChange={e => setF('location', e.target.value)} />
+                                <label>{t('sellPage.city')} *</label>
+                                <input placeholder={t('sellPage.cityPlaceholder', { defaultValue: "e.g. Coimbatore" })} value={form.location} onChange={e => setF('location', e.target.value)} />
                                 {fieldErrors.location && <div style={{ color: '#e63946', fontSize: 12, marginTop: 4 }}>⚠️ {fieldErrors.location}</div>}
                             </div>
                             <div className="ff">
-                                <label>Landmark <span style={{ fontSize: 11, color: 'var(--g3)' }}>(Optional)</span></label>
-                                <input placeholder="e.g. Near bus stand" value={form.landmark} onChange={e => setF('landmark', e.target.value)} />
+                                <label>{t('sellPage.landmark')} <span style={{ fontSize: 11, color: 'var(--g3)' }}>{t('sellPage.landmarkOptional')}</span></label>
+                                <input placeholder={t('sellPage.landmarkPlaceholder', { defaultValue: "e.g. Near bus stand" })} value={form.landmark} onChange={e => setF('landmark', e.target.value)} />
                             </div>
                         </div>
                         <div className="fg">
                             <div className="ff">
                                 <label>State *</label>
                                 <select value={form.state} onChange={e => setF('state', e.target.value)}>
-                                    <option value="">Select State</option>
+                                    <option value="">{t('sellPage.selectState')}</option>
                                     {INDIAN_STATES.map(s => (
                                         <option key={s} value={s}>{s}</option>
                                     ))}
@@ -708,7 +705,7 @@ export default function SellPage() {
                     {/* BOOST SECTION - HIDDEN (not deleted, can re-enable by removing {false &&}) */}
                     {false && (
                         <div className="fs ba">
-                            <h3>⚡ Boost &amp; Promote</h3>
+                            <h3>{t('sellPage.boostPromote', { defaultValue: '⚡ Boost & Promote' })}</h3>
                             <p style={{ fontSize: 13, color: 'var(--g3)', marginBottom: 14, textAlign: 'left' }}>Get up to 10× more views by boosting your listing to the top of search results.</p>
                             <label className="boost-zone" id="boost-toggle-label" htmlFor="boost-toggle" style={{
                                 display: 'flex',
@@ -777,10 +774,10 @@ export default function SellPage() {
                         </div>
                     )}
                     <div className="fs ba">
-                        <h3>✍️ Description</h3>
+                        <h3>{t('sellPage.description')}</h3>
                         <div className="ff">
                             <textarea
-                                placeholder="Describe the cattle — health, temperament, milk history, reason for selling..."
+                                placeholder={t('sellPage.descriptionPlaceholder')}
                                 value={form.description}
                                 onChange={e => setF('description', e.target.value)}
                                 maxLength={1000}
@@ -803,7 +800,7 @@ export default function SellPage() {
                         disabled={!canGoNext()}
                         onClick={() => setStep(s => s + 1)}
                     >
-                        Continue →
+                        {t('sellPage.continue')}
                     </button>
                 ) : (
                     <button
@@ -812,9 +809,9 @@ export default function SellPage() {
                         onClick={handleSubmit}
                     >
                         {submitting ? (
-                            <><span className="spinner" /> {isEditing ? 'Updating…' : 'Publishing…'}</>
+                            <><span className="spinner" /> {isEditing ? t('sellPage.updatingListing') : t('sellPage.submitting')}</>
                         ) : (
-                            isEditing ? '🚀 Update Listing' : '🚀 Publish Listing'
+                            isEditing ? t('sellPage.updateListing', { defaultValue: '🚀 Update Listing' }) : t('sellPage.publishListing', { defaultValue: '🚀 Publish Listing' })
                         )}
                     </button>
                 )}
