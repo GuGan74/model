@@ -11,7 +11,7 @@ import './Navbar.css';
 export default function Navbar() {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const location = useLocation();
+    const { pathname } = useLocation();
     const { currentProfile, signOut, isLoggedIn, listingType, setListingType } = useAuth();
     const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -51,7 +51,7 @@ export default function Navbar() {
                         {navLinks.map(l => (
                             <button
                                 key={l.path}
-                                className={`nav-link${location.pathname === l.path ? ' active' : ''}`}
+                                className={`nav-link${pathname === l.path ? ' active' : ''}`}
                                 onClick={() => navigate(l.path)}
                             >
                                 <span style={{ marginRight: '6px' }}>{l.icon}</span>
