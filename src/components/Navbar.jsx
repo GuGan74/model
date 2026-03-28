@@ -28,7 +28,6 @@ export default function Navbar() {
 
     const navLinks = [
         { icon: '🏠', label: t('nav.home'), path: '/' },
-        { icon: '🐄', label: t('nav.animals'), path: '/animals' },
         { icon: '👤', label: t('nav.profile'), path: '/profile' },
     ];
 
@@ -52,7 +51,7 @@ export default function Navbar() {
                         {navLinks.map(l => (
                             <button
                                 key={l.path}
-                                className={`nav-link-btn ${location.pathname === l.path ? 'active' : ''}`}
+                                className={`nav-link${location.pathname === l.path ? ' active' : ''}`}
                                 onClick={() => navigate(l.path)}
                             >
                                 <span style={{ marginRight: '6px' }}>{l.icon}</span>
