@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import OTPInput from '../components/OTPInput';
 import SEOHead from '../components/SEOHead';
-import LanguageSelector from '../components/LanguageSelector';
 import logoImg from '../assets/kosalai-logo-removebg-preview.png';
 import loadingGif from '../assets/379.gif';
 import toast from 'react-hot-toast';
@@ -137,7 +136,6 @@ export default function SplashPage() {
             {/* RIGHT / MAIN PANEL OR FORM */}
             <div className="splash-main-panel">
                 <div className="splash-top-actions">
-                    <LanguageSelector />
                     <button className="admin-nav-btn" onClick={() => navigate('/admin')}>
                         {t('login.manage_admin')}
                     </button>

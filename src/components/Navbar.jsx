@@ -85,30 +85,34 @@ export default function Navbar() {
                             <span>{toggleIcon}</span>
                             <span>{toggleLabel}</span>
                         </button>
-                        <span className="hide-mobile"><LanguageSelector /></span>
+                        <span className={pathname === '/login' ? '' : 'hide-mobile'}>
+                            <LanguageSelector />
+                        </span>
                         {/* Show avatar for logged-in, Sign In button for guests */}
                         {isLoggedIn ? (
                             <div className="nav-avatar" onClick={() => navigate('/profile')} title={t('navbar.myProfile')}>
                                 {initials}
                             </div>
                         ) : (
-                            <button
-                                onClick={() => navigate('/login')}
-                                style={{
-                                    background: '#1a7a3c',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: 20,
-                                    padding: '8px 18px',
-                                    fontWeight: 800,
-                                    fontSize: 13,
-                                    cursor: 'pointer',
-                                    fontFamily: 'Nunito, sans-serif',
-                                    whiteSpace: 'nowrap',
-                                }}
-                            >
-                                {t('navbar.signIn')}
-                            </button>
+                            pathname !== '/login' && (
+                                <button
+                                    onClick={() => navigate('/login')}
+                                    style={{
+                                        background: '#1a7a3c',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: 20,
+                                        padding: '8px 18px',
+                                        fontWeight: 800,
+                                        fontSize: 13,
+                                        cursor: 'pointer',
+                                        fontFamily: 'Nunito, sans-serif',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    {t('navbar.signIn')}
+                                </button>
+                            )
                         )}
                         {isLoggedIn && (
                             <button className="btn-sell-nav hide-mobile" onClick={() => navigate('/sell')}>
