@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import OTPInput from '../components/OTPInput';
 import SEOHead from '../components/SEOHead';
@@ -20,6 +21,7 @@ const DISTRICTS = [
 
 export default function SplashPage() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const { sendOTP, verifyOTP, signInWithGoogle } = useAuth();
 
     const [step, setStep] = useState(1); // 1 = register, 2 = OTP
@@ -92,12 +94,15 @@ export default function SplashPage() {
     return (
         <div className="splash-wrapper">
             <SEOHead
-                title="Kosalai — Buy &amp; Sell Cattle with Full Trust"
+                title="Kosalai — Buy & Sell Cattle with Full Trust"
                 description="India's most trusted cattle marketplace. Verified cows, buffaloes, goats and pets from farmers across India."
                 url="https://model-mauve.vercel.app/"
             />
 
-
+            {/* Language Selector — top right */}
+            <div style={{ position: 'fixed', top: 16, right: 20, zIndex: 10000 }}>
+                <LanguageSelector />
+            </div>
 
             {/* LEFT / BRANDING PANEL */}
             <div className="splash-brand-panel">
@@ -105,29 +110,29 @@ export default function SplashPage() {
                     <img src={logoImg} alt="Kosalai Logo" style={{ height: 48, objectFit: 'contain' }} />
                 </div>
 
-                <h1 className="brand-title">South India's<br />trusted cattle<br />marketplace</h1>
-                <div className="brand-subtitle">Connecting thousands of farmers and pet lovers across the region with safety and trust.</div>
+                <h1 className="brand-title">{t('login.left_headline')}</h1>
+                <div className="brand-subtitle">{t('login.left_subtitle')}</div>
 
                 <div className="trust-badges">
                     <div className="trust-badge-card">
                         <div className="tb-icon">✓</div>
                         <div className="tb-content">
-                            <div className="tb-title">100% Verified Listings</div>
-                            <div className="tb-desc">Every cattle is checked manually</div>
+                            <div className="tb-title">{t('login.badge_verified')}</div>
+                            <div className="tb-desc">{t('login.badge_verified_desc')}</div>
                         </div>
                     </div>
                     <div className="trust-badge-card">
                         <div className="tb-icon">🏛</div>
                         <div className="tb-content">
-                            <div className="tb-title">Government Registered</div>
-                            <div className="tb-desc">Compliant with all local regulations</div>
+                            <div className="tb-title">{t('login.badge_govt')}</div>
+                            <div className="tb-desc">{t('login.badge_govt_desc')}</div>
                         </div>
                     </div>
                     <div className="trust-badge-card">
                         <div className="tb-icon">🛡</div>
                         <div className="tb-content">
-                            <div className="tb-title">Secure Transactions</div>
-                            <div className="tb-desc">Protected payments and buyer safety</div>
+                            <div className="tb-title">{t('login.badge_secure')}</div>
+                            <div className="tb-desc">{t('login.badge_secure_desc')}</div>
                         </div>
                     </div>
                 </div>
@@ -136,40 +141,40 @@ export default function SplashPage() {
             {/* RIGHT / MAIN PANEL OR FORM */}
             <div className="splash-main-panel">
                 <button className="admin-nav-btn" onClick={() => navigate('/admin')}>
-                    Manage App (Admin)
+                    {t('login.manage_admin')}
                 </button>
 
                 <div className="form-container">
                     {step === 1 && (
                         <div className="animate-fadeIn">
-                            <h2 className="form-header-title">Ko<span>salai</span></h2>
-                            <p className="form-header-sub">South India's Trusted Cattle Marketplace</p>
+                            <h2 className="form-header-title">{t('login.brand_title')}</h2>
+                            <p className="form-header-sub">{t('login.brand_tagline')}</p>
 
                             <button className="btn-google-white" onClick={handleGoogleLogin}>
                                 <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.33 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z" /><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" /><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" /><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.67 14.62 48 24 48z" /></svg>
-                                Continue with Google
+                                {t('login.continue_google')}
                             </button>
 
-                            <div className="divider"><span>Or continue with your profile</span></div>
+                            <div className="divider"><span>{t('login.or_divider')}</span></div>
 
 
                             <div className="fields-row">
                                 <div className="field-col">
-                                    <label className="field-lbl">Full Name</label>
+                                    <label className="field-lbl">{t('login.label_fullname')}</label>
                                     <input
                                         type="text"
                                         className="pb-input"
-                                        placeholder="Full Name"
+                                        placeholder={t('login.placeholder_fullname')}
                                         value={name}
                                         onChange={e => setName(e.target.value)}
                                     />
                                 </div>
                                 <div className="field-col">
-                                    <label className="field-lbl">Email Address</label>
+                                    <label className="field-lbl">{t('login.label_email')}</label>
                                     <input
                                         type="email"
                                         className="pb-input"
-                                        placeholder="email@example.com"
+                                        placeholder={t('login.placeholder_email')}
                                         value={email}
                                         onChange={e => setEmail(e.target.value)}
                                     />
@@ -178,13 +183,13 @@ export default function SplashPage() {
 
                             <div className="fields-row">
                                 <div className="field-col">
-                                    <label className="field-lbl">Mobile Number</label>
+                                    <label className="field-lbl">{t('login.label_mobile')}</label>
                                     <div style={{ position: 'relative' }}>
                                         <span style={{ position: 'absolute', left: 20, top: 14, color: '#8792a2', fontWeight: 600, fontSize: 14 }}>+91</span>
                                         <input
                                             type="tel"
                                             className="pb-input"
-                                            placeholder="Mobile Number"
+                                            placeholder={t('login.placeholder_mobile')}
                                             style={{ paddingLeft: 54 }}
                                             maxLength={10}
                                             value={phone}
@@ -194,13 +199,13 @@ export default function SplashPage() {
                                 </div>
                                 <div className="field-col">
                                     <div className="dist-dropdown-wrap">
-                                        <label className="field-lbl" style={{ display: 'block' }}>Select Your District</label>
+                                        <label className="field-lbl" style={{ display: 'block' }}>{t('login.label_district')}</label>
                                         <select
                                             className="pb-select"
                                             value={district}
                                             onChange={e => setDistrict(e.target.value)}
                                         >
-                                            <option value="">Choose District</option>
+                                            <option value="">{t('login.placeholder_district')}</option>
                                             {DISTRICTS.map(g => (
                                                 <optgroup key={g.group} label={g.group}>
                                                     {g.opts.map(o => <option key={o} value={o}>{o}</option>)}
@@ -224,10 +229,10 @@ export default function SplashPage() {
                                 <span style={{ fontSize: 22 }}>📱</span>
                                 <div>
                                     <div style={{ fontWeight: 800, fontSize: 13, color: '#92400e' }}>
-                                        Demo Mode — No real SMS sent
+                                        {t('login.demo_mode_title')}
                                     </div>
                                     <div style={{ fontSize: 12, color: '#78350f', marginTop: 2 }}>
-                                        Use OTP: <strong style={{
+                                        {t('login.demo_mode_desc')} <strong style={{
                                             fontSize: 18,
                                             letterSpacing: 4,
                                             color: '#1a7a3c',
@@ -238,19 +243,19 @@ export default function SplashPage() {
                             </div>
 
                             <button className="btn-send-otp" onClick={handleSendOTP} disabled={loading}>
-                                {loading ? <img src={loadingGif} alt="Loading..." style={{ width: 24, height: 24, objectFit: 'contain' }} /> : 'Send OTP →'}
+                                {loading ? <img src={loadingGif} alt="Loading..." style={{ width: 24, height: 24, objectFit: 'contain' }} /> : t('login.send_otp')}
                             </button>
 
                             <div className="login-legal">
-                                By continuing, you agree to Kosalai's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                                {t('login.legal')} <a href="#">{t('login.terms')}</a> {t('login.and')} <a href="#">{t('login.privacy')}</a>
                             </div>
                         </div>
                     )}
 
                     {step === 2 && (
                         <div className="otp-screen">
-                            <h2 className="form-header-title">Verify Phone</h2>
-                            <p className="form-header-sub" style={{ marginBottom: 12 }}>Enter the 6-digit OTP for <strong>{otpPhone}</strong></p>
+                            <h2 className="form-header-title">{t('login.verify_title')}</h2>
+                            <p className="form-header-sub" style={{ marginBottom: 12 }}>{t('login.verify_sub')} <strong>{otpPhone}</strong></p>
 
                             <div style={{
                                 background: '#e8f5e9',
@@ -261,7 +266,7 @@ export default function SplashPage() {
                                 textAlign: 'center',
                             }}>
                                 <div style={{ fontSize: 12, color: '#2e7d32', fontWeight: 700, marginBottom: 4 }}>
-                                    📱 DEMO OTP — type this exactly:
+                                    📱 {t('login.demo_otp_hint')}
                                 </div>
                                 <div style={{
                                     fontSize: 36,
@@ -273,7 +278,7 @@ export default function SplashPage() {
                                     123456
                                 </div>
                                 <div style={{ fontSize: 11, color: '#4caf50', marginTop: 4 }}>
-                                    No real SMS is sent in demo mode
+                                    {t('login.demo_otp_no_sms')}
                                 </div>
                             </div>
 
@@ -306,14 +311,14 @@ export default function SplashPage() {
                                     opacity: loading ? 0.7 : 1,
                                 }}
                             >
-                                ✅ Use Demo OTP (123456) — Sign In
+                                {t('login.use_demo_otp')}
                             </button>
 
                             <button
                                 onClick={() => setStep(1)}
                                 style={{ background: 'transparent', border: 'none', color: '#194628', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}
                             >
-                                ← Change mobile number
+                                {t('login.change_mobile')}
                             </button>
                         </div>
                     )}
