@@ -85,7 +85,7 @@ export default function Navbar() {
                             <span>{toggleIcon}</span>
                             <span>{toggleLabel}</span>
                         </button>
-                        <LanguageSelector />
+                        <span className="hide-mobile"><LanguageSelector /></span>
                         {/* Show avatar for logged-in, Sign In button for guests */}
                         {isLoggedIn ? (
                             <div className="nav-avatar" onClick={() => navigate('/profile')} title={t('navbar.myProfile')}>
@@ -146,6 +146,11 @@ export default function Navbar() {
                         </button>
                     ))}
                     <hr style={{ border: 'none', borderTop: '1px solid var(--g5)', margin: '8px 0' }} />
+                    {/* Language selector in drawer */}
+                    <div style={{ padding: '4px 14px 8px' }}>
+                        <LanguageSelector />
+                    </div>
+                    <hr style={{ border: 'none', borderTop: '1px solid var(--g5)', margin: '0 0 8px' }} />
                     <button className="mob-dl" onClick={() => { navigate('/sell'); setDrawerOpen(false); }} style={{ color: 'var(--green)', background: 'var(--green-light)' }}>
                         {t('navbar.postNewListing')}
                     </button>
