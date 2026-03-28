@@ -27,21 +27,20 @@ export default function Navbar() {
     const toggleLabel = listingType === 'livestock' ? t('nav.buy_pets') : t('nav.buy_cattle');
 
     const navLinks = [
-        { label: t('nav.home'), path: '/' },
-        { label: t('nav.animals'), path: '/animals' },
-        { label: t('nav.price_trends'), path: '/price-trends' },
-        { label: t('nav.users'), path: '/users' },
+        { icon: '🏠', label: t('nav.home'), path: '/' },
+        { icon: '🐄', label: t('nav.animals'), path: '/animals' },
+        { icon: '👤', label: t('nav.profile'), path: '/profile' },
     ];
 
     async function handleSignOut() {
         await signOut();
-        toast.success('Signed out. See you soon! 👋');
-        setDrawerOpen(false);
+        navigate('/');
     }
 
     return (
         <>
-            <nav className="navbar">
+            <nav className="navbar-container">
+                <div className="nav-wrapper">
                 <div className="nav-inner">
                     <div className="nav-logo" onClick={() => navigate('/')}>
                         <img src={cowLogo} className="nav-logo-icon" alt="Logo" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
@@ -53,9 +52,10 @@ export default function Navbar() {
                         {navLinks.map(l => (
                             <button
                                 key={l.path}
-                                className={`nav-link${location.pathname === l.path ? ' active' : ''}`}
+                                className={`nav-link-btn ${location.pathname === l.path ? 'active' : ''}`}
                                 onClick={() => navigate(l.path)}
                             >
+                                <span style={{ marginRight: '6px' }}>{l.icon}</span>
                                 {l.label}
                             </button>
                         ))}
@@ -126,9 +126,10 @@ export default function Navbar() {
                         </button>
                     </div>
                 </div>
-            </nav>
+            </div>
+        </nav>
 
-            {/* Mobile Drawer */}
+        {/* Mobile Drawer */}
             <div
                 className={`mob-overlay${drawerOpen ? ' open' : ''}`}
                 onClick={() => setDrawerOpen(false)}
