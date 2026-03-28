@@ -97,10 +97,7 @@ export default function SplashPage() {
                 url="https://model-mauve.vercel.app/"
             />
 
-            {/* Manual Language Selector for First-time users */}
-            <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 10000 }}>
-                <LanguageSelector />
-            </div>
+
 
             {/* LEFT / BRANDING PANEL */}
             <div className="splash-brand-panel">

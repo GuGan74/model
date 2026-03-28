@@ -1,4 +1,20 @@
 {
+    "nav": {
+        "brand": "Kosalai",
+        "home": "Home",
+        "animals": "Animals",
+        "buy_cattle": "Buy Cattle",
+        "buy_pets": "Buy Pets",
+        "sell": "Sell",
+        "price_trends": "Price Trends",
+        "users": "Users",
+        "alerts": "Alerts",
+        "notifications": "Notifications",
+        "profile": "Profile",
+        "login": "Login",
+        "logout": "Logout",
+        "language": "Language"
+    },
     "navbar": {
         "buyCattle": "🛒 Buy Cattle",
         "buyPets": "🐾 Buy Pets",

@@ -79,10 +79,7 @@ export default function OnboardingPage() {
             background:
                 'linear-gradient(160deg,#0f5228 0%,#1a7a3c 55%,#0d3d1e 100%)',
         }}>
-            {/* Manual Language Selector for First-time users */}
-            <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 10000 }}>
-                <LanguageSelector />
-            </div>
+
 
             {/* Logo */}
             <div style={{

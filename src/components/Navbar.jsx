@@ -24,12 +24,13 @@ export default function Navbar() {
     }
 
     const toggleIcon = listingType === 'livestock' ? '🐾' : '🐄';
-    const toggleLabel = listingType === 'livestock' ? 'Buy Pets' : 'Buy Cattle';
+    const toggleLabel = listingType === 'livestock' ? t('nav.buy_pets') : t('nav.buy_cattle');
 
     const navLinks = [
-        { label: listingType === 'livestock' ? t('navbar.buyCattle') : 'Buy Pets', path: '/' },
-        { label: t('navbar.alerts'), path: '/notifications' },
-        { label: t('navbar.profile'), path: '/profile' },
+        { label: t('nav.home'), path: '/' },
+        { label: t('nav.animals'), path: '/animals' },
+        { label: t('nav.price_trends'), path: '/price-trends' },
+        { label: t('nav.users'), path: '/users' },
     ];
 
     async function handleSignOut() {
@@ -44,7 +45,7 @@ export default function Navbar() {
                 <div className="nav-inner">
                     <div className="nav-logo" onClick={() => navigate('/')}>
                         <img src={cowLogo} className="nav-logo-icon" alt="Logo" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
-                        <div className="nav-brand">Ko<span>salai</span></div>
+                        <div className="nav-brand">{t('nav.brand')}</div>
                     </div>
 
                     {/* Desktop links */}
@@ -135,7 +136,7 @@ export default function Navbar() {
             <div className={`mob-drawer${drawerOpen ? ' open' : ''}`}>
                 <div className="mob-drawer-hd">
                     <img src={cowLogo} className="nav-logo-icon" alt="Logo" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
-                    <div className="nav-brand" style={{ fontSize: 16 }}>Ko<span>salai</span></div>
+                    <div className="nav-brand" style={{ fontSize: 16 }}>{t('nav.brand')}</div>
                     <button className="mob-close-btn" onClick={() => setDrawerOpen(false)}>✕</button>
                 </div>
                 <div className="mob-drawer-links">

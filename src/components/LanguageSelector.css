@@ -1,122 +1,131 @@
-.lang-sel-wrap {
-    position: relative;
-    display: inline-block;
+.language-selector {
+  position: relative;
 }
 
-.lang-sel-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-    background: white;
-    border: 2px solid var(--g5, #e5e7eb);
-    border-radius: 20px;
-    cursor: pointer;
-    font-family: Nunito, sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--g1, #1f2937);
-    transition: border-color 0.2s, background 0.2s;
-    white-space: nowrap;
+.lang-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
 }
 
-.lang-sel-btn:hover {
-    border-color: var(--green, #1a7a3c);
-    background: #f0fdf4;
+.lang-button:hover {
+  border-color: #4caf50;
+  background: #f0fdf4;
 }
 
-.lang-code {
-    font-size: 12px;
-    font-weight: 800;
-    color: var(--green, #1a7a3c);
-    background: #e8f5e9;
-    padding: 2px 6px;
-    border-radius: 4px;
-    line-height: 1.2;
+.lang-icon {
+  font-size: 18px;
 }
 
-.lang-native {
-    font-size: 13px;
+.lang-text {
+  font-size: 14px;
 }
 
-.lang-chevron {
-    font-size: 11px;
-    color: #9ca3af;
-    transition: transform 0.2s;
-    display: inline-block;
+.lang-arrow {
+  font-size: 10px;
+  color: #9ca3af;
+  margin-left: 4px;
 }
 
-.lang-chevron.open {
-    transform: rotate(180deg);
+.lang-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
 }
 
 .lang-dropdown {
-    position: absolute;
-    top: calc(100% + 6px);
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  min-width: 220px;
+  z-index: 1000;
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  width: 100%;
+  background: white;
+  border: none;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.lang-option:last-child {
+  border-bottom: none;
+}
+
+.lang-option:hover {
+  background: #f9fafb;
+}
+
+.lang-option.active {
+  background: #f0fdf4;
+}
+
+.lang-flag {
+  font-size: 24px;
+}
+
+.lang-info {
+  flex: 1;
+  text-align: left;
+}
+
+.lang-native {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.lang-english {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.lang-check {
+  color: #4caf50;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .lang-dropdown {
+    left: 0;
     right: 0;
-    background: white;
-    border: 2px solid #e5e7eb;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-    z-index: 2000;
-    min-width: 180px;
-    overflow: hidden;
-    animation: langSlideDown 0.18s ease-out;
-}
-
-@keyframes langSlideDown {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.lang-opt {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 10px 14px;
-    background: none;
-    border: none;
-    border-bottom: 1px solid #f3f4f6;
-    cursor: pointer;
-    font-family: Nunito, sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: #1f2937;
-    text-align: left;
-    transition: background 0.15s;
-}
-
-.lang-opt:last-child {
-    border-bottom: none;
-}
-
-.lang-opt:hover {
-    background: #f9fafb;
-}
-
-.lang-opt.active {
-    background: #f0fdf4;
-    color: var(--green, #1a7a3c);
-}
-
-.lang-tick {
-    margin-left: auto;
-    color: var(--green, #1a7a3c);
-    font-weight: 800;
-    font-size: 15px;
-}
-
-@media (max-width: 480px) {
-    .lang-dropdown {
-        right: 0;
-        left: auto;
-        min-width: 170px;
-    }
-    .lang-sel-btn .lang-native {
-        display: none;
-    }
-    .lang-sel-btn {
-        padding: 6px 8px;
-    }
+  }
 }

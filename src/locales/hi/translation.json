@@ -1,4 +1,20 @@
 {
+    "nav": {
+        "brand": "कोसलाई",
+        "home": "होम",
+        "animals": "जानवर",
+        "buy_cattle": "पशु खरीदें",
+        "buy_pets": "पालतू जानवर खरीदें",
+        "sell": "बेचें",
+        "price_trends": "मूल्य रुझान",
+        "users": "उपयोगकर्ता",
+        "alerts": "सूचनाएं",
+        "notifications": "अधिसूचनाएं",
+        "profile": "प्रोफ़ाइल",
+        "login": "लॉगिन",
+        "logout": "लॉगआउट",
+        "language": "भाषा"
+    },
     "navbar": {
         "buyCattle": "🛒 पशु खरीदें",
         "buyPets": "🐾 पालतू खरीदें",
