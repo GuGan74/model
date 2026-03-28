@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-const DEFAULT_IMAGE = 'https://model-mauve.vercel.app/og-image.png';
+const DEFAULT_IMAGE = 'https://model-mauve.vercel.app/kosalai-logo.png';
 const SITE_NAME = 'Kosalai';
 
 export default function SEOHead({ title, description, imageUrl, url }) {

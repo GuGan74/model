@@ -1,6 +1,6 @@
-# 🐄 PashuBazaar — India's Livestock Marketplace
+# 🐄 Kosalai — India's Livestock Marketplace
 
-PashuBazaar is a modern, high-performance marketplace built for farmers and livestock traders in India. It enables users to browse, buy, and sell cows, buffaloes, goats, sheep, and pets with trust and transparency.
+Kosalai is a modern, high-performance marketplace built for farmers and livestock traders in India. It enables users to browse, buy, and sell cows, buffaloes, goats, sheep, and pets with trust and transparency.
 
 **Live Demo:** [model-mauve.vercel.app](https://model-mauve.vercel.app)
 
