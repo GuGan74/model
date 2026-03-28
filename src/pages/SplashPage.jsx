@@ -99,10 +99,6 @@ export default function SplashPage() {
                 url="https://model-mauve.vercel.app/"
             />
 
-            {/* Language Selector — top right */}
-            <div style={{ position: 'fixed', top: 16, right: 20, zIndex: 10000 }}>
-                <LanguageSelector />
-            </div>
 
             {/* LEFT / BRANDING PANEL */}
             <div className="splash-brand-panel">
@@ -140,9 +136,12 @@ export default function SplashPage() {
 
             {/* RIGHT / MAIN PANEL OR FORM */}
             <div className="splash-main-panel">
-                <button className="admin-nav-btn" onClick={() => navigate('/admin')}>
-                    {t('login.manage_admin')}
-                </button>
+                <div className="splash-top-actions">
+                    <LanguageSelector />
+                    <button className="admin-nav-btn" onClick={() => navigate('/admin')}>
+                        {t('login.manage_admin')}
+                    </button>
+                </div>
 
                 <div className="form-container">
                     {step === 1 && (

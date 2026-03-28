@@ -125,7 +125,7 @@
 /* Mobile */
 @media (max-width: 768px) {
   .lang-dropdown {
-    left: 0;
     right: 0;
+    min-width: 200px;
   }
 }
