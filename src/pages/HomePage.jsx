@@ -21,14 +21,14 @@ const INDIAN_STATES = [
     'Delhi', 'Jammu & Kashmir', 'Puducherry',
 ];
 
-const DEMO_LISTINGS = [
+const DEMO_LISTINGS = import.meta.env.VITE_SHOW_DEMO_DATA === 'true' ? [
     { id: 'd1', title: 'HF Cow — High Milk Yield', category: 'cow', breed: 'HF Holstein', age_years: 4, price: 65000, location: 'Coimbatore', state: 'Tamil Nadu', milk_yield_liters: 18, is_vaccinated: true, is_verified: true, is_pregnant: true, is_promoted: false, for_adoption: false, image_url: null, status: 'active', gender: 'female', created_at: new Date().toISOString() },
     { id: 'd2', title: 'Murrah Buffalo — Milk Breed', category: 'buffalo', breed: 'Murrah', age_years: 5, price: 85000, location: 'Amreli', state: 'Gujarat', milk_yield_liters: 14, is_vaccinated: true, is_verified: true, is_pregnant: false, is_promoted: false, for_adoption: false, image_url: null, status: 'active', gender: 'female', created_at: new Date().toISOString() },
     { id: 'd3', title: 'Boer Goat — Meat Breed', category: 'goat', breed: 'Boer', age_years: 2, price: 12000, location: 'Pune', state: 'Maharashtra', milk_yield_liters: null, is_vaccinated: false, is_verified: false, is_pregnant: false, is_promoted: false, for_adoption: false, image_url: null, status: 'active', gender: 'male', created_at: new Date().toISOString() },
     { id: 'd4', title: 'Gir Cow — A2 Milk', category: 'cow', breed: 'Gir', age_years: 3, price: 48000, location: 'Junagadh', state: 'Gujarat', milk_yield_liters: 12, is_vaccinated: true, is_verified: true, is_pregnant: true, is_promoted: false, for_adoption: false, image_url: null, status: 'active', gender: 'female', created_at: new Date().toISOString() },
     { id: 'd5', title: 'Labrador Retriever Puppy', category: 'dog', breed: 'Labrador', age_years: 0.3, price: 15000, location: 'Chennai', state: 'Tamil Nadu', is_vaccinated: true, is_verified: true, is_pregnant: false, is_promoted: false, for_adoption: false, image_url: null, status: 'active', gender: 'male', created_at: new Date().toISOString() },
     { id: 'd6', title: 'Persian Cat — Ready for Adoption', category: 'cat', breed: 'Persian', age_years: 1, price: 8000, location: 'Bengaluru', state: 'Karnataka', is_vaccinated: true, is_verified: false, is_pregnant: false, is_promoted: false, for_adoption: false, image_url: null, status: 'active', gender: 'female', created_at: new Date().toISOString() },
-];
+] : [];
 
 export default function HomePage() {
     const { t } = useTranslation();
